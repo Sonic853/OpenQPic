@@ -1,0 +1,160 @@
+{
+  "baseline_sha256": "23ed7071608dc05465c6885a98c5884478defddc9731580929533bd3d9a6b107",
+  "apk_sha256": "ae02d65c8adfedafd078059c16e41a947ae9610dc5ad2d820a2b0ba4a0c35801",
+  "apk": "app-debug.apk",
+  "target_executed": false,
+  "checks": {
+    "native": {
+      "passed": true,
+      "sha256": {
+        "lib/armeabi/libqpicjni156.so": "e5fd228d0794f113b0988c1087bbdc297d48090732ae6867daa0095443da7340",
+        "lib/x86/libqpicjni156.so": "5277d455bff687ce8749709d22002dc84fcdbde951a9290c2e26fbaa268823df"
+      },
+      "stored": true
+    },
+    "assets_raw": {
+      "passed": true,
+      "members": 50
+    },
+    "payload_inventory": {
+      "passed": true,
+      "original_count": 258,
+      "packaged_count": 260,
+      "added": [
+        "META-INF/com/android/build/gradle/app-metadata.properties",
+        "classes2.dex"
+      ],
+      "missing": []
+    },
+    "binary_manifest": {
+      "passed": true,
+      "ignored": [
+        "XML source line numbers",
+        "debug variant android:debuggable=true"
+      ],
+      "tags": {
+        "manifest": 1,
+        "uses-sdk": 1,
+        "uses-permission": 29,
+        "supports-screens": 1,
+        "application": 1,
+        "activity": 9,
+        "provider": 2,
+        "meta-data": 3,
+        "intent-filter": 14,
+        "action": 15,
+        "category": 21,
+        "data": 27,
+        "activity-alias": 1,
+        "service": 1,
+        "uses-library": 1
+      }
+    },
+    "resource_ids": {
+      "passed": true,
+      "names_and_ids": 918,
+      "differences": {
+        "missing": [],
+        "added": [],
+        "changed": []
+      }
+    },
+    "complete_resource_table_dump": {
+      "passed": true,
+      "lines": 11818,
+      "renamed_backing_paths": 20
+    },
+    "compile_time_R": {
+      "passed": true,
+      "fields": 918,
+      "java_only_aliases": [
+        "string/stable_keyword_default",
+        "string/stable_keyword_interface"
+      ]
+    },
+    "all_dex_definitions_and_bodies": {
+      "passed": true,
+      "original": {
+        "classes.dex": {
+          "class_defs": 2332,
+          "method_defs": 15225
+        }
+      },
+      "packaged": {
+        "classes.dex": {
+          "class_defs": 2331,
+          "method_defs": 15191
+        },
+        "classes2.dex": {
+          "class_defs": 1,
+          "method_defs": 34
+        }
+      },
+      "exact_smali_classes": 2331,
+      "text_differences": {
+        "missing": [],
+        "added": [],
+        "changed": [
+          "Lcom/alensw/jni/JniUtils;"
+        ]
+      },
+      "java_not_equal_except_source_and_line_markers": [],
+      "classes": 2332,
+      "methods": 15225
+    },
+    "decoded_resources": {
+      "passed": true,
+      "paths": 298,
+      "differences": {
+        "missing": [],
+        "added": [],
+        "changed": []
+      }
+    },
+    "bundle_payload": {
+      "passed": true,
+      "abi_members": [
+        "lib/armeabi/libqpicjni156.so",
+        "lib/x86/libqpicjni156.so"
+      ],
+      "dex_members": [
+        "classes.dex",
+        "classes2.dex"
+      ],
+      "same_resource_table_as_apk": true,
+      "same_manifest_as_apk": true
+    },
+    "runtime_input_provenance": {
+      "passed": true,
+      "javac_outputs": [
+        "com/alensw/jni/JniUtils.class"
+      ],
+      "jni_dex": "classes2.dex",
+      "javac_source_sha256": "2b9181201de750b3cea25a4239accb1724f394fbc9bfc929fe60328ac306a047",
+      "matches_d8_output": true,
+      "matches_smali_output": true,
+      "smali_inputs": 2331,
+      "packaged_dex_sha256": {
+        "classes.dex": "16b457c591ad891b4b4916401f5ae1649f6df2d2b973893d5f41bda8cc32c69b",
+        "classes2.dex": "3dcaa9dd695f96d3c3895211ed42bf91d7c1cb5ce417127d030471d428ce22b0"
+      }
+    },
+    "reading_root": {
+      "passed": true,
+      "files": 2163,
+      "entire_root_passed_to_javac": false
+    },
+    "apk_signature": {
+      "passed": true,
+      "schemes": [
+        "Verified using v1 scheme (JAR signing): true",
+        "Verified using v2 scheme (APK Signature Scheme v2): true"
+      ],
+      "signer_certificate_sha256": "56369f45bdea83779b087fea897884b6779a314050dec92ad7b1fec60b297527"
+    },
+    "zip_alignment": {
+      "passed": true
+    }
+  },
+  "passed": true
+}

@@ -1,0 +1,9 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+
+# The restoration checks compare these inputs byte-for-byte, including mixed XML line endings.
+app/src/** -text
+verification/*.json -text
+*.jar binary
+*.so binary
+*.png binary

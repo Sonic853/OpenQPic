@@ -1,0 +1,67 @@
+{
+  "apk_sha256": "56e9768377c074ef07334563fc835ab69eba49910db6a6eaa480fdb7412b88d7",
+  "device": "Android/sdk_phone_armv7/generic:6.0/MASTER/3079352:userdebug/test-keys",
+  "abi": "armeabi-v7a",
+  "api": "23",
+  "activity": "com.alensw.PicFolder/.GalleryActivity",
+  "per_app_external_ipv4_ipv6": "blocked",
+  "package_uid": 10057,
+  "storage_permissions_requested_for_test": [
+    "READ_EXTERNAL_STORAGE",
+    "WRITE_EXTERNAL_STORAGE"
+  ],
+  "am_start_wait": "Starting: Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.alensw.PicFolder/.GalleryActivity }\nStatus: ok\nActivity: com.alensw.PicFolder/.GalleryActivity\nThisTime: 1284\nTotalTime: 1284\nWaitTime: 4972\nComplete",
+  "activity_state": [
+    "mResumedActivity: ActivityRecord{32dff08 u0 com.alensw.PicFolder/.GalleryActivity t5}",
+    "mFocusedActivity: ActivityRecord{32dff08 u0 com.alensw.PicFolder/.GalleryActivity t5}"
+  ],
+  "window_focus": [
+    "mCurrentFocus=Window{6e33a38 u0 com.alensw.PicFolder/com.alensw.PicFolder.GalleryActivity}"
+  ],
+  "app_process_observed": true,
+  "jni_libraries_mapped_by_app": [
+    "/data/app/com.alensw.PicFolder-1/lib/arm/libqpicjni156.so"
+  ],
+  "launcher_resumed": true,
+  "preferences": {
+    "component": "com.alensw.PicFolder/com.alensw.ui.activity.MainPreference",
+    "invocation": "explicit am start -W",
+    "am_start_wait": "Starting: Intent { cmp=com.alensw.PicFolder/com.alensw.ui.activity.MainPreference }\nStatus: ok\nActivity: com.alensw.PicFolder/com.alensw.ui.activity.MainPreference\nThisTime: 1013\nTotalTime: 1013\nWaitTime: 1122\nComplete",
+    "visible_titles": [
+      "Interface",
+      "Albums",
+      "View",
+      "Security",
+      "Slideshow"
+    ],
+    "expected_default_strings": [
+      [
+        "string/interface",
+        "0x7f0a003c",
+        "Interface"
+      ],
+      [
+        "string/local_albums",
+        "0x7f0a00ba",
+        "Albums"
+      ],
+      [
+        "string/view",
+        "0x7f0a008c",
+        "View"
+      ],
+      [
+        "string/security",
+        "0x7f0a006e",
+        "Security"
+      ],
+      [
+        "string/slideshow",
+        "0x7f0a007a",
+        "Slideshow"
+      ]
+    ],
+    "ui_xml_sha256": "3aed4d7583592948424922bf1ef259149fa04fbb0f7753086ed2af4a03c13b62",
+    "visible_titles_match_original_resource_ids": true
+  }
+}

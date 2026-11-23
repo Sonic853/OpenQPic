@@ -1,0 +1,3 @@
+# DEX identities; use descriptors, not JADX filenames. JniUtils is already Java.
+Lorg/apache/http/RequestLine;
+Lorg/apache/http/NoHttpResponseException;

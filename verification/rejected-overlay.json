@@ -1,0 +1,10 @@
+{
+  "passed": false,
+  "checked_types": [
+    "Lorg/apache/http/NoHttpResponseException;"
+  ],
+  "missing_or_changed_code": [
+    "Lorg/apache/http/NoHttpResponseException;"
+  ],
+  "unexpected_d8_types": []
+}

@@ -1,0 +1,3 @@
+# Paths under ../reference/java, compiled without editing the canonical files.
+org/apache/http/RequestLine.java
+org/apache/http/NoHttpResponseException.java

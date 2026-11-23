@@ -1,0 +1,31 @@
+{
+  "module": [
+    ":app type=APPLICATION"
+  ],
+  "namespace": [
+    "com.alensw.PicFolder"
+  ],
+  "variant": [
+    "debug",
+    "release"
+  ],
+  "manifest": [
+    "D:\\Git\\OpenPic\\OpenPic\\android-project\\app\\src\\main\\AndroidManifest.xml"
+  ],
+  "java": [
+    "D:\\Git\\OpenPic\\OpenPic\\android-project\\app\\src\\main\\java",
+    "D:\\Git\\OpenPic\\OpenPic\\android-project\\app\\src\\recovered\\java"
+  ],
+  "res": [
+    "D:\\Git\\OpenPic\\OpenPic\\android-project\\app\\src\\main\\res"
+  ],
+  "jniLibs": [
+    "D:\\Git\\OpenPic\\OpenPic\\android-project\\app\\src\\main\\jniLibs"
+  ],
+  "reading": [
+    "D:\\Git\\OpenPic\\OpenPic\\reference\\java"
+  ],
+  "smali": [
+    "D:\\Git\\OpenPic\\OpenPic\\android-project\\app\\src\\main\\smali"
+  ]
+}

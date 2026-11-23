@@ -1,0 +1,11 @@
+{
+  "copied": "android-project sources only",
+  "sibling_reference_tree": false,
+  "input_apks": 0,
+  "gradle_build_cache": false,
+  "offline": true,
+  "jdk": "openjdk version \"21.0.12.1\" 2026-08-18 LTS",
+  "signed_apk_sha256": "56e9768377c074ef07334563fc835ab69eba49910db6a6eaa480fdb7412b88d7",
+  "compared_to": "56e9768377c074ef07334563fc835ab69eba49910db6a6eaa480fdb7412b88d7",
+  "same_signed_apk": true
+}

@@ -1,0 +1,64 @@
+{
+  "stable_apk": "23ed7071608dc05465c6885a98c5884478defddc9731580929533bd3d9a6b107",
+  "built_apk": "77b7b7f59dbc39ea4c4806a35bd7d97f08499ee9e4be2aa4b25af3a4ef27234c",
+  "stable_dex": [
+    {
+      "dex": "classes.dex",
+      "sha256": "ba8d7e946dd195705b86994680f53bdc846ec59dfda51e638b4b28499972d177",
+      "bytes": 2147108,
+      "version": "035",
+      "type_ids": 3198,
+      "field_ids": 8190,
+      "method_ids": 20012,
+      "class_defs": 2332,
+      "defined_fields": 7348,
+      "defined_methods": 15225
+    }
+  ],
+  "built_dex": [
+    {
+      "dex": "classes.dex",
+      "sha256": "0ab0f27e1019e8807ee9ec8be3face854eb48d1fa847060509f3aecd5d6f98da",
+      "bytes": 2112268,
+      "version": "035",
+      "type_ids": 3162,
+      "field_ids": 7959,
+      "method_ids": 19820,
+      "class_defs": 2076,
+      "defined_fields": 7119,
+      "defined_methods": 14541
+    },
+    {
+      "dex": "classes2.dex",
+      "sha256": "32ebf5fba47d1668beda0eb709b25538454a45ec66c82171e13a855d9712cf25",
+      "bytes": 73884,
+      "version": "035",
+      "type_ids": 424,
+      "field_ids": 237,
+      "method_ids": 740,
+      "class_defs": 256,
+      "defined_fields": 229,
+      "defined_methods": 684
+    }
+  ],
+  "original_classes_present": 2332,
+  "original_class_differences": {},
+  "missing_original_classes": [],
+  "additional_classes": [],
+  "original_members": {
+    "fields": 7348,
+    "methods": 15225
+  },
+  "source_file_attribute_changes": 78,
+  "manifest": {
+    "root_attributes": {},
+    "application_attributes": {},
+    "top_level_declaration_order_equal": true,
+    "top_level_declaration_multiset_equal": true,
+    "component_order_equal": true,
+    "application_other_children_equal": true,
+    "component_contract_differences": {}
+  },
+  "native_payload_differences": {},
+  "passed_structural_contract": true
+}

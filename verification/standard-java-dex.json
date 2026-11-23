@@ -1,0 +1,23 @@
+{
+  "apk_sha256": "56e9768377c074ef07334563fc835ab69eba49910db6a6eaa480fdb7412b88d7",
+  "original_apk_sha256": "23ed7071608dc05465c6885a98c5884478defddc9731580929533bd3d9a6b107",
+  "normalized_dex_equal": true,
+  "all_symbolic_references_equal": true,
+  "source_file_matches_java": true,
+  "java_source_units": 254,
+  "dex_classes": 256,
+  "classes_by_dex": {
+    "classes2.dex": 256
+  },
+  "totals": {
+    "method_bodies": 144,
+    "classes_with_bodies": 57,
+    "methods": 684,
+    "fields": 229,
+    "original_source_file_missing": 78
+  },
+  "units_by_evidence": {
+    "original-sourcefile-and-dex": 176,
+    "exact-single-type-jadx-and-dex": 78
+  }
+}

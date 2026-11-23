@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The linked parent chain is ActionButton -> ActionButton.Base ->
+     ActionButton.System -> android:style/Widget.Material.ActionButton. -->
+<issues format="6" by="lint 9.0.1">
+    <issue id="ResourceCycle"
+           message="Potential cycle: `ActionButton` is the implied parent of `ActionButton.Base` and this defines the opposite">
+        <location file="src/main/res/values/styles.xml" line="23" column="32" />
+    </issue>
+</issues>
