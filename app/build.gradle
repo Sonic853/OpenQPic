@@ -49,6 +49,8 @@ def recoveryCandidates = [rootProject.file('../OpenPic'), rootProject.file('..')
 def recoveryRoot = configuredRecovery ? rootProject.file(configuredRecovery) :
         (recoveryCandidates.find { new File(it, 'reference/java').isDirectory() } ?: recoveryCandidates.first())
 def readingRoot = new File(recoveryRoot, 'reference/java')
+// AGP requires at least one directory for a registered source type, even when there are no files.
+def ideReadingRoot = readingRoot.isDirectory() ? readingRoot : file('src/main/reading')
 selectedSources.each { path ->
     if (!path.endsWith('.java') || path.startsWith('/') || path.contains('\\') ||
             path.split('/').any { it in ['.', '..', ''] } || !(new File(readingRoot, path)).isFile())
@@ -331,7 +333,7 @@ androidComponents {
     finalizeDsl { dsl ->
         dsl.sourceSets.main.'getExtras$gradle_core'().configureEach { directory ->
             if (directory.sourceSetName == 'reading')
-                directory.setSrcDirs(readingRoot.isDirectory() ? [readingRoot] : [])
+                directory.setSrcDirs([ideReadingRoot])
         }
     }
     onVariants(selector().all()) { variant ->

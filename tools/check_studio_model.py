@@ -46,7 +46,9 @@ def main():
         if [Path(v).resolve() for v in data.get(key, [])] != [(ROOT / path).resolve()]:
             raise SystemExit(f"Unexpected IDE model {key}: {data.get(key)}")
     reading = RECOVERY_ROOT / "reference/java"
-    if [Path(v).resolve() for v in data.get("reading", [])] != ([reading.resolve()] if reading.is_dir() else []):
+    if not reading.is_dir():
+        reading = ROOT / "app/src/main/reading"
+    if [Path(v).resolve() for v in data.get("reading", [])] != [reading.resolve()]:
         raise SystemExit(f"Unexpected IDE model reading: {data.get('reading')}")
     if {Path(p).resolve() for p in data.get("java", [])} != {
         (ROOT/"app/src/main/java").resolve(), (ROOT/"app/src/recovered/java").resolve()}:
