@@ -212,7 +212,7 @@ You can also %s to let others connect your hotspot."</string>
     <string name="version">__OPENQPIC_VERSION__</string>
     <string name="split_action_bar_summary_on">May not work on versions higher than Android 8.1.0 or with Xposed modules</string>
     <string name="faq">Frequently asked questions</string>
-    <string name="wstxda">WSTxda</string>
+    <string name="wstxda" translatable="false">WESxda</string>
     <string name="tran_category">Transition</string>
     <string name="vega_url">https://github.com/VegaBobo</string>
     <string name="pass_reset">If you forget password will need to clear app data to remove it</string>

@@ -1,0 +1,9 @@
+<resources>
+    <string name="about_v97_developer">原 9.7 开发者</string>
+    <string name="about_contact">联系</string>
+    <string name="about_send_email">发送邮件</string>
+    <string name="about_profile_card">个人名片</string>
+    <string name="about_follow">关注我</string>
+    <string name="about_bilibili">哔哩哔哩</string>
+    <string name="x">X（Twitter）</string>
+</resources>

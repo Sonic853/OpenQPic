@@ -1,0 +1,14 @@
+<resources>
+    <string name="about_sonic853" translatable="false">Sonic853</string>
+    <string name="about_sonic853_email" translatable="false">mailto:Sonic853@qq.com</string>
+    <string name="about_sonic853_card" translatable="false">https://page.853lab.com</string>
+    <string name="about_sonic853_github" translatable="false">https://github.com/Sonic853</string>
+    <string name="about_sonic853_bilibili" translatable="false">https://space.bilibili.com/1968333</string>
+    <string name="about_sonic853_x" translatable="false">https://x.com/Sonic853</string>
+    <string name="about_v97_developer">Original 9.7 developer</string>
+    <string name="about_contact">@string/contact_category</string>
+    <string name="about_send_email">Send email</string>
+    <string name="about_profile_card">Profile card</string>
+    <string name="about_follow">@string/follow_category</string>
+    <string name="about_bilibili">Bilibili</string>
+</resources>

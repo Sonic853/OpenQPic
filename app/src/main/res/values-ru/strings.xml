@@ -201,7 +201,6 @@
     <string name="contributors_desc">Люди, которые помогают в проекте</string>
     <string name="split_action_bar_summary_on">Может не работать на версиях выше Android 8.1.0 или с модулями Xposed</string>
     <string name="faq">Часто задаваемые вопросы</string>
-    <string name="wstxda">WSTxda</string>
     <string name="tran_category">Варианты</string>
     <string name="pass_reset">Если вы забыли пароль, необходимо очистить данные приложения, чтобы удалить его</string>
     <string name="android_11_warning">Вы используете Android 11, некоторые параметры могут работать нестабильно</string>

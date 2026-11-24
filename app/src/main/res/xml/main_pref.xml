@@ -84,7 +84,28 @@
         <Preference android:layout="@layout/about_version">
             <intent android:action="android.settings.APPLICATION_DETAILS_SETTINGS" android:data="package:com.alensw.PicFolder" />
         </Preference>
-        <PreferenceScreen android:icon="@drawable/ic_developer_page" android:title="@string/wstxda" android:summary="@string/developer" android:singleLineTitle="false">
+        <PreferenceScreen android:icon="@drawable/ic_contributors" android:title="@string/about_sonic853" android:summary="@string/developer" android:singleLineTitle="false">
+            <PreferenceCategory android:layout="@layout/pref_category" android:title="@string/about_contact">
+                <Preference android:icon="@drawable/ic_email" android:title="@string/about_send_email" android:singleLineTitle="false">
+                    <intent android:action="android.intent.action.SENDTO" android:data="@string/about_sonic853_email" />
+                </Preference>
+                <Preference android:icon="@drawable/ic_link_share" android:title="@string/about_profile_card" android:singleLineTitle="false">
+                    <intent android:action="android.intent.action.VIEW" android:data="@string/about_sonic853_card" />
+                </Preference>
+            </PreferenceCategory>
+            <PreferenceCategory android:layout="@layout/pref_category" android:title="@string/about_follow">
+                <Preference android:icon="@drawable/ic_github" android:title="@string/github" android:singleLineTitle="false">
+                    <intent android:action="android.intent.action.VIEW" android:data="@string/about_sonic853_github" />
+                </Preference>
+                <Preference android:icon="@drawable/ic_bilibili" android:title="@string/about_bilibili" android:singleLineTitle="false">
+                    <intent android:action="android.intent.action.VIEW" android:data="@string/about_sonic853_bilibili" />
+                </Preference>
+                <Preference android:icon="@drawable/ic_x" android:title="@string/x" android:singleLineTitle="false">
+                    <intent android:action="android.intent.action.VIEW" android:data="@string/about_sonic853_x" />
+                </Preference>
+            </PreferenceCategory>
+        </PreferenceScreen>
+        <PreferenceScreen android:icon="@drawable/ic_developer_page" android:title="@string/wstxda" android:summary="@string/about_v97_developer" android:singleLineTitle="false">
             <PreferenceCategory android:layout="@layout/pref_category" android:title="@string/contact_category">
                 <Preference android:icon="@drawable/ic_email" android:title="@string/email" android:singleLineTitle="false">
                     <intent android:action="android.intent.action.VIEW" android:data="@string/email_url" />

@@ -149,8 +149,11 @@ def verify(apk, aab, tools):
     stable = dict(x.split(":")[1].split(" = ") for x in (APP/"resource-ids.txt").read_text().splitlines())
     assert stable.items() <= table.items()
     update_labels={"string/update_"+s for s in ("no_release","check_failed","view_release","open_failed")}
-    assert update_labels <= table.keys()
-    assert all(re.fullmatch(r"(string|id|layout|drawable)/ls_\w+",k) or k in update_labels for k in table.keys()-stable.keys())
+    about_labels={"string/about_"+s for s in ("sonic853","sonic853_email","sonic853_card","sonic853_github",
+                  "sonic853_bilibili","sonic853_x","v97_developer","contact","send_email","profile_card","follow","bilibili")}
+    product_resources=update_labels | about_labels | {"drawable/ic_bilibili"}
+    assert product_resources <= table.keys()
+    assert all(re.fullmatch(r"(string|id|layout|drawable)/ls_\w+",k) or k in product_resources for k in table.keys()-stable.keys())
     symbols = (APP/"build/intermediates/runtime_symbol_list/debug/processDebugResources/R.txt").read_text()
     for k in table.keys()-stable.keys():
         assert "int "+k.replace("/"," ")+" "+table[k] in symbols, k
