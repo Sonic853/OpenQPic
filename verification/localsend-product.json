@@ -1,37 +1,42 @@
 {
-  "apk_sha256": "ce6d8bbafb52d5a8fb1782a4e892bb7483218a1693aaa31b6bf275aea42187f0",
-  "bytes": 2898873,
-  "dex_classes": 2332,
+  "apk_sha256": "694a93564042379e15edd5f78cff0e0e08187b6148c9cf8f279a4c4a67f9f299",
+  "bytes": 2902760,
+  "dex_classes": 2337,
   "original_resource_ids": 918,
   "native_sha256": {
     "lib/armeabi/libqpicjni156.so": "d68b2dbd74bde541f98e3bd80f23e6fe4b785dfe8c6a69b6747f832e2a7b404b",
-    "lib/armeabi/libqpiclocalsend.so": "9ad06c8356ea150c2693e1fbd549501a77ccfee7fd292c4a98ba056bfa5e9535",
+    "lib/armeabi/libqpiclocalsend.so": "ff81822e7ece381d72eff9a46fff86140bbbee30d3daa0cf307a806b5751fe6b",
     "lib/x86/libqpicjni156.so": "8a9fffcbaa2c05211e6d86b224fae153c08a371b80ee6330113a8c2db1470bb2",
-    "lib/x86/libqpiclocalsend.so": "926df2c119c7c7999f62b83703c71045c02f99bb061210180dfc82e0c9b401af",
+    "lib/x86/libqpiclocalsend.so": "1532453bd5e5f4061912d195c27e1127410d0b1dafd4efcbb80fcf1edd3d8502",
     "lib/arm64-v8a/libqpicjni156.so": "8b46c181b0384ee1e4806413ed5ade3926f700b50d2481280df8158dd3f66304",
-    "lib/arm64-v8a/libqpiclocalsend.so": "1c172279e62002c6a421160d36abe87378584b165c6f0eb8b3dc72cf111c0881"
+    "lib/arm64-v8a/libqpiclocalsend.so": "995271746a5ffa1a74c973474ab8b31855d70306280b37d4425b1309c2e5e3b9"
   },
   "inputs": {
     "OpenQPicJni": "761302f416d2166b26d7699ace352d6c2b18bff8",
-    "OpenQPicLocalSend": "a119f8be548962a9fee4452249e5a2c1448c96ed",
+    "OpenQPicLocalSend_base": "a119f8be548962a9fee4452249e5a2c1448c96ed",
+    "OpenQPicLocalSend_changed_source_sha256": {
+      "java/org/openqpic/localsend/LocalSend.java": "d2e109064fd906d6987325396b1013094ba4b0611b653b984e43976882ed3b29",
+      "src/transport.c": "4c0bff0589095564100de53af9a49cadab06fdc2a5724f34b9e5f1a223484a45",
+      "tests/official_peer.py": "9f791c3639fe5426a63ef102ad54620830755c61d3b86463302177909bc1de4c"
+    },
     "LocalSend_test_peer": "d8702511dfb074d795452a9204ba3c9473f4f01f"
   },
   "artifacts": {
     "app-debug.apk": {
-      "bytes": 2898873,
-      "sha256": "ce6d8bbafb52d5a8fb1782a4e892bb7483218a1693aaa31b6bf275aea42187f0"
+      "bytes": 2902760,
+      "sha256": "694a93564042379e15edd5f78cff0e0e08187b6148c9cf8f279a4c4a67f9f299"
     },
     "app-debug.aab": {
-      "bytes": 1971187,
-      "sha256": "8eaece8f64c833351da4bb70f84eadb7f05dede5961790aa5ca73e315746d4ba"
+      "bytes": 1974364,
+      "sha256": "74e4ab4c8275462418e2912ebc0bea1169bd577038f490a159d177071095fcdd"
     },
     "app-release-unsigned.apk": {
-      "bytes": 2768531,
-      "sha256": "3d0ce4fccbe21466935ae657f989f8978fad55af295c5405d2a42f963cc53e38"
+      "bytes": 2772007,
+      "sha256": "7c0bce93de8213e8c04043535ffa2755f3cbf7fec2b08aab4cf05f7a4acd9816"
     },
     "app-release-test-signed.apk": {
-      "bytes": 2843130,
-      "sha256": "f3636934b2fc907c381f356b2ae457cc32489e14a1b8283fbb6a0db4dcb478bc"
+      "bytes": 2847226,
+      "sha256": "225795fb6c17c566bf38b10e3df7dc06c9894191e2e84a253c80929966961361"
     }
   },
   "release_test_signer": "local Android debug certificate; v1/v2/v3 verified; zipalign -c 4 passed"

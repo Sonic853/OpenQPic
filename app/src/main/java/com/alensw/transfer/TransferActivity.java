@@ -30,6 +30,9 @@ public final class TransferActivity extends ao implements TransferSessionService
     private final Map<Uri,CommonFile> thumbs=new HashMap<>();
     private final ExecutorService metadata=Executors.newSingleThreadExecutor();
     private final ArrayList<NearbyDevices.Entry> devices=new ArrayList<>();
+    private final LinkedHashSet<String> recipients=new LinkedHashSet<>(); // fingerprints survive sorting and rediscovery
+    private boolean multi;
+    private Button multiButton, sendSelected;
     private final ArrayList<TransferSessionService.Row> rows=new ArrayList<>();
     private final Handler main=new Handler(Looper.getMainLooper());
     private final Set<String> deferred=new HashSet<>();
@@ -57,12 +60,28 @@ public final class TransferActivity extends ao implements TransferSessionService
         pages[1]=getLayoutInflater().inflate(layout.list_view,pager,false);
         tip=send.findViewById(id.empty_tip); count=send.findViewById(id.files_to_send);
         nearby=send.findViewById(id.ls_nearby);
+        multiButton=send.findViewById(id.ls_multi); sendSelected=send.findViewById(id.ls_send_selected);
+        if(state!=null && state.getBoolean("multi")) {
+            multi=true; recipients.addAll(state.getStringArrayList("recipients"));
+        }
+        multiButton.setOnClickListener(v->setMulti(!multi));
+        sendSelected.setOnClickListener(v->{
+            List<LocalSend.Peer> peers=selectedPeers();
+            if(!peers.isEmpty() && peers.size()==recipients.size()) sendTo(peers);
+        });
         tip.setOnClickListener(v->manual()); send.findViewById(id.ls_connect).setOnClickListener(v->manual());
         ListView peers=send.findViewById(id.devices), history=pages[1].findViewById(id.list);
         TextView empty=pages[1].findViewById(id.empty); empty.setText(string.transfer_list_empty);
         peers.setEmptyView(send.findViewById(id.empty)); history.setEmptyView(empty);
         peers.setAdapter(deviceAdapter=new Devices()); history.setAdapter(historyAdapter=new History());
-        peers.setOnItemClickListener((parent,v,pos,n)->sendTo(devices.get(pos).peer));
+        peers.setOnItemClickListener((parent,v,pos,n)->{
+            LocalSend.Peer p=devices.get(pos).peer;
+            if(!multi) sendTo(Collections.singletonList(p));
+            else {
+                if(!recipients.remove(p.fingerprint)) recipients.add(p.fingerprint);
+                refreshTargets();
+            }
+        });
         history.setOnItemClickListener((parent,v,pos,n)->{
             String key=rows.get(pos).key; deferred.remove(key); promptsChanged();
         });
@@ -124,6 +143,7 @@ public final class TransferActivity extends ao implements TransferSessionService
     @Override public void onConfigurationChanged(Configuration c) { super.onConfigurationChanged(c); orient(c); }
     @Override protected void onSaveInstanceState(Bundle b) {
         super.onSaveInstanceState(b); b.putParcelableArrayList("uris",selection);
+        b.putBoolean("multi",multi); b.putStringArrayList("recipients",new ArrayList<>(recipients));
         b.putStringArrayList("deferred",new ArrayList<>(deferred)); b.putInt("page",pager.getCurrentItem());
     }
     @Override protected void onNewIntent(Intent i) {
@@ -189,8 +209,11 @@ public final class TransferActivity extends ao implements TransferSessionService
         public void b(int i) {} public void c(int i) {}
     }
     private static final class DeviceRow {
-        final TextView name,detail; final ImageView image;
-        DeviceRow(View v) { name=v.findViewById(id.title); detail=v.findViewById(id.summary); image=v.findViewById(id.icon); }
+        final TextView name,detail; final ImageView image; final CheckBox check;
+        DeviceRow(View v) {
+            name=v.findViewById(id.title); detail=v.findViewById(id.summary);
+            image=v.findViewById(id.icon); check=v.findViewById(id.ls_recipient);
+        }
     }
     private final class Devices extends BaseAdapter {
         public int getCount() { return devices.size(); }
@@ -198,7 +221,7 @@ public final class TransferActivity extends ao implements TransferSessionService
         public long getItemId(int i) { return getItem(i).id; }
         public boolean hasStableIds() { return true; }
         public boolean areAllItemsEnabled() { return false; }
-        public boolean isEnabled(int i) { return getItem(i).available(); }
+        public boolean isEnabled(int i) { return canSelect(getItem(i)); }
         public View getView(int i,View v,ViewGroup parent) {
             if(v==null) { v=getLayoutInflater().inflate(layout.ls_device,parent,false); v.setTag(new DeviceRow(v)); }
             DeviceRow r=(DeviceRow)v.getTag(); LocalSend.Peer p=getItem(i).peer;
@@ -206,8 +229,11 @@ public final class TransferActivity extends ao implements TransferSessionService
             r.image.setImageResource(mobile?drawable.ls_mobile:desktop?drawable.ls_desktop:drawable.ls_device);
             r.name.setText(p.alias);
             String kind=p.deviceModel.isEmpty()?getString(mobile?string.ls_mobile:desktop?string.ls_desktop:string.ls_device):p.deviceModel;
-            r.detail.setText((getItem(i).available()?kind:getString(string.ls_encrypted))+" · "+p.ip+":"+p.port);
-            v.setAlpha(getItem(i).available()?1f:.6f); return v;
+            boolean enabled=isEnabled(i);
+            r.detail.setText((enabled?kind:getString(getItem(i).available()?string.ls_sending_to:string.ls_encrypted))+" · "+p.ip+":"+p.port);
+            r.check.setVisibility(multi?View.VISIBLE:View.GONE); r.check.setEnabled(enabled);
+            r.check.setChecked(multi && recipients.contains(p.fingerprint));
+            v.setAlpha(enabled?1f:.6f); return v;
         }
     }
     private final class History extends BaseAdapter {
@@ -229,17 +255,37 @@ public final class TransferActivity extends ao implements TransferSessionService
             return v;
         }
     }
-    private void sendTo(LocalSend.Peer peer) {
+    private boolean canSelect(NearbyDevices.Entry e) {
+        return service!=null && e.available() && !service.sendingTo(e.peer);
+    }
+    private List<LocalSend.Peer> selectedPeers() {
+        List<LocalSend.Peer> peers=new ArrayList<>();
+        for(NearbyDevices.Entry e:devices) if(recipients.contains(e.peer.fingerprint) && canSelect(e)) peers.add(e.peer);
+        return peers;
+    }
+    private void setMulti(boolean enabled) {
+        multi=enabled; recipients.clear(); refreshTargets();
+    }
+    private void refreshTargets() {
+        deviceAdapter.notifyDataSetChanged();
+        multiButton.setText(multi?android.R.string.cancel:string.ls_multi);
+        sendSelected.setVisibility(multi?View.VISIBLE:View.GONE);
+        if(!multi) return;
+        int selected=recipients.size(), available=selectedPeers().size();
+        sendSelected.setText(available==selected?getString(string.ls_send_selected,selected):
+                getString(string.ls_wait_devices,available,selected));
+        sendSelected.setEnabled(available>0 && available==selected);
+    }
+    private void sendTo(List<LocalSend.Peer> peers) {
         if(service==null) return;
-        if(!"http".equals(peer.protocol)) { toast(getString(string.ls_https)); return; }
         if(selection.isEmpty()) { toast(getString(string.ls_pick)); pick(); return; }
-        if(service.send(peer,selection)) pager.setCurrentItem(1);
+        if(service.send(peers,selection)) { setMulti(false); pager.setCurrentItem(1); }
     }
     private void toast(String msg) { Toast.makeText(this,msg,Toast.LENGTH_LONG).show(); }
     @Override public void problem(String msg) { toast(msg); }
     @Override public void peersChanged() {
         devices.clear(); if(service!=null) devices.addAll(service.nearby.rows);
-        deviceAdapter.notifyDataSetChanged(); nearby.setText(getString(string.ls_nearby,devices.size()));
+        refreshTargets(); nearby.setText(getString(string.ls_nearby,devices.size()));
         String address=service==null?null:service.address();
         tip.setText(address==null?getString(string.ls_offline):getString(string.ls_here,address));
     }
@@ -275,13 +321,14 @@ public final class TransferActivity extends ao implements TransferSessionService
             pinDialog=new AlertDialog.Builder(this).setTitle(service.pins.get(key).alias+" · PIN").setView(input)
                     .setPositiveButton(android.R.string.ok,(d,w)->{ if(service!=null) service.pin(key,input.getText().toString()); })
                     .setNegativeButton(android.R.string.cancel,(d,w)->{ if(service!=null) service.cancel(key); })
-                    .setOnCancelListener(d->{ deferred.add(key); dismissPin(); }).show(); return;
+                    .setOnCancelListener(d->{ deferred.add(key); dismissPin(); promptsChanged(); }).show(); return;
         }
     }
     @Override public void onBackPressed() {
         if(receive!=null) {
             deferred.add(receive.offer.key); hideReceive(); pager.setCurrentItem(1); return;
         }
+        if(multi && pager.getCurrentItem()==0) { setMulti(false); return; }
         super.onBackPressed();
     }
     @Override protected void onResume() {

@@ -6,6 +6,7 @@ Android 相册，保留原图库、播放、分享和「WiFi 快传」界面。*
 
 1. 两台设备连接同一局域网，在 LocalSend 对端关闭加密。
 2. 从图库、桌面快捷方式或系统分享打开快传。「发送」页优先列出可发送的设备，显示名称、类型或型号及地址；重复公告不重复添加设备，长时间无响应的设备会移除。`+` 打开图库多选，也可点「通过 IP 连接」输入 `IPv4[:端口]`。
+   点设备即可单独发送。要把同一批文件发给多台设备，点「多选」，勾选接收设备，再点「发送（台数）」。最多同时向 3 台发送，其余自动排队。每台设备在传输列表中单独显示进度，可单独取消。
 3. **只接收图片、视频、音频。** 独立接收提示页列出发送者、保存位置、可选媒体、选中大小和跳过数量。非媒体不会获得上传 token，伪装成媒体的内容不会发布。发送端仍可分享其他文件。默认保存到 `Download/QP Transfer`；未授权写入公共存储的旧系统显示实际应用目录，同名文件不覆盖。
 4. 离开快传、打开选图、按 Home 或返回图库都不会取消任务。可从前台服务通知返回传输列表，手动取消对应任务；只有一个任务时也可从通知直接取消。接收提示页按返回是稍后处理，可从列表重新打开。
 5. 收到图片或视频后，已打开的相册列表和接收目录会自动更新缩略图、数量；在快传页收完再返回图库也无需重新打开。
@@ -36,6 +37,6 @@ Android 相册，保留原图库、播放、分享和「WiFi 快传」界面。*
 
 ## 验证
 
-`verifyLocalSendDebug` 检查实际 APK/AAB 的两套 JNI、DEX、Manifest、原有 918 个资源 ID、签名与对齐。`tools/localsend_smoke.py` 在独立模拟器上用官方 Rust HTTP 核心作对端，检查实际字节、组播、收发、确认、取消和界面开关。详见[实现与实测](docs/localsend-http/IMPLEMENTATION.md)。
+`verifyLocalSendDebug` 检查实际 APK/AAB 的两套 JNI、DEX、Manifest、原有 918 个资源 ID、签名与对齐。`tools/localsend_smoke.py` 和 `tools/multisend_smoke.py` 用官方 Rust HTTP 核心作对端，验证单机及多机收发、文件内容、取消和后台行为。详见[实现与实测](docs/localsend-http/IMPLEMENTATION.md)。
 
 [原版保真验证](verification/README.md)及[早期协议与定容分析](docs/localsend-http/README.md)保留作历史对照；`verifyStableDebug` 仍按原版判定。

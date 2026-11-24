@@ -93,6 +93,7 @@ public final class TransferSessionService extends Service {
             if(!finished && !endpoint.hasSession(key)) return;
             boolean prompt=finished && (offers.remove(key)!=null | pins.remove(key)!=null);
             record(key,label,percent,finished); settle();
+            if(finished && client!=null) client.peersChanged();
             if(prompt && client!=null) client.promptsChanged();
         }); }
     }
@@ -175,10 +176,17 @@ public final class TransferSessionService extends Service {
         client.peersChanged(); settle();
     }
     void probe(String ip,int port) { if(discovery!=null) discovery.endpoint.probe(ip,port,true); }
-    boolean send(LocalSend.Peer peer,List<Uri> selected) {
-        if(discovery==null || discovery.endpoint.sending() || selected.isEmpty()) {
-            if(client!=null) client.problem(getString(discovery==null?R.string.ls_offline:
-                    selected.isEmpty()?R.string.ls_pick:R.string.ls_busy));
+    boolean sendingTo(LocalSend.Peer peer) {
+        for(Lane l:lanes) if(l.endpoint.sendingTo(peer)) return true;
+        return false;
+    }
+    boolean send(List<LocalSend.Peer> peers,List<Uri> selected) {
+        if(discovery==null || selected.isEmpty()) {
+            if(client!=null) client.problem(getString(discovery==null?R.string.ls_offline:R.string.ls_pick));
+            return false;
+        }
+        for(LocalSend.Peer p:peers) if(sendingTo(p)) {
+            if(client!=null) client.problem(p.alias+" · "+getString(R.string.ls_sending_to));
             return false;
         }
         ArrayList<Uri> uris=new ArrayList<>(selected);
@@ -194,8 +202,9 @@ public final class TransferSessionService extends Service {
             if(client!=null) client.problem(getString(R.string.ls_no_grant));
             return false;
         }
-        discovery.endpoint.send(peer,uris.size(),(i,cancel)->storage.source(uris.get(i),cancel));
-        settle(); return true;
+        boolean started=discovery.endpoint.send(peers,uris.size(),(i,cancel)->storage.source(uris.get(i),cancel));
+        if(started) { settle(); if(client!=null) client.peersChanged(); }
+        return started;
     }
     void answer(String key,boolean accept) {
         Offer offer=offers.remove(key); if(offer==null) return;

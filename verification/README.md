@@ -2,7 +2,7 @@
 
 以下是原版恢复基线 `e4c35cb` 的交付记录。当前 LocalSend 产品使用 `:app:verifyLocalSendDebug`；见[当前产品验证](../docs/localsend-http/IMPLEMENTATION.md)。需要重验历史保真时，在基线提交运行 `:app:verifyStableDebug`。
 
-当前快传：[APK/AAB 摘要](localsend-product.json) · [官方对端收发](localsend-smoke.json) · [接收后图库自动刷新](received-gallery-smoke.json)。
+当前快传：[APK/AAB 摘要](localsend-product.json) · [官方对端收发](localsend-smoke.json) · [多设备发送](multisend-smoke.json) · [接收后图库自动刷新](received-gallery-smoke.json)。
 
 | 记录 | 含义 |
 |---|---|

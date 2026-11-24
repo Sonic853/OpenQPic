@@ -25,6 +25,6 @@
     "completed_after_back": true
   },
   "back_and_reopen": true,
-  "apk_sha256": "ce6d8bbafb52d5a8fb1782a4e892bb7483218a1693aaa31b6bf275aea42187f0",
+  "apk_sha256": "694a93564042379e15edd5f78cff0e0e08187b6148c9cf8f279a4c4a67f9f299",
   "device": "Android/sdk_phone_armv7/generic:6.0/MASTER/3079352:userdebug/test-keys"
 }

@@ -111,6 +111,14 @@ def main():
                 chunk(b"tEXt",b"Comment\0"+b"P"*180000)+chunk(b"IDAT",zlib.compress((b"\0"+b"\x31\x22\x13"*2)*2))+chunk(b"IEND",b""))
     def upload_path(ticket,key="one"):
         return "upload?"+urllib.parse.urlencode({"sessionId":ticket["sessionId"],"fileId":key,"token":ticket["files"][key]})
+    def forbidden_upload(path,size):
+        # Check authorization before sending the body. Pushing the complete rejected body through
+        # adbd can reset the connection on close (unread bytes) before the 403 reaches the client.
+        c=HTTPConnection("127.0.0.1",port,timeout=5)
+        try:
+            c.request("POST",API+path,headers={"Content-Length":str(size),"Expect":"100-continue"})
+            r=c.getresponse(); assert r.status==403,(r.status,r.read())
+        finally: c.close()
     def partial(path,data):
         c=HTTPConnection("127.0.0.1",port,timeout=12)
         c.putrequest("POST",API+path); c.putheader("Content-Length",str(len(data))); c.endheaders()
@@ -185,10 +193,10 @@ def main():
             status,raw=waiter.result(); assert status==200
             ticket=json.loads(raw); args={"sessionId":ticket["sessionId"],"fileId":"one","token":"invalid"}
             path=lambda:"upload?"+urllib.parse.urlencode(args)
-            assert http(path(),data)[0]==403; args["token"]=ticket["files"]["one"]
+            forbidden_upload(path(),len(data)); args["token"]=ticket["files"]["one"]
             assert http(path(),b"X"*len(data))[0]==422
             assert name not in files() and http(path(),data)[0]==200
-            added.add(name); assert contents(name)==data and http(path(),data)[0]==403
+            added.add(name); assert contents(name)==data; forbidden_upload(path(),len(data))
             result["busy_cancel_token_hash_retry_replay"]=True
             def accept(req):
                 waiter=pool.submit(http,"prepare-upload",req,"POST",75)
@@ -234,7 +242,7 @@ def main():
             try:
                 shell("input keyevent 3"); hidden(True)
                 launch(SCREEN,"-a com.alensw.transfer.VIEW_SESSION"); state([True]*3)
-                tap(rid=PKG+":id/cancel"); assert http(upload_path(t),data)[0]==403
+                tap(rid=PKG+":id/cancel"); forbidden_upload(upload_path(t),len(data))
             finally: c.close()
             assert name not in files()
             result["manual_cancel_from_restored_history"]=True

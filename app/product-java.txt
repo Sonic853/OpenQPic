@@ -28,6 +28,8 @@ Lcom/alensw/video/VideoProxyService;
 Lcom/alensw/video/VideoProxyService$Server;
 Lcom/alensw/video/VideoProxyService$Server$1;
 Lorg/openqpic/localsend/LocalSend;
+Lorg/openqpic/localsend/LocalSend$Batch;
+Lorg/openqpic/localsend/LocalSend$CancelToken;
 Lorg/openqpic/localsend/LocalSend$Cancellation;
 Lorg/openqpic/localsend/LocalSend$Events;
 Lorg/openqpic/localsend/LocalSend$FileState;
