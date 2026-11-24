@@ -594,14 +594,7 @@
 .end method
 
 .method public b(Landroid/content/ContentResolver;)V
-    .locals 1
-
-    invoke-virtual {p0}, Lcom/alensw/bean/DocumentFolder;->q()Landroid/net/Uri;
-
-    move-result-object v0
-
-    invoke-static {p1, v0}, Lcom/alensw/b/j/a;->a(Landroid/content/ContentResolver;Landroid/net/Uri;)V
-
+    .locals 0
     return-void
 .end method
 

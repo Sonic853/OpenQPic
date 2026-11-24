@@ -25,26 +25,6 @@
 .method public static a(Landroid/content/Context;)Landroid/content/Intent;
     .locals 6
 
-    invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Landroid/content/res/Resources;->getConfiguration()Landroid/content/res/Configuration;
-
-    move-result-object v0
-
-    iget-object v0, v0, Landroid/content/res/Configuration;->locale:Ljava/util/Locale;
-
-    const-string v1, " "
-
-    invoke-virtual {v0}, Ljava/util/Locale;->getLanguage()Ljava/lang/String;
-
-    move-result-object v0
-
-    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-
-    move-result v0
-
     new-instance v1, Landroid/content/Intent;
 
     const-string v2, "android.intent.action.SEND"
@@ -65,11 +45,9 @@
 
     const/4 v5, 0x0
 
-    if-eqz v0, :cond_0
-
-    const-string v0, "http://t.cn/zWYtuBy"
-
-    :goto_0
+    const v0, 0x7f0a013f
+    invoke-virtual {p0, v0}, Landroid/content/Context;->getString(I)Ljava/lang/String;
+    move-result-object v0
     aput-object v0, v4, v5
 
     invoke-virtual {p0, v3, v4}, Landroid/content/Context;->getString(I[Ljava/lang/Object;)Ljava/lang/String;
@@ -79,11 +57,6 @@
     invoke-virtual {v1, v2, v0}, Landroid/content/Intent;->putExtra(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
 
     return-object v1
-
-    :cond_0
-    const-string v0, "https://github.com/WSTxda/QP-Gallery-Releases"
-
-    goto :goto_0
 .end method
 
 .method static synthetic a(Lcom/alensw/ui/activity/MainPreference;)Ljava/lang/Runnable;
@@ -1069,7 +1042,9 @@
 
     const-string v2, "android.intent.action.VIEW"
 
-    const-string v3, "https://github.com/WSTxda/QP-Gallery-Releases"
+    const v3, 0x7f0a013f
+    invoke-virtual {p0, v3}, Landroid/content/Context;->getString(I)Ljava/lang/String;
+    move-result-object v3
 
     invoke-static {v3}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
 

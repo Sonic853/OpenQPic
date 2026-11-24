@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.*;
 import android.provider.OpenableColumns;
 import android.util.Log;
-import com.alensw.b.e.i;
 import com.alensw.b.e.j;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -19,13 +18,22 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** Adapts the gallery's range-aware cloud providers to external video players, on loopback only. */
+/** Serves Android content descriptors to players that need HTTP byte ranges, on loopback only. */
 public final class VideoProxyService extends Service {
     private final Handler main=new Handler(Looper.getMainLooper());
     private final Runnable idle=this::stopSelf;
     private int streams;
     private Server server;
     private final Map<String,Uri> grants=new ConcurrentHashMap<>();
+
+    public static void view(Context context, Uri uri, String mime) {
+        Intent intent=new Intent(Intent.ACTION_VIEW).setDataAndType(uri,mime)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        if(!com.alensw.ui.activity.a.a(context,intent) && "content".equals(uri.getScheme())
+                && mime!=null && mime.startsWith("video/")) {
+            context.startService(intent.setClass(context,VideoProxyService.class));
+        }
+    }
     @Override public IBinder onBind(Intent i) { return null; }
     private synchronized void acquire() { streams++; main.removeCallbacks(idle); }
     private synchronized void release() { if(--streams==0) main.postDelayed(idle,30000); }
@@ -52,7 +60,6 @@ public final class VideoProxyService extends Service {
     }
     private final class Server extends j {
         Server() { super(0); }
-        // Hook in the shared gallery HTTP server (also used by the cloud module).
         protected InetSocketAddress bindAddress(int port) {
             return new InetSocketAddress("127.0.0.1",port);
         }
@@ -62,7 +69,7 @@ public final class VideoProxyService extends Service {
             if(parts.length!=4 || !"video".equals(parts[1]) || parts[3].isEmpty() ||
                     ".".equals(parts[3]) || "..".equals(parts[3]) || parts[3].contains("\\")) return;
             Uri uri=grants.get(parts[2]); if(uri==null) return;
-            ContentProviderClient provider=null; InputStream stream=null; boolean owned=false;
+            InputStream stream=null; boolean owned=false;
             try {
                 String name; long size;
                 try(Cursor c=getContentResolver().query(uri,new String[]{OpenableColumns.DISPLAY_NAME,OpenableColumns.SIZE},null,null,null)) {
@@ -95,21 +102,13 @@ public final class VideoProxyService extends Service {
                     }
                     range="bytes="+begin+"-"+end;
                 }
-                provider=getContentResolver().acquireContentProviderClient(uri.getAuthority());
-                i data=new i();
-                if(provider!=null && provider.getLocalContentProvider() instanceof com.alensw.b.j.e) {
-                    ((com.alensw.b.j.e)provider.getLocalContentProvider()).a(com.alensw.b.j.a.b(uri),range,data,null);
-                    stream=data.e;
-                } else {
-                    AssetFileDescriptor asset=getContentResolver().openAssetFileDescriptor(uri,"r");
-                    if(asset==null) return;
-                    try {
-                        FileInputStream in=asset.createInputStream(); stream=in;
-                        if(begin>0) in.getChannel().position(asset.getStartOffset()+begin);
-                        data.c=getContentResolver().getType(uri);
-                    } catch(Exception ex) { asset.close(); throw ex; }
-                }
-                if(stream==null) return;
+                AssetFileDescriptor asset=getContentResolver().openAssetFileDescriptor(uri,"r");
+                if(asset==null) return;
+                try {
+                    FileInputStream in=asset.createInputStream(); stream=in;
+                    if(begin>0) in.getChannel().position(asset.getStartOffset()+begin);
+                } catch(Exception ex) { asset.close(); throw ex; }
+                String mime=getContentResolver().getType(uri);
                 acquire(); owned=true;
                 InputStream entity=new FilterInputStream(stream) {
                     boolean closed;
@@ -117,14 +116,13 @@ public final class VideoProxyService extends Service {
                 };
                 res.setEntity(a(entity,range==null?size:end-begin+1));
                 res.addHeader("Accept-Ranges","bytes");
-                if(data.c!=null) res.addHeader("Content-Type",data.c);
+                if(mime!=null) res.addHeader("Content-Type",mime);
                 if(range!=null) res.addHeader("Content-Range","bytes "+begin+"-"+end+"/"+size);
                 res.setStatusCode(range==null?200:206); stream=null; owned=false;
             } catch(Exception e) { res.setStatusCode(404); }
             finally {
                 if(stream!=null) try { stream.close(); } catch(IOException ignored) {}
                 if(owned) release();
-                if(provider!=null) provider.release();
             }
         }
         @Override protected void b(String path,Map q,HttpRequest req,HttpResponse res,HttpContext ctx) { res.setStatusCode(405); }

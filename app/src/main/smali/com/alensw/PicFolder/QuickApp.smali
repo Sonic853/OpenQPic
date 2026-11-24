@@ -9,10 +9,6 @@
 
 .field private static final F:[Ljava/lang/String;
 
-.field private static final G:[B
-
-.field private static final H:[B
-
 .field public static final a:[I
 
 .field public static b:Z
@@ -78,8 +74,6 @@
 .method static constructor <clinit>()V
     .locals 4
 
-    const/16 v3, 0x10
-
     const/16 v0, 0xb
 
     new-array v0, v0, [I
@@ -130,18 +124,6 @@
 
     sput-object v0, Lcom/alensw/PicFolder/QuickApp;->F:[Ljava/lang/String;
 
-    new-array v0, v3, [B
-
-    fill-array-data v0, :array_1
-
-    sput-object v0, Lcom/alensw/PicFolder/QuickApp;->G:[B
-
-    new-array v0, v3, [B
-
-    fill-array-data v0, :array_2
-
-    sput-object v0, Lcom/alensw/PicFolder/QuickApp;->H:[B
-
     return-void
 
     :array_0
@@ -159,45 +141,6 @@
         0x140
     .end array-data
 
-    :array_1
-    .array-data 1
-        -0x2dt
-        0x6dt
-        -0x73t
-        -0x56t
-        0x67t
-        -0x68t
-        -0x24t
-        0x42t
-        -0x51t
-        -0x30t
-        0x4at
-        0xet
-        0x3bt
-        0x13t
-        0x4dt
-        0x4dt
-    .end array-data
-
-    :array_2
-    .array-data 1
-        -0x3et
-        0x7ft
-        -0x4bt
-        -0x5ct
-        0x47t
-        0x3ct
-        0x4bt
-        0x37t
-        0x5ft
-        -0x63t
-        -0x1ft
-        0x42t
-        0x40t
-        0x6ft
-        0x65t
-        0x65t
-    .end array-data
 .end method
 
 .method public constructor <init>()V
@@ -301,22 +244,6 @@
     goto :goto_0
 .end method
 
-.method public static a(Ljava/lang/String;)V
-    .locals 1
-
-    :try_start_0
-    invoke-static {p0}, Lcom/alensw/b/f/a;->a(Ljava/lang/String;)V
-    :try_end_0
-    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_0
-
-    :goto_0
-    return-void
-
-    :catch_0
-    move-exception v0
-
-    goto :goto_0
-.end method
 
 .method public static a(Z)Z
     .locals 1
@@ -393,22 +320,6 @@
     return-object v0
 .end method
 
-.method public static b(Ljava/lang/String;)V
-    .locals 1
-
-    :try_start_0
-    invoke-static {p0}, Lcom/alensw/b/f/a;->b(Ljava/lang/String;)V
-    :try_end_0
-    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_0
-
-    :goto_0
-    return-void
-
-    :catch_0
-    move-exception v0
-
-    goto :goto_0
-.end method
 
 .method public static b(Z)Z
     .locals 1
@@ -488,8 +399,6 @@
     move-result-object v4
 
     invoke-static {p0}, Lcom/alensw/b/h/b;->a(Landroid/content/Context;)V
-
-    invoke-static {}, Lcom/alensw/b/e/b;->a()V
 
     iget v0, v3, Landroid/content/res/Configuration;->screenLayout:I
 
@@ -948,28 +857,6 @@
     move v0, v1
 
     :cond_3
-    const-string v3, "failed_upload_tasks"
-
-    invoke-interface {v5, v3, v2}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
-
-    move-result v3
-
-    if-lez v3, :cond_4
-
-    invoke-static {p0, v4, v3}, Lcom/alensw/cloud/UrlTaskService;->b(Landroid/content/Context;II)V
-
-    :cond_4
-    const-string v3, "failed_download_tasks"
-
-    invoke-interface {v5, v3, v2}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
-
-    move-result v2
-
-    if-lez v2, :cond_5
-
-    invoke-static {p0, v1, v2}, Lcom/alensw/cloud/UrlTaskService;->b(Landroid/content/Context;II)V
-
-    :cond_5
     if-eqz v0, :cond_6
 
     invoke-static {v6}, Lcom/alensw/b/l/b;->a(Landroid/content/SharedPreferences$Editor;)V
@@ -1287,7 +1174,7 @@
 
     move-result-object v1
 
-    const/16 v2, 0x40
+    const/4 v2, 0x0
 
     invoke-virtual {v0, v1, v2}, Landroid/content/pm/PackageManager;->getPackageInfo(Ljava/lang/String;I)Landroid/content/pm/PackageInfo;
 
@@ -1297,15 +1184,10 @@
 
     sput v1, Lcom/alensw/PicFolder/QuickApp;->k:I
 
-    sget-object v1, Lcom/alensw/PicFolder/QuickApp;->G:[B
-
-    sget-object v2, Lcom/alensw/PicFolder/QuickApp;->H:[B
-
-    invoke-static {v0, v1, v2}, Lcom/alensw/b/l/b;->a(Landroid/content/pm/PackageInfo;[B[B)I
     :try_end_0
     .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_0
 
-    move-result v0
+    move v0, v1
 
     :goto_0
     return v0
@@ -1320,59 +1202,6 @@
     goto :goto_0
 .end method
 
-.method public e(Landroid/app/Activity;)V
-    .locals 1
-
-    :try_start_0
-    invoke-virtual {p1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/Class;->getSimpleName()Ljava/lang/String;
-
-    move-result-object v0
-
-    invoke-static {v0}, Lcom/alensw/b/f/a;->a(Ljava/lang/String;)V
-
-    invoke-static {p1}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;)V
-    :try_end_0
-    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_0
-
-    :goto_0
-    return-void
-
-    :catch_0
-    move-exception v0
-
-    goto :goto_0
-.end method
-
-.method public f(Landroid/app/Activity;)V
-    .locals 1
-
-    :try_start_0
-    invoke-virtual {p1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/Class;->getSimpleName()Ljava/lang/String;
-
-    move-result-object v0
-
-    invoke-static {v0}, Lcom/alensw/b/f/a;->b(Ljava/lang/String;)V
-
-    invoke-static {p1}, Lcom/alensw/b/f/a;->b(Landroid/content/Context;)V
-    :try_end_0
-    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_0
-
-    :goto_0
-    return-void
-
-    :catch_0
-    move-exception v0
-
-    goto :goto_0
-.end method
 
 .method public onCreate()V
     .locals 6
@@ -1386,10 +1215,6 @@
     invoke-virtual {p0}, Lcom/alensw/PicFolder/QuickApp;->e()I
 
     move-result v0
-
-    invoke-static {p0, v0}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;I)Ljava/lang/String;
-
-    move-result-object v1
 
     :try_start_0
     invoke-direct {p0}, Lcom/alensw/PicFolder/QuickApp;->f()I
@@ -1439,16 +1264,6 @@
     sget v3, Lcom/alensw/b/k/a;->c:I
 
     invoke-virtual {v0, v3}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
-
-    move-result-object v0
-
-    const-string v3, ", ch="
-
-    invoke-virtual {v0, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v0
-
-    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
     move-result-object v0
 

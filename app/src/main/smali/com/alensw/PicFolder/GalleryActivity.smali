@@ -195,13 +195,6 @@
 
     invoke-virtual {v0, v1}, Landroid/widget/ListView;->setOnItemClickListener(Landroid/widget/AdapterView$OnItemClickListener;)V
 
-    iget-object v0, p0, Lcom/alensw/PicFolder/GalleryActivity;->g:Landroid/widget/ListView;
-
-    new-instance v1, Lcom/alensw/PicFolder/ak;
-
-    invoke-direct {v1, p0}, Lcom/alensw/PicFolder/ak;-><init>(Lcom/alensw/PicFolder/GalleryActivity;)V
-
-    invoke-virtual {v0, v1}, Landroid/widget/ListView;->setOnItemLongClickListener(Landroid/widget/AdapterView$OnItemLongClickListener;)V
 
     return-void
 
@@ -342,36 +335,8 @@
 .end method
 
 .method private onCreate__$appendPatch3(Landroid/os/Bundle;)V
-    .locals 2
-
-    invoke-virtual {p0}, Lcom/alensw/PicFolder/GalleryActivity;->getCurrentChannel()Ljava/lang/String;
-
-    move-result-object v0
-
-    const/4 v1, 0x0
-
-    if-nez v0, :cond_0
-
-    const-string v0, "stable"
-
-    invoke-virtual {p0, v0}, Lcom/alensw/PicFolder/GalleryActivity;->writeUpdateChannelPreference(Ljava/lang/String;)V
-
-    invoke-virtual {p0, v1}, Lcom/alensw/PicFolder/GalleryActivity;->writeUpdatesOnStartup(Z)V
-
-    :cond_0
-    invoke-virtual {p0}, Lcom/alensw/PicFolder/GalleryActivity;->getStartupUpdates()Z
-
-    move-result v0
-
-    if-eqz v0, :cond_1
-
-    new-instance v0, Lcom/alensw/updater/UpdaterAssistant;
-
-    invoke-direct {v0, p0, v1}, Lcom/alensw/updater/UpdaterAssistant;-><init>(Landroid/content/Context;Z)V
-
-    invoke-virtual {v0}, Lcom/alensw/updater/UpdaterAssistant;->checkForUpdates()V
-
-    :cond_1
+    .locals 0
+    invoke-static {p0}, Lcom/alensw/updater/GitHubUpdates;->onStartup(Landroid/app/Activity;)V
     return-void
 .end method
 
@@ -683,19 +648,6 @@
 
     invoke-direct {v1, p0, v0}, Lcom/alensw/PicFolder/ad;-><init>(Lcom/alensw/PicFolder/GalleryActivity;Landroid/content/Intent;)V
 
-    invoke-static {v5}, Lcom/alensw/b/j/a;->c(Landroid/net/Uri;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_9
-
-    const-string v0, "protect_cloud"
-
-    invoke-static {p0, v0, v1, v7}, Lcom/alensw/ui/a/x;->a(Landroid/content/Context;Ljava/lang/String;Ljava/lang/Runnable;Ljava/lang/Runnable;)V
-
-    goto/16 :goto_0
-
-    :cond_9
     invoke-interface {v1}, Ljava/lang/Runnable;->run()V
 
     goto/16 :goto_0
@@ -770,30 +722,6 @@
     invoke-virtual {p0, v0, v1, v8}, Lcom/alensw/PicFolder/GalleryActivity;->a(Ljava/lang/Class;Landroid/content/Intent;Landroid/os/Bundle;)Lcom/alensw/ui/c/cu;
 
     :goto_4
-    const-string v0, "zh"
-
-    invoke-virtual {p0}, Lcom/alensw/PicFolder/GalleryActivity;->getResources()Landroid/content/res/Resources;
-
-    move-result-object v1
-
-    invoke-virtual {v1}, Landroid/content/res/Resources;->getConfiguration()Landroid/content/res/Configuration;
-
-    move-result-object v1
-
-    iget-object v1, v1, Landroid/content/res/Configuration;->locale:Ljava/util/Locale;
-
-    invoke-virtual {v1}, Ljava/util/Locale;->getLanguage()Ljava/lang/String;
-
-    move-result-object v1
-
-    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_1
-
-    invoke-static {p0, v6}, Lcom/alensw/ui/a/a;->a(Landroid/app/Activity;Landroid/content/SharedPreferences;)V
-
     goto/16 :goto_0
 
     :cond_d
@@ -1078,49 +1006,6 @@
     return-object v0
 .end method
 
-.method public getCurrentChannel()Ljava/lang/String;
-    .locals 3
-
-    const-string v0, "com.alensw.PicFolder_preferences"
-
-    const/4 v1, 0x0
-
-    invoke-virtual {p0, v0, v1}, Lcom/alensw/PicFolder/GalleryActivity;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
-
-    move-result-object v0
-
-    const-string v1, "channel"
-
-    const/4 v2, 0x0
-
-    invoke-interface {v0, v1, v2}, Landroid/content/SharedPreferences;->getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
-
-    move-result-object v1
-
-    return-object v1
-.end method
-
-.method public getStartupUpdates()Z
-    .locals 3
-
-    const-string v0, "com.alensw.PicFolder_preferences"
-
-    const/4 v1, 0x0
-
-    invoke-virtual {p0, v0, v1}, Lcom/alensw/PicFolder/GalleryActivity;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
-
-    move-result-object v0
-
-    const-string v1, "updates_on_startup"
-
-    const/4 v2, 0x1
-
-    invoke-interface {v0, v1, v2}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
-
-    move-result v1
-
-    return v1
-.end method
 
 .method public isStoragePermissionGranted()Z
     .locals 4
@@ -1257,28 +1142,6 @@
 
     goto :goto_0
 
-    :sswitch_0
-    iget-object v1, p0, Lcom/alensw/PicFolder/GalleryActivity;->i:Lcom/alensw/ui/view/bc;
-
-    if-eqz v1, :cond_0
-
-    iget-object v1, p0, Lcom/alensw/PicFolder/GalleryActivity;->i:Lcom/alensw/ui/view/bc;
-
-    invoke-virtual {v1}, Lcom/alensw/ui/view/bc;->b()V
-
-    goto :goto_0
-
-    :sswitch_1
-    new-instance v1, Landroid/content/Intent;
-
-    const-class v2, Lcom/alensw/cloud/sync/SyncSettings;
-
-    invoke-direct {v1, p0, v2}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
-
-    invoke-static {p0, v1}, Lcom/alensw/ui/activity/a;->a(Landroid/content/Context;Landroid/content/Intent;)Z
-
-    goto :goto_0
-
     :sswitch_2
     new-instance v2, Landroid/content/Intent;
 
@@ -1352,8 +1215,6 @@
 
     :sswitch_data_0
     .sparse-switch
-        0x7f090000 -> :sswitch_0
-        0x7f090001 -> :sswitch_1
         0x7f090056 -> :sswitch_2
         0x7f090057 -> :sswitch_3
     .end sparse-switch
@@ -1489,54 +1350,6 @@
     const-string v0, ""
 
     sput-object v0, Lcom/alensw/PicFolder/QuickApp;->y:Ljava/lang/String;
-
-    return-void
-.end method
-
-.method public writeUpdateChannelPreference(Ljava/lang/String;)V
-    .locals 2
-
-    const-string v0, "com.alensw.PicFolder_preferences"
-
-    const/4 v1, 0x0
-
-    invoke-virtual {p0, v0, v1}, Lcom/alensw/PicFolder/GalleryActivity;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
-
-    move-result-object v0
-
-    invoke-interface {v0}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
-
-    move-result-object v0
-
-    const-string v1, "channel"
-
-    invoke-interface {v0, v1, p1}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
-
-    invoke-interface {v0}, Landroid/content/SharedPreferences$Editor;->apply()V
-
-    return-void
-.end method
-
-.method public writeUpdatesOnStartup(Z)V
-    .locals 2
-
-    const-string v0, "com.alensw.PicFolder_preferences"
-
-    const/4 v1, 0x0
-
-    invoke-virtual {p0, v0, v1}, Lcom/alensw/PicFolder/GalleryActivity;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
-
-    move-result-object v0
-
-    invoke-interface {v0}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
-
-    move-result-object v0
-
-    const-string v1, "updates_on_startup"
-
-    invoke-interface {v0, v1, p1}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
-
-    invoke-interface {v0}, Landroid/content/SharedPreferences$Editor;->apply()V
 
     return-void
 .end method

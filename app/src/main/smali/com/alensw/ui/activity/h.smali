@@ -33,11 +33,5 @@
 
     invoke-static {v0, p1, p2}, Lcom/alensw/ui/activity/a;->a(Landroid/content/Context;Landroid/content/Intent;Landroid/content/pm/ResolveInfo;)V
 
-    iget-object v0, p0, Lcom/alensw/ui/activity/h;->a:Landroid/content/Context;
-
-    sget-object v1, Lcom/alensw/b/f/b;->l:Lcom/alensw/b/f/b;
-
-    invoke-static {v0, v1}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;Lcom/alensw/b/f/b;)V
-
     return-void
 .end method

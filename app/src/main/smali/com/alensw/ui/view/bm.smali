@@ -15,20 +15,12 @@
 
 
 # direct methods
-.method private constructor <init>(Lcom/alensw/ui/view/bc;)V
+.method constructor <init>(Lcom/alensw/ui/view/bc;)V
     .locals 0
 
     iput-object p1, p0, Lcom/alensw/ui/view/bm;->e:Lcom/alensw/ui/view/bc;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
-
-    return-void
-.end method
-
-.method synthetic constructor <init>(Lcom/alensw/ui/view/bc;Lcom/alensw/ui/view/bd;)V
-    .locals 0
-
-    invoke-direct {p0, p1}, Lcom/alensw/ui/view/bm;-><init>(Lcom/alensw/ui/view/bc;)V
 
     return-void
 .end method

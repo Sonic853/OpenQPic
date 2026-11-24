@@ -3,7 +3,6 @@
 
 
 # instance fields
-.field public k:Lcom/alensw/cloud/z;
 
 .field public l:I
 

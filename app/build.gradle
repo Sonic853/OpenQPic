@@ -14,12 +14,15 @@ import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
+import org.openqpic.version.GalleryVersion
 
 plugins {
     id 'com.android.application'
 }
 
 def jniType = 'Lcom/alensw/jni/JniUtils;'
+def galleryVersion = providers.gradleProperty('openqpicVersion')
+        .getOrElse(GalleryVersion.beijingDate(System.currentTimeMillis()))
 def overlay = providers.gradleProperty('stableJavaOverlay').map { rootProject.file(it) }.orNull
 def singleJava = providers.gradleProperty('stableSingleJava').map { it.toBoolean() }.getOrElse(false)
 def builtInJava = overlay == null && !singleJava
@@ -66,8 +69,8 @@ android {
         applicationId 'com.alensw.PicFolder'
         minSdk 23
         targetSdk 23
-        versionCode 9700000
-        versionName '9.7'
+        versionCode GalleryVersion.code(galleryVersion)
+        versionName galleryVersion
         ndk { abiFilters 'armeabi', 'x86', 'arm64-v8a' }
     }
     compileOptions {
@@ -93,6 +96,7 @@ android {
     }
     if (builtInJava)
         sourceSets.main.java.srcDir('src/recovered/java')
+    sourceSets.main.java.srcDir(rootProject.file('buildSrc/src/main/java'))
     if (overlay != null && new File(overlay, 'java').isDirectory())
         sourceSets.main.java.srcDir(new File(overlay, 'java'))
 }
@@ -126,6 +130,7 @@ abstract class StageOverlayJava extends DefaultTask {
 // runtime table and the Java-legal compile-time projection used for R.jar.
 @CacheableTask
 abstract class CompileStableResources extends DefaultTask {
+    @Input abstract Property<String> getGalleryVersionName()
     @InputDirectory @PathSensitive(PathSensitivity.RELATIVE)
     abstract DirectoryProperty getResourcesDir()
     @InputFile @PathSensitive(PathSensitivity.NONE) abstract RegularFileProperty getAaptBinary()
@@ -137,7 +142,16 @@ abstract class CompileStableResources extends DefaultTask {
     @Inject abstract ArchiveOperations getArchives()
 
     @TaskAction void compileResources() {
-        def raw = resourcesDir.get().asFile
+        // Materialize the two pinned version string IDs before compiling either projection.
+        def raw = new File(temporaryDir, 'versioned-res')
+        fileOps.sync {
+            from resourcesDir
+            into raw
+            filteringCharset = 'UTF-8'
+            filesMatching('values/strings.xml') {
+                filter { String line -> line.replace('__OPENQPIC_VERSION__', galleryVersionName.get()) }
+            }
+        }
         def genuine = runtimeArchive.get().asFile
         genuine.parentFile.mkdirs()
         execOperations.exec {
@@ -346,6 +360,7 @@ androidComponents {
         }
         def aapt = sdkComponents.aapt2.flatMap { it.executable }
         def flats = tasks.register("compile${cap}StableResources", CompileStableResources) {
+            galleryVersionName.set(galleryVersion)
             resourcesDir.set(layout.projectDirectory.dir('src/main/res'))
             aaptBinary.set(aapt)
             runtimeArchive.set(layout.buildDirectory.file("intermediates/stable-inputs/${variant.name}/runtime-flats.zip"))

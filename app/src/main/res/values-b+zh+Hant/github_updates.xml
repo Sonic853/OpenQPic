@@ -1,0 +1,6 @@
+<resources>
+    <string name="update_no_release">GitHub 上暫無正式發佈的版本。</string>
+    <string name="update_check_failed">無法檢查 GitHub 更新，請稍後再試。</string>
+    <string name="update_view_release">查看發佈頁</string>
+    <string name="update_open_failed">沒有應用程式可以開啟 GitHub 連結。</string>
+</resources>

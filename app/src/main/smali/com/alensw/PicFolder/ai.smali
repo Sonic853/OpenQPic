@@ -56,17 +56,9 @@
 
     if-eqz v0, :cond_3
 
-    iget-object v0, v6, Lcom/alensw/bean/CommonRoot;->n:Ljava/lang/String;
-
-    invoke-static {v0}, Lcom/alensw/ui/view/bc;->b(Ljava/lang/String;)Z
-
-    move-result v0
-
     new-instance v1, Lcom/alensw/PicFolder/aj;
 
     invoke-direct {v1, p0, p3, v6}, Lcom/alensw/PicFolder/aj;-><init>(Lcom/alensw/PicFolder/ai;ILcom/alensw/bean/CommonRoot;)V
-
-    if-eqz v0, :cond_2
 
     iget-object v0, p0, Lcom/alensw/PicFolder/ai;->a:Lcom/alensw/PicFolder/GalleryActivity;
 
@@ -90,31 +82,7 @@
 
     invoke-interface {v1}, Ljava/lang/Runnable;->run()V
 
-    :goto_1
-    invoke-static {v6}, Lcom/alensw/ui/view/bc;->a(Lcom/alensw/bean/CommonRoot;)Ljava/lang/String;
-
-    move-result-object v0
-
-    if-eqz v0, :cond_0
-
-    iget-object v1, p0, Lcom/alensw/PicFolder/ai;->a:Lcom/alensw/PicFolder/GalleryActivity;
-
-    sget-object v2, Lcom/alensw/b/f/b;->b:Lcom/alensw/b/f/b;
-
-    invoke-static {v1, v2, v0}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;Lcom/alensw/b/f/b;Ljava/lang/String;)V
-
-    goto :goto_0
-
-    :cond_2
-    iget-object v0, p0, Lcom/alensw/PicFolder/ai;->a:Lcom/alensw/PicFolder/GalleryActivity;
-
-    const-string v2, "protect_cloud"
-
-    const/4 v3, 0x0
-
-    invoke-static {v0, v2, v1, v3}, Lcom/alensw/ui/a/x;->a(Landroid/content/Context;Ljava/lang/String;Ljava/lang/Runnable;Ljava/lang/Runnable;)V
-
-    goto :goto_1
+    return-void
 
     :cond_3
     iget-object v0, p0, Lcom/alensw/PicFolder/ai;->a:Lcom/alensw/PicFolder/GalleryActivity;
@@ -133,5 +101,5 @@
 
     invoke-virtual/range {v0 .. v5}, Lcom/alensw/ui/view/bc;->a(Landroid/widget/AdapterView;Landroid/view/View;IJ)Z
 
-    goto :goto_1
+    return-void
 .end method

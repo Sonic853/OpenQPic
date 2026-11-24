@@ -1,5 +1,6 @@
 """Verify the shipped LocalSend product (distinct from the original stable equivalence gate)."""
 import argparse
+from datetime import date
 import hashlib
 import json
 import os
@@ -7,6 +8,7 @@ from pathlib import Path
 import re
 import struct
 import subprocess
+import tempfile
 from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -82,8 +84,10 @@ def verify(apk, aab, tools):
     assert sha(abi_jar.read_bytes())=="c81c7e8312e73aa8abd6f7fadd12efed2875d71d6fc6ebd5eb5e61b828e6957f"
     with ZipFile(abi_jar) as headers:
         old={"L"+n[:-6]+";" for n in headers.namelist() if n.endswith(".class")}
-    preserved={t for t in old if not t.startswith(PREFIX)}
-    assert len(preserved)==2247 and preserved <= expected
+    original={t for t in old if not t.startswith(PREFIX)}
+    retired={t for t in (APP/"removed-legacy-types.txt").read_text().splitlines() if t.startswith("L")}
+    assert len(original)==2247 and retired < original and not retired & expected
+    assert original-retired <= expected, original-retired-expected
     with ZipFile(apk) as z, ZipFile(aab) as bundle:
         assert {p for p in z.namelist() if p.startswith("lib/")} == libs.keys()
         assert {p[5:] for p in bundle.namelist() if p.startswith("base/lib/")} == libs.keys()
@@ -103,19 +107,34 @@ def verify(apk, aab, tools):
             assert not classes & defs
             defs |= classes
             refs |= {t.lstrip("[") for t in types}
-            assert b"PeerHub" not in data and b"224.0.0.251" not in data
+            for stale in (b"PeerHub", b"224.0.0.251", b"CloudProvider", b"ver.q-supreme.com", b"QP-Gallery-Releases",
+                          b"last_check_update", b"quickpic.authorization", b"quickpic.account", b"failed_upload_tasks", b"umeng"):
+                assert stale.lower() not in data.lower(), stale
         generated = defs - expected
         assert not expected - defs, expected - defs
         assert all("$$ExternalSynthetic" in d and d.startswith((PREFIX, "Lcom/alensw/ui/c/ReceivedMediaUpdates$$ExternalSynthetic",
-                   "Lcom/alensw/video/", "Lorg/openqpic/localsend/"))
+                   "Lcom/alensw/video/", "Lcom/alensw/updater/GitHubUpdates$$ExternalSynthetic", "Lorg/openqpic/localsend/"))
                    for d in generated), generated
         assert not {t for t in refs if t.startswith(PREFIX)} - {d for d in defs if d.startswith(PREFIX)}
-        removed={t for t in old if t.startswith(PREFIX) and t!=PREFIX+"TransferActivity;"}
+        removed=retired | {t for t in old if t.startswith(PREFIX) and t!=PREFIX+"TransferActivity;"}
         assert not removed & (defs|refs), removed & (defs|refs)
+        assert not any(t.startswith(("Lcom/alensw/cloud/", "Lb/a/", "Lcom/c/a/")) for t in refs)
+        api=b"https://api.github.com/repos/Sonic853/OpenQPic/releases/latest"
+        assert any(api in z.read(n) for n in z.namelist() if re.fullmatch(r"classes\d*\.dex",n))
     def run(*args):
         return subprocess.check_output([str(x) for x in args], text=True, encoding="utf-8", errors="replace")
     aapt = tools/("aapt2.exe" if os.name=="nt" else "aapt2")
     manifest = run(aapt,"dump","xmltree",apk,"--file","AndroidManifest.xml")
+    def version(package):
+        badging=run(aapt,"dump","badging",package).splitlines()[0]
+        code, tag = re.search(r"\bversionCode='(\d+)' versionName='([^']+)'",badging).groups()
+        day, _, patch = tag.partition("p")
+        assert re.fullmatch(r"\d{4}\.\d{2}\.\d{2}(?:p[1-9]\d*)?",tag)
+        expected_code=10000000+(date.fromisoformat(day.replace(".","-"))-date(2020,1,1)).days*65536+int(patch or 0)
+        assert int(code)==expected_code and 9700000<int(code)<=2100000000
+        return tag, int(code)
+    tag,code=version(apk)
+    assert "android.permission.WRITE_SYNC_SETTINGS" not in manifest and "android.permission.REQUEST_INSTALL_PACKAGES" not in manifest
     for s in ["com.alensw.transfer.TransferActivity","com.alensw.transfer.TransferSessionService",
               "android.permission.FOREGROUND_SERVICE_DATA_SYNC","com.alensw.video.VideoProxyService","android.intent.action.SEND_MULTIPLE",".StreamingActivity"]:
         assert s in manifest, s
@@ -124,17 +143,34 @@ def verify(apk, aab, tools):
     transfer,=[block for block in services if '"com.alensw.transfer.TransferSessionService"' in block]
     for attribute,value in (("exported","false"),("stopWithTask","false"),("foregroundServiceType","0x00000001")):
         assert re.search(r"android:"+attribute+r"\(0x[0-9a-f]+\)="+value+r"\b",transfer),attribute
-    table = dict((name,n) for n,name in re.findall(r"^\s*resource (0x[0-9a-f]+) (\S+)",run(aapt,"dump","resources",apk),re.M))
+    resources=run(aapt,"dump","resources",apk)
+    assert re.search(r'resource \S+ string/version\b[^\n]*\n[^\n]*"'+re.escape(tag)+r'"',resources)
+    table = dict((name,n) for n,name in re.findall(r"^\s*resource (0x[0-9a-f]+) (\S+)",resources,re.M))
     stable = dict(x.split(":")[1].split(" = ") for x in (APP/"resource-ids.txt").read_text().splitlines())
     assert stable.items() <= table.items()
-    assert all(re.fullmatch(r"(string|id|layout|drawable)/ls_\w+",k) for k in table.keys()-stable.keys())
+    update_labels={"string/update_"+s for s in ("no_release","check_failed","view_release","open_failed")}
+    assert update_labels <= table.keys()
+    assert all(re.fullmatch(r"(string|id|layout|drawable)/ls_\w+",k) or k in update_labels for k in table.keys()-stable.keys())
     symbols = (APP/"build/intermediates/runtime_symbol_list/debug/processDebugResources/R.txt").read_text()
     for k in table.keys()-stable.keys():
         assert "int "+k.replace("/"," ")+" "+table[k] in symbols, k
     run(tools/("zipalign.exe" if os.name=="nt" else "zipalign"),"-c","4",apk)
     java = Path(os.environ["JAVA_HOME"])/"bin/java" if "JAVA_HOME" in os.environ else "java"
+    javac = Path(java).with_name("javac")
+    with tempfile.TemporaryDirectory() as temp:
+        run(javac,"-d",temp,ROOT/"buildSrc/src/main/java/org/openqpic/version/GalleryVersion.java",
+            ROOT/"tools/version/ReleaseVersion.java",ROOT/"tools/version/VersionTest.java")
+        run(java,"-ea","-cp",temp,"VersionTest")
+        with ZipFile(aab) as bundle, ZipFile(Path(temp)/"bundle.zip","w") as proto:
+            for n in bundle.namelist():
+                if n=="base/manifest/AndroidManifest.xml": proto.writestr("AndroidManifest.xml",bundle.read(n))
+                if n=="base/resources.pb" or n.startswith("base/res/"): proto.writestr(n[5:],bundle.read(n))
+        binary=Path(temp)/"bundle.apk"
+        run(aapt,"convert","--output-format","binary","-o",binary,Path(temp)/"bundle.zip")
+        assert version(binary)==(tag,code)
     run(java,"-Xmx128m","-XX:+UseSerialGC","-jar",tools/"lib/apksigner.jar","verify",apk)
     return {"apk_sha256":sha(apk.read_bytes()), "bytes":apk.stat().st_size, "dex_classes":len(defs),
+            "versionName":tag,"versionCode":code,"retired_legacy_types":len(retired),
             "original_resource_ids":len(stable),"native_sha256":libs}
 
 

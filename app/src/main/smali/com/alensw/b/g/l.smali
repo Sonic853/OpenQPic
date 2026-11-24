@@ -43,7 +43,7 @@
 
     const/4 v4, 0x2
 
-    const/16 v0, 0x12
+    const/16 v0, 0x11
 
     new-array v0, v0, [[I
 
@@ -174,14 +174,6 @@
     new-array v3, v4, [I
 
     fill-array-data v3, :array_10
-
-    aput-object v3, v0, v2
-
-    const/16 v2, 0x11
-
-    new-array v3, v4, [I
-
-    fill-array-data v3, :array_11
 
     aput-object v3, v0, v2
 
@@ -327,11 +319,6 @@
         0x7f020033
     .end array-data
 
-    :array_11
-    .array-data 4
-        0x7f090053
-        0x7f050018
-    .end array-data
 .end method
 
 .method public constructor <init>(Lcom/alensw/b/g/b;Landroid/content/Context;IILjava/lang/CharSequence;)V

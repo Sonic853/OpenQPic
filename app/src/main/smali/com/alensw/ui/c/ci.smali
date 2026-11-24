@@ -794,14 +794,6 @@
 
     invoke-virtual {v1, v0, p1}, Lcom/alensw/ui/c/bz;->a(Lcom/alensw/a/e;I)V
 
-    iget-object v0, p0, Lcom/alensw/ui/c/ci;->a:Lcom/alensw/ui/c/bz;
-
-    iget-object v0, v0, Lcom/alensw/ui/c/bz;->C:Lcom/alensw/ui/c/cx;
-
-    const-string v1, "local"
-
-    invoke-static {v0, v1}, Lcom/alensw/ui/c/a;->a(Landroid/content/Context;Ljava/lang/String;)V
-
     goto/16 :goto_0
 .end method
 

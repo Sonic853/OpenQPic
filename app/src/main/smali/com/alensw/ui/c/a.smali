@@ -52,86 +52,6 @@
     return-void
 .end method
 
-.method public static a(Landroid/content/Context;Lcom/alensw/b/h/j;Ljava/lang/String;)V
-    .locals 3
-
-    const/4 v2, 0x2
-
-    if-eqz p1, :cond_0
-
-    iget v0, p1, Lcom/alensw/b/h/j;->d:I
-
-    if-ge v0, v2, :cond_1
-
-    :cond_0
-    :goto_0
-    return-void
-
-    :cond_1
-    iget-object v0, p1, Lcom/alensw/b/h/j;->h:Ljava/lang/String;
-
-    if-nez v0, :cond_2
-
-    const-string v0, "unknown"
-
-    :cond_2
-    const-string v1, "video/"
-
-    invoke-virtual {v0, v1}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
-
-    move-result v1
-
-    if-eqz v1, :cond_3
-
-    const-string v0, "video"
-
-    :goto_1
-    new-instance v1, Ljava/util/HashMap;
-
-    invoke-direct {v1, v2}, Ljava/util/HashMap;-><init>(I)V
-
-    const-string v2, "source"
-
-    invoke-virtual {v1, v2, p2}, Ljava/util/HashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-
-    const-string v2, "type"
-
-    invoke-virtual {v1, v2, v0}, Ljava/util/HashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-
-    sget-object v0, Lcom/alensw/b/f/b;->e:Lcom/alensw/b/f/b;
-
-    invoke-static {p0, v0, v1}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;Lcom/alensw/b/f/b;Ljava/util/Map;)V
-
-    goto :goto_0
-
-    :cond_3
-    const-string v1, "/gif"
-
-    invoke-virtual {v0, v1}, Ljava/lang/String;->endsWith(Ljava/lang/String;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_4
-
-    const-string v0, "gif"
-
-    goto :goto_1
-
-    :cond_4
-    const-string v0, "image"
-
-    goto :goto_1
-.end method
-
-.method public static a(Landroid/content/Context;Ljava/lang/String;)V
-    .locals 1
-
-    sget-object v0, Lcom/alensw/b/f/b;->d:Lcom/alensw/b/f/b;
-
-    invoke-static {p0, v0, p1}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;Lcom/alensw/b/f/b;Ljava/lang/String;)V
-
-    return-void
-.end method
 
 .method static synthetic e(Ljava/lang/String;)Ljava/lang/String;
     .locals 0
@@ -190,15 +110,6 @@
 
     invoke-super {p0}, Lcom/alensw/ui/c/cu;->a()V
 
-    invoke-virtual {p0}, Lcom/alensw/ui/c/a;->c()Ljava/lang/String;
-
-    move-result-object v0
-
-    if-eqz v0, :cond_0
-
-    invoke-static {v0}, Lcom/alensw/PicFolder/QuickApp;->a(Ljava/lang/String;)V
-
-    :cond_0
     instance-of v0, p0, Lcom/alensw/ui/c/dp;
 
     if-nez v0, :cond_1
@@ -1356,25 +1267,9 @@
 
     invoke-virtual {v0}, Lcom/alensw/ui/c/cx;->u()V
 
-    invoke-virtual {p0}, Lcom/alensw/ui/c/a;->c()Ljava/lang/String;
-
-    move-result-object v0
-
-    if-eqz v0, :cond_0
-
-    invoke-static {v0}, Lcom/alensw/PicFolder/QuickApp;->b(Ljava/lang/String;)V
-
-    :cond_0
     return-void
 .end method
 
-.method protected c()Ljava/lang/String;
-    .locals 1
-
-    const/4 v0, 0x0
-
-    return-object v0
-.end method
 
 .method public c(Ljava/lang/String;)V
     .locals 5

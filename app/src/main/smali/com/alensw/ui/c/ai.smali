@@ -46,29 +46,9 @@
 
     move-result-object v3
 
-    iget-object v0, p0, Lcom/alensw/ui/c/ai;->a:Lcom/alensw/ui/c/z;
-
-    iget-object v0, v0, Lcom/alensw/ui/c/z;->y:Lcom/alensw/bean/CommonFolder;
-
-    invoke-virtual {v0}, Lcom/alensw/bean/CommonFolder;->i()Landroid/net/Uri;
-
-    move-result-object v0
-
-    invoke-static {v0}, Lcom/alensw/b/j/a;->c(Landroid/net/Uri;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_0
-
-    const-wide/16 v0, 0xbb8
-
-    :goto_0
+    const-wide/16 v0, 0x12c
     invoke-virtual {v2, v3, v0, v1}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
 
     return-void
 
-    :cond_0
-    const-wide/16 v0, 0x12c
-
-    goto :goto_0
 .end method

@@ -35,17 +35,9 @@
 
 # virtual methods
 .method public onPreferenceClick(Landroid/preference/Preference;)Z
-    .locals 3
-
-    new-instance v0, Lcom/alensw/updater/UpdaterAssistant;
-
-    iget-object v1, p0, Lcom/alensw/updater/UpdateView$1;->this$0:Lcom/alensw/updater/UpdateView;
-
-    const/4 v2, 0x1
-
-    invoke-direct {v0, v1, v2}, Lcom/alensw/updater/UpdaterAssistant;-><init>(Landroid/content/Context;Z)V
-
-    invoke-virtual {v0}, Lcom/alensw/updater/UpdaterAssistant;->checkForUpdates()V
-
-    return v2
+    .locals 2
+    iget-object v0, p0, Lcom/alensw/updater/UpdateView$1;->this$0:Lcom/alensw/updater/UpdateView;
+    const/4 v1, 0x1
+    invoke-static {v0, v1}, Lcom/alensw/updater/GitHubUpdates;->check(Landroid/app/Activity;Z)V
+    return v1
 .end method

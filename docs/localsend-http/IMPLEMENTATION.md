@@ -20,7 +20,7 @@
 
 收到合格报价时显示独立的接收页（[`ls_receive.xml`](../../app/src/main/res/layout/ls_receive.xml)），可核对来源、保存目录、选中数量/大小、跳过数量。返回列表或 Home 不等于拒收，待决定项与勾选状态由服务持有。后台不会弹出新页面；通知可返回任务页。
 
-旧 `com.alensw.transfer.a.*`、PeerHub 和反向拉取实现已从应用源中删除，包括原先实际经 javac 入包的四个类。新的 `/upload` 只接收推流。视频转交使用单独的、未导出的回环服务，保留播放器 `StreamingActivity` 别名。
+旧 `com.alensw.transfer.a.*`、PeerHub 和反向拉取实现已从应用源中删除，包括原先实际经 javac 入包的四个类。新的 `/upload` 只接收推流。播放视频优先使用原 URI 和系统读授权；没有应用能直接打开 `content://` 视频时，使用独立的、未导出的回环 Range 服务。播放器保留 `StreamingActivity` 别名。
 
 ## 文件与协议
 
@@ -55,6 +55,7 @@ python tools\received_gallery_smoke.py --serial <专用模拟器> --mp4 <小型�
 python tools\localsend_smoke.py --serial <专用模拟器> --peer ..\OpenQPicLocalSend\build\official\target\debug\examples\openqpic_peer.exe --mp4 <小型测试视频> --report app\build\reports\localsend-smoke.json
 python tools\multisend_smoke.py --serial <专用模拟器> --peer ..\OpenQPicLocalSend\build\official\target\debug\examples\openqpic_peer.exe --report app\build\reports\multisend-smoke.json
 python tools\video_proxy_smoke.py --serial <专用模拟器> --mp4 <小型测试视频>
+python tools\github_update_smoke.py --serial <专用模拟器> --sdk <Android-SDK-路径>
 ```
 
 运行环境为独立的、root 的英文 API 23 ARM 模拟器，`eth0` 有局域地址；用测试端口的 adb 转发跨越模拟器 NAT。原本禁用联网的旧系统镜像需要让 `224.0.0.167/32` 可从 `eth0` 到达。脚本通过真实按钮确认，APK 无测试后门。

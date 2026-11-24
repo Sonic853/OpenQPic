@@ -63,12 +63,6 @@
 
     move-result-object v3
 
-    iget-object v1, p0, Lcom/alensw/ui/c/an;->f:Lcom/alensw/ui/c/z;
-
-    iget-boolean v1, v1, Lcom/alensw/ui/c/z;->m:Z
-
-    if-eqz v1, :cond_4
-
     iget-object v1, p0, Lcom/alensw/ui/c/an;->b:Landroid/content/ContentResolver;
 
     invoke-virtual {v1, v3, v4, v4}, Landroid/content/ContentResolver;->delete(Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I
@@ -109,14 +103,6 @@
 
     goto :goto_0
 
-    :cond_4
-    iget-object v1, p0, Lcom/alensw/ui/c/an;->b:Landroid/content/ContentResolver;
-
-    invoke-static {v1, v3}, Lcom/alensw/b/j/a;->b(Landroid/content/ContentResolver;Landroid/net/Uri;)Z
-
-    move-result v1
-
-    goto :goto_0
 .end method
 
 .method protected b()V

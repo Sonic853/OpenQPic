@@ -4,6 +4,8 @@
 
 当前快传：[APK/AAB 摘要](localsend-product.json) · [官方对端收发](localsend-smoke.json) · [多设备发送](multisend-smoke.json) · [接收后图库自动刷新](received-gallery-smoke.json)。
 
+[本地图库、日期版本与 GitHub 更新验收](local-gallery.md)。
+
 | 记录 | 含义 |
 |---|---|
 | [`default-debug.json`](default-debug.json) | 正常 Gradle `debug` APK / AAB，全部类、方法、资源、Manifest、native、签名和 Java 来源检查 |

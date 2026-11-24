@@ -56,11 +56,6 @@
 
     invoke-virtual {v0}, Landroid/widget/ListView;->requestFocus()Z
 
-    iget-object v0, p0, Lcom/alensw/PicFolder/ag;->a:Lcom/alensw/PicFolder/GalleryActivity;
-
-    sget-object v1, Lcom/alensw/b/f/b;->a:Lcom/alensw/b/f/b;
-
-    invoke-static {v0, v1}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;Lcom/alensw/b/f/b;)V
 
     return-void
 .end method

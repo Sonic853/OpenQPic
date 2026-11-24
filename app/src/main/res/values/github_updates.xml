@@ -1,0 +1,6 @@
+<resources>
+    <string name="update_no_release">No published GitHub release is available.</string>
+    <string name="update_check_failed">Could not check GitHub Releases. Try again later.</string>
+    <string name="update_view_release">View release</string>
+    <string name="update_open_failed">No app can open the GitHub link.</string>
+</resources>

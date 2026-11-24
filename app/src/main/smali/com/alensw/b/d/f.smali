@@ -11,10 +11,6 @@
 # instance fields
 .field private a:Landroid/os/Handler;
 
-.field private final d:Lcom/alensw/b/d/a;
-
-.field private final e:Lcom/alensw/b/d/b;
-
 .field private final f:Lcom/alensw/b/d/e;
 
 .field private final g:Lcom/alensw/b/d/d;
@@ -90,18 +86,6 @@
 
     iput-object v0, p0, Lcom/alensw/b/d/f;->k:Ljava/util/concurrent/atomic/AtomicReference;
 
-    new-instance v0, Lcom/alensw/b/d/a;
-
-    invoke-direct {v0}, Lcom/alensw/b/d/a;-><init>()V
-
-    iput-object v0, p0, Lcom/alensw/b/d/f;->d:Lcom/alensw/b/d/a;
-
-    new-instance v0, Lcom/alensw/b/d/b;
-
-    invoke-direct {v0}, Lcom/alensw/b/d/b;-><init>()V
-
-    iput-object v0, p0, Lcom/alensw/b/d/f;->e:Lcom/alensw/b/d/b;
-
     new-instance v0, Lcom/alensw/b/d/e;
 
     invoke-direct {v0, p1}, Lcom/alensw/b/d/e;-><init>(Landroid/content/Context;)V
@@ -159,13 +143,6 @@
     return-wide v0
 .end method
 
-.method static synthetic a(Lcom/alensw/b/d/f;)Lcom/alensw/b/d/b;
-    .locals 1
-
-    iget-object v0, p0, Lcom/alensw/b/d/f;->e:Lcom/alensw/b/d/b;
-
-    return-object v0
-.end method
 
 .method public static declared-synchronized a(Landroid/content/Context;)Lcom/alensw/b/d/f;
     .locals 2
@@ -259,13 +236,6 @@
     return-void
 .end method
 
-.method static synthetic b(Lcom/alensw/b/d/f;)Lcom/alensw/b/d/a;
-    .locals 1
-
-    iget-object v0, p0, Lcom/alensw/b/d/f;->d:Lcom/alensw/b/d/a;
-
-    return-object v0
-.end method
 
 .method public static b(FF)Z
     .locals 1

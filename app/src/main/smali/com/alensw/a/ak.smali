@@ -570,35 +570,12 @@
     monitor-enter p0
 
     :try_start_0
-    iget-object v0, p0, Lcom/alensw/a/ak;->g:Landroid/net/Uri;
-
     iget-object v1, p0, Lcom/alensw/a/ak;->f:Lcom/alensw/b/h/a;
 
     monitor-exit p0
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0
 
-    if-eqz v0, :cond_0
-
-    :try_start_1
-    iget-object v0, p0, Lcom/alensw/a/ak;->a:Lcom/alensw/a/ah;
-
-    invoke-static {v0}, Lcom/alensw/a/ah;->c(Lcom/alensw/a/ah;)Landroid/content/ContentResolver;
-
-    move-result-object v0
-
-    iget-object v2, p0, Lcom/alensw/a/ak;->d:Lcom/alensw/bean/CommonFile;
-
-    invoke-virtual {v2}, Lcom/alensw/bean/CommonFile;->i()Landroid/net/Uri;
-
-    move-result-object v2
-
-    invoke-static {v0, v2}, Lcom/alensw/b/j/a;->a(Landroid/content/ContentResolver;Landroid/net/Uri;)V
-    :try_end_1
-    .catch Ljava/lang/Throwable; {:try_start_1 .. :try_end_1} :catch_0
-
-    :cond_0
-    :goto_0
     if-eqz v1, :cond_1
 
     invoke-virtual {v1}, Lcom/alensw/b/h/a;->requestCancelDecode()V
@@ -616,10 +593,6 @@
 
     throw v0
 
-    :catch_0
-    move-exception v0
-
-    goto :goto_0
 .end method
 
 .method public equals(Ljava/lang/Object;)Z

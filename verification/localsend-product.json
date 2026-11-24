@@ -1,7 +1,10 @@
 {
-  "apk_sha256": "694a93564042379e15edd5f78cff0e0e08187b6148c9cf8f279a4c4a67f9f299",
-  "bytes": 2902760,
-  "dex_classes": 2337,
+  "apk_sha256": "ebf5cbd0e299881dd1be71e19eabccf2b5ed7272fcb848b0c94f9f00996f1532",
+  "bytes": 2527510,
+  "dex_classes": 1568,
+  "versionName": "2026.11.24",
+  "versionCode": 175085184,
+  "retired_legacy_types": 775,
   "original_resource_ids": 918,
   "native_sha256": {
     "lib/armeabi/libqpicjni156.so": "d68b2dbd74bde541f98e3bd80f23e6fe4b785dfe8c6a69b6747f832e2a7b404b",
@@ -13,6 +16,7 @@
   },
   "inputs": {
     "OpenQPicJni": "761302f416d2166b26d7699ace352d6c2b18bff8",
+    "OpenQPicLocalSend": "cad8f78d3480944a5a3202d906e80fe0df66b58c",
     "OpenQPicLocalSend_base": "a119f8be548962a9fee4452249e5a2c1448c96ed",
     "OpenQPicLocalSend_changed_source_sha256": {
       "java/org/openqpic/localsend/LocalSend.java": "d2e109064fd906d6987325396b1013094ba4b0611b653b984e43976882ed3b29",
@@ -23,20 +27,20 @@
   },
   "artifacts": {
     "app-debug.apk": {
-      "bytes": 2902760,
-      "sha256": "694a93564042379e15edd5f78cff0e0e08187b6148c9cf8f279a4c4a67f9f299"
+      "bytes": 2527510,
+      "sha256": "ebf5cbd0e299881dd1be71e19eabccf2b5ed7272fcb848b0c94f9f00996f1532"
     },
     "app-debug.aab": {
-      "bytes": 1974364,
-      "sha256": "74e4ab4c8275462418e2912ebc0bea1169bd577038f490a159d177071095fcdd"
+      "bytes": 1659100,
+      "sha256": "1de5088cf6f7f16977f5b451fd7bb28b108ae73f18f51a47f0d0f836aa79c9b3"
     },
     "app-release-unsigned.apk": {
-      "bytes": 2772007,
-      "sha256": "7c0bce93de8213e8c04043535ffa2755f3cbf7fec2b08aab4cf05f7a4acd9816"
+      "bytes": 2427079,
+      "sha256": "f609f7219487cc09bcc842cabb6a19181828705dcec034c185b69acb2a339b06"
     },
     "app-release-test-signed.apk": {
-      "bytes": 2847226,
-      "sha256": "225795fb6c17c566bf38b10e3df7dc06c9894191e2e84a253c80929966961361"
+      "bytes": 2497210,
+      "sha256": "c449ae5f05fbcf09410ebb99c45097e2ab97facb5eea43ffc1f3f4256a309f81"
     }
   },
   "release_test_signer": "local Android debug certificate; v1/v2/v3 verified; zipalign -c 4 passed"

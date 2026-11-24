@@ -26,9 +26,4 @@
         <item>@string/clear_preview</item>
         <item>@string/clear_thumb</item>
     </string-array>
-    <string-array name="update_channel">
-        <item>stable</item>
-        <item>beta</item>
-        <item>alternative</item>
-    </string-array>
 </resources>

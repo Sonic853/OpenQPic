@@ -439,66 +439,19 @@
 .end method
 
 .method public static a(Landroid/app/Activity;Lcom/alensw/bean/CommonFile;)V
-    .locals 7
+    .locals 2
 
     invoke-virtual {p1}, Lcom/alensw/bean/CommonFile;->i()Landroid/net/Uri;
 
-    move-result-object v4
+    move-result-object v0
 
     invoke-virtual {p1}, Lcom/alensw/bean/CommonFile;->b()Ljava/lang/String;
 
-    move-result-object v6
+    move-result-object v1
 
-    invoke-static {v4}, Lcom/alensw/b/j/a;->c(Landroid/net/Uri;)Z
+    invoke-static {p0, v0, v1}, Lcom/alensw/ui/activity/a;->a(Landroid/content/Context;Landroid/net/Uri;Ljava/lang/String;)V
 
-    move-result v0
-
-    if-eqz v0, :cond_0
-
-    new-instance v0, Lcom/alensw/ui/c/at;
-
-    const v1, 0x7f0a0048
-
-    invoke-virtual {p0, v1}, Landroid/app/Activity;->getString(I)Ljava/lang/String;
-
-    move-result-object v2
-
-    const/4 v3, 0x0
-
-    move-object v1, p0
-
-    move-object v5, p0
-
-    invoke-direct/range {v0 .. v6}, Lcom/alensw/ui/c/at;-><init>(Landroid/app/Activity;Ljava/lang/String;ILandroid/net/Uri;Landroid/app/Activity;Ljava/lang/String;)V
-
-    invoke-virtual {v0}, Lcom/alensw/ui/c/at;->c()V
-
-    :goto_0
     return-void
-
-    :cond_0
-    invoke-virtual {p1}, Lcom/alensw/bean/CommonFile;->j()Ljava/lang/String;
-
-    move-result-object v0
-
-    if-eqz v0, :cond_1
-
-    new-instance v1, Ljava/io/File;
-
-    invoke-direct {v1, v0}, Ljava/io/File;-><init>(Ljava/lang/String;)V
-
-    invoke-static {v1}, Landroid/net/Uri;->fromFile(Ljava/io/File;)Landroid/net/Uri;
-
-    move-result-object v0
-
-    invoke-static {p0, v0, v6}, Lcom/alensw/ui/activity/a;->a(Landroid/content/Context;Landroid/net/Uri;Ljava/lang/String;)V
-
-    goto :goto_0
-
-    :cond_1
-    invoke-static {p0, v4, v6}, Lcom/alensw/ui/activity/a;->a(Landroid/content/Context;Landroid/net/Uri;Ljava/lang/String;)V
-
-    goto :goto_0
 .end method
 
 .method static synthetic a(Lcom/alensw/ui/c/as;Z)V
@@ -3338,19 +3291,6 @@
 
     iput-boolean v3, p0, Lcom/alensw/ui/c/as;->t:Z
 
-    iget-object v1, p0, Lcom/alensw/ui/c/as;->C:Lcom/alensw/ui/c/cx;
-
-    invoke-static {v4}, Lcom/alensw/b/j/a;->c(Landroid/net/Uri;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_b
-
-    const-string v0, "cloud"
-
-    :goto_6
-    invoke-static {v1, p1, v0}, Lcom/alensw/ui/c/as;->a(Landroid/content/Context;Lcom/alensw/b/h/j;Ljava/lang/String;)V
-
     goto/16 :goto_0
 
     :cond_6
@@ -3381,11 +3321,6 @@
     const/16 v2, 0x8
 
     goto :goto_5
-
-    :cond_b
-    const-string v0, "local"
-
-    goto :goto_6
 
     :cond_c
     iput-boolean p2, p0, Lcom/alensw/ui/c/as;->t:Z
@@ -3441,27 +3376,6 @@
 
     invoke-static {v0, v1, p1}, Lcom/alensw/b/g/b;->a(Landroid/content/Context;ILandroid/view/Menu;)V
 
-    iget-object v0, p0, Lcom/alensw/ui/c/as;->k:Lcom/alensw/bean/CommonFolder;
-
-    invoke-virtual {v0}, Lcom/alensw/bean/CommonFolder;->i()Landroid/net/Uri;
-
-    move-result-object v0
-
-    invoke-static {v0}, Lcom/alensw/b/j/a;->c(Landroid/net/Uri;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_0
-
-    const v0, 0x7f090069
-
-    invoke-interface {p1, v0}, Landroid/view/Menu;->removeItem(I)V
-
-    const v0, 0x7f090050
-
-    invoke-interface {p1, v0}, Landroid/view/Menu;->removeItem(I)V
-
-    :cond_0
     const v0, 0x7f090062
 
     invoke-interface {p1, v0}, Landroid/view/Menu;->removeItem(I)V
@@ -4235,35 +4149,6 @@
     goto :goto_0
 .end method
 
-.method protected c()Ljava/lang/String;
-    .locals 1
-
-    iget-object v0, p0, Lcom/alensw/ui/c/as;->k:Lcom/alensw/bean/CommonFolder;
-
-    if-eqz v0, :cond_0
-
-    iget-object v0, p0, Lcom/alensw/ui/c/as;->k:Lcom/alensw/bean/CommonFolder;
-
-    invoke-virtual {v0}, Lcom/alensw/bean/CommonFolder;->i()Landroid/net/Uri;
-
-    move-result-object v0
-
-    invoke-static {v0}, Lcom/alensw/b/j/a;->c(Landroid/net/Uri;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_0
-
-    const-string v0, "CloudPicture"
-
-    :goto_0
-    return-object v0
-
-    :cond_0
-    const-string v0, "Picture"
-
-    goto :goto_0
-.end method
 
 .method public e(Landroid/view/Menu;)V
     .locals 2
@@ -4456,27 +4341,7 @@
 
     move-result-object v6
 
-    invoke-static {v6}, Lcom/alensw/b/j/a;->c(Landroid/net/Uri;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_1
-
-    new-instance v0, Lcom/alensw/ui/c/bd;
-
-    iget-object v2, p0, Lcom/alensw/ui/c/as;->C:Lcom/alensw/ui/c/cx;
-
-    const v1, 0x7f0a002d
-
-    invoke-virtual {p0, v1}, Lcom/alensw/ui/c/as;->g(I)Ljava/lang/String;
-
-    move-result-object v3
-
-    move-object v1, p0
-
-    invoke-direct/range {v0 .. v7}, Lcom/alensw/ui/c/bd;-><init>(Lcom/alensw/ui/c/as;Landroid/app/Activity;Ljava/lang/String;ILandroid/content/ContentResolver;Landroid/net/Uri;Lcom/alensw/a/bc;)V
-
-    invoke-virtual {v0}, Lcom/alensw/ui/c/bd;->c()V
+    goto :cond_1
 
     :cond_0
     :goto_0

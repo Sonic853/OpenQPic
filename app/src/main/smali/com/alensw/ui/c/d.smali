@@ -303,32 +303,6 @@
 
     :cond_7
     :goto_5
-    iget-object v0, p0, Lcom/alensw/ui/c/d;->h:Lcom/alensw/ui/c/c;
-
-    iget-object v0, v0, Lcom/alensw/ui/c/c;->f:Lcom/alensw/ui/c/a;
-
-    iget-object v2, v0, Lcom/alensw/ui/c/a;->C:Lcom/alensw/ui/c/cx;
-
-    iget-object v0, p0, Lcom/alensw/ui/c/d;->h:Lcom/alensw/ui/c/c;
-
-    iget-boolean v0, v0, Lcom/alensw/ui/c/c;->b:Z
-
-    if-eqz v0, :cond_b
-
-    sget-object v0, Lcom/alensw/b/f/b;->h:Lcom/alensw/b/f/b;
-
-    move-object v1, v0
-
-    :goto_6
-    const/16 v0, 0x56
-
-    if-ne v4, v0, :cond_c
-
-    const-string v0, "video"
-
-    :goto_7
-    invoke-static {v2, v1, v0}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;Lcom/alensw/b/f/b;Ljava/lang/String;)V
-
     invoke-virtual {p0}, Lcom/alensw/ui/c/d;->d()Z
 
     move-result v0
@@ -420,18 +394,6 @@
     invoke-virtual {v0, v2}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 
     goto :goto_5
-
-    :cond_b
-    sget-object v0, Lcom/alensw/b/f/b;->g:Lcom/alensw/b/f/b;
-
-    move-object v1, v0
-
-    goto :goto_6
-
-    :cond_c
-    const-string v0, "image"
-
-    goto :goto_7
 
     :catch_2
     move-exception v5

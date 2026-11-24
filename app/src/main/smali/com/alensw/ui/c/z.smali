@@ -15,8 +15,6 @@
 
 .field private M:Lcom/alensw/b/k/d;
 
-.field private N:Ljava/util/Set;
-
 .field private O:Lcom/alensw/b/a/a;
 
 .field private P:I
@@ -46,8 +44,6 @@
 .field protected k:I
 
 .field protected l:Z
-
-.field protected m:Z
 
 .field protected n:Z
 
@@ -310,41 +306,6 @@
     return-void
 .end method
 
-.method private x()V
-    .locals 4
-
-    new-instance v0, Landroid/content/Intent;
-
-    const-string v1, "com.alensw.PicFolder.action.PICK_MULTIPLE"
-
-    invoke-direct {v0, v1}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
-
-    new-instance v1, Landroid/content/ComponentName;
-
-    iget-object v2, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    invoke-virtual {v2}, Lcom/alensw/ui/c/cx;->getPackageName()Ljava/lang/String;
-
-    move-result-object v2
-
-    const-class v3, Lcom/alensw/PicFolder/GalleryActivity;
-
-    invoke-virtual {v3}, Ljava/lang/Class;->getName()Ljava/lang/String;
-
-    move-result-object v3
-
-    invoke-direct {v1, v2, v3}, Landroid/content/ComponentName;-><init>(Ljava/lang/String;Ljava/lang/String;)V
-
-    invoke-virtual {v0, v1}, Landroid/content/Intent;->setComponent(Landroid/content/ComponentName;)Landroid/content/Intent;
-
-    iget-object v1, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    const/4 v2, 0x1
-
-    invoke-static {v1, v0, v2}, Lcom/alensw/ui/activity/a;->a(Landroid/app/Activity;Landroid/content/Intent;I)Z
-
-    return-void
-.end method
 
 .method private y()V
     .locals 2
@@ -582,100 +543,6 @@
     return-void
 .end method
 
-.method public a(IILandroid/content/Intent;)V
-    .locals 6
-
-    const/4 v5, 0x2
-
-    const/4 v0, 0x1
-
-    if-ne p1, v0, :cond_0
-
-    if-eqz p3, :cond_0
-
-    iget-object v0, p0, Lcom/alensw/ui/c/z;->y:Lcom/alensw/bean/CommonFolder;
-
-    invoke-virtual {v0}, Lcom/alensw/bean/CommonFolder;->i()Landroid/net/Uri;
-
-    move-result-object v1
-
-    invoke-virtual {p3}, Landroid/content/Intent;->getAction()Ljava/lang/String;
-
-    move-result-object v0
-
-    const-string v2, "android.intent.action.SEND"
-
-    invoke-virtual {v2, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-
-    move-result v2
-
-    if-eqz v2, :cond_1
-
-    const-string v0, "android.intent.extra.STREAM"
-
-    invoke-virtual {p3, v0}, Landroid/content/Intent;->getParcelableExtra(Ljava/lang/String;)Landroid/os/Parcelable;
-
-    move-result-object v0
-
-    check-cast v0, Landroid/net/Uri;
-
-    iget-object v2, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    iget-object v3, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    invoke-static {v3, v5, v0, v1}, Lcom/alensw/cloud/UrlTaskService;->a(Landroid/content/Context;ILandroid/net/Uri;Landroid/net/Uri;)Landroid/content/Intent;
-
-    move-result-object v0
-
-    invoke-virtual {v2, v0}, Lcom/alensw/ui/c/cx;->startService(Landroid/content/Intent;)Landroid/content/ComponentName;
-
-    :cond_0
-    return-void
-
-    :cond_1
-    const-string v2, "android.intent.action.SEND_MULTIPLE"
-
-    invoke-virtual {v2, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_0
-
-    const-string v0, "android.intent.extra.STREAM"
-
-    invoke-virtual {p3, v0}, Landroid/content/Intent;->getParcelableArrayListExtra(Ljava/lang/String;)Ljava/util/ArrayList;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/util/ArrayList;->iterator()Ljava/util/Iterator;
-
-    move-result-object v2
-
-    :goto_0
-    invoke-interface {v2}, Ljava/util/Iterator;->hasNext()Z
-
-    move-result v0
-
-    if-eqz v0, :cond_0
-
-    invoke-interface {v2}, Ljava/util/Iterator;->next()Ljava/lang/Object;
-
-    move-result-object v0
-
-    check-cast v0, Landroid/net/Uri;
-
-    iget-object v3, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    iget-object v4, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    invoke-static {v4, v5, v0, v1}, Lcom/alensw/cloud/UrlTaskService;->a(Landroid/content/Context;ILandroid/net/Uri;Landroid/net/Uri;)Landroid/content/Intent;
-
-    move-result-object v0
-
-    invoke-virtual {v3, v0}, Lcom/alensw/ui/c/cx;->startService(Landroid/content/Intent;)Landroid/content/ComponentName;
-
-    goto :goto_0
-.end method
 
 .method protected a(ILcom/alensw/bean/CommonFile;)V
     .locals 4
@@ -861,23 +728,6 @@
 
     iput-object v0, p0, Lcom/alensw/ui/c/z;->O:Lcom/alensw/b/a/a;
 
-    iget-object v0, p0, Lcom/alensw/ui/c/z;->y:Lcom/alensw/bean/CommonFolder;
-
-    invoke-virtual {v0}, Lcom/alensw/bean/CommonFolder;->i()Landroid/net/Uri;
-
-    move-result-object v0
-
-    invoke-static {v0}, Lcom/alensw/b/j/a;->c(Landroid/net/Uri;)Z
-
-    move-result v0
-
-    if-nez v0, :cond_6
-
-    move v0, v1
-
-    :goto_1
-    iput-boolean v0, p0, Lcom/alensw/ui/c/z;->m:Z
-
     iget-object v0, p0, Lcom/alensw/ui/c/z;->E:Landroid/content/Intent;
 
     const-string v3, "QuickPic.is_root"
@@ -960,10 +810,6 @@
     :goto_4
     iput-boolean v0, p0, Lcom/alensw/ui/c/z;->p:Z
 
-    iget-boolean v0, p0, Lcom/alensw/ui/c/z;->m:Z
-
-    if-eqz v0, :cond_2
-
     iget-boolean v0, p0, Lcom/alensw/ui/c/z;->n:Z
 
     if-eqz v0, :cond_2
@@ -1018,25 +864,6 @@
 
     invoke-virtual {v0, v2}, Landroid/graphics/Paint;->setTextAlign(Landroid/graphics/Paint$Align;)V
 
-    iget-boolean v0, p0, Lcom/alensw/ui/c/z;->n:Z
-
-    if-eqz v0, :cond_5
-
-    iget-boolean v0, p0, Lcom/alensw/ui/c/z;->m:Z
-
-    if-nez v0, :cond_5
-
-    iget-object v0, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    iget-object v2, p0, Lcom/alensw/ui/c/z;->B:Ljava/lang/String;
-
-    invoke-static {v0, v2}, Lcom/alensw/cloud/aa;->a(Landroid/content/Context;Ljava/lang/String;)Ljava/util/Set;
-
-    move-result-object v0
-
-    iput-object v0, p0, Lcom/alensw/ui/c/z;->N:Ljava/util/Set;
-
-    :cond_5
     iget-object v0, p0, Lcom/alensw/ui/c/z;->y:Lcom/alensw/bean/CommonFolder;
 
     invoke-virtual {v0}, Lcom/alensw/bean/CommonFolder;->a()Ljava/lang/String;
@@ -1152,23 +979,7 @@
 
     invoke-virtual {v0, v1, v2}, Lcom/alensw/bean/CommonFolder;->a(Landroid/content/ContentResolver;Landroid/database/ContentObserver;)V
 
-    iget-object v1, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    iget-boolean v0, p0, Lcom/alensw/ui/c/z;->m:Z
-
-    if-eqz v0, :cond_c
-
-    const-string v0, "local"
-
-    :goto_7
-    invoke-static {v1, v0}, Lcom/alensw/ui/c/a;->a(Landroid/content/Context;Ljava/lang/String;)V
-
     goto/16 :goto_0
-
-    :cond_6
-    move v0, v2
-
-    goto/16 :goto_1
 
     :cond_7
     move v0, v2
@@ -1199,10 +1010,6 @@
 
     goto/16 :goto_6
 
-    :cond_c
-    const-string v0, "cloud"
-
-    goto :goto_7
 .end method
 
 .method public a(Landroid/view/View;)V
@@ -1483,70 +1290,6 @@
     return-void
 .end method
 
-.method public a(Ljava/util/HashSet;Landroid/net/Uri;)V
-    .locals 11
-
-    invoke-virtual {p1}, Ljava/util/HashSet;->size()I
-
-    move-result v4
-
-    if-nez v4, :cond_1
-
-    :cond_0
-    :goto_0
-    return-void
-
-    :cond_1
-    iget-object v0, p0, Lcom/alensw/ui/c/z;->y:Lcom/alensw/bean/CommonFolder;
-
-    invoke-virtual {v0}, Lcom/alensw/bean/CommonFolder;->i()Landroid/net/Uri;
-
-    move-result-object v7
-
-    invoke-virtual {v7, p2}, Landroid/net/Uri;->equals(Ljava/lang/Object;)Z
-
-    move-result v0
-
-    if-nez v0, :cond_0
-
-    const/4 v0, 0x0
-
-    invoke-virtual {p0, v0}, Lcom/alensw/ui/c/z;->a(Z)V
-
-    sget-object v9, Lcom/alensw/PicFolder/QuickApp;->r:Lcom/alensw/a/bc;
-
-    iget-object v0, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    invoke-virtual {v0}, Lcom/alensw/ui/c/cx;->getContentResolver()Landroid/content/ContentResolver;
-
-    move-result-object v6
-
-    new-instance v10, Ljava/util/ArrayList;
-
-    invoke-direct {v10, v4}, Ljava/util/ArrayList;-><init>(I)V
-
-    new-instance v0, Lcom/alensw/ui/c/aq;
-
-    iget-object v2, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    const v1, 0x7f0a004b
-
-    invoke-virtual {p0, v1}, Lcom/alensw/ui/c/z;->g(I)Ljava/lang/String;
-
-    move-result-object v3
-
-    move-object v1, p0
-
-    move-object v5, p1
-
-    move-object v8, p2
-
-    invoke-direct/range {v0 .. v10}, Lcom/alensw/ui/c/aq;-><init>(Lcom/alensw/ui/c/z;Landroid/app/Activity;Ljava/lang/String;ILjava/util/HashSet;Landroid/content/ContentResolver;Landroid/net/Uri;Landroid/net/Uri;Lcom/alensw/a/bc;Ljava/util/ArrayList;)V
-
-    invoke-virtual {v0}, Lcom/alensw/ui/c/aq;->c()V
-
-    goto :goto_0
-.end method
 
 .method public a(Z)V
     .locals 3
@@ -1658,26 +1401,7 @@
     invoke-virtual {p0, p1, v6, v1}, Lcom/alensw/ui/c/z;->a(Landroid/view/Menu;II)V
 
     :goto_1
-    and-int/lit8 v0, v0, 0x2
-
-    if-eqz v0, :cond_5
-
-    invoke-static {v3}, Lcom/alensw/b/j/a;->c(Landroid/net/Uri;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_5
-
-    const v0, 0x7f090053
-
-    invoke-virtual {p0, p1, v0, v5}, Lcom/alensw/ui/c/z;->a(Landroid/view/Menu;II)V
-
-    :goto_2
     iget-boolean v0, p0, Lcom/alensw/ui/c/z;->n:Z
-
-    if-eqz v0, :cond_6
-
-    iget-boolean v0, p0, Lcom/alensw/ui/c/z;->m:Z
 
     if-eqz v0, :cond_6
 
@@ -1695,10 +1419,6 @@
     const v0, 0x7f090056
 
     iget-boolean v4, p0, Lcom/alensw/ui/c/z;->n:Z
-
-    if-eqz v4, :cond_2
-
-    iget-boolean v4, p0, Lcom/alensw/ui/c/z;->m:Z
 
     if-eqz v4, :cond_2
 
@@ -1732,13 +1452,6 @@
     invoke-interface {p1, v6}, Landroid/view/Menu;->removeItem(I)V
 
     goto :goto_1
-
-    :cond_5
-    const v0, 0x7f090053
-
-    invoke-interface {p1, v0}, Landroid/view/Menu;->removeItem(I)V
-
-    goto :goto_2
 
     :cond_6
     move v0, v2
@@ -1922,16 +1635,7 @@
 
     goto/16 :goto_0
 
-    :sswitch_1
-    invoke-direct {p0}, Lcom/alensw/ui/c/z;->x()V
-
-    goto/16 :goto_1
-
     :sswitch_2
-    iget-boolean v0, p0, Lcom/alensw/ui/c/z;->m:Z
-
-    if-eqz v0, :cond_1
-
     iget-object v0, p0, Lcom/alensw/ui/c/z;->B:Ljava/lang/String;
 
     if-eqz v0, :cond_1
@@ -2170,16 +1874,7 @@
 
     goto/16 :goto_1
 
-    :sswitch_e
-    invoke-virtual {p0}, Lcom/alensw/ui/c/z;->p()V
-
-    goto/16 :goto_1
-
     :sswitch_f
-    iget-boolean v0, p0, Lcom/alensw/ui/c/z;->m:Z
-
-    if-eqz v0, :cond_8
-
     sget-boolean v0, Lcom/alensw/ui/c/z;->a:Z
 
     if-eqz v0, :cond_7
@@ -2208,11 +1903,6 @@
     invoke-direct {v4, p0}, Lcom/alensw/ui/c/al;-><init>(Lcom/alensw/ui/c/z;)V
 
     invoke-virtual {p0, v3, v0, v4}, Lcom/alensw/ui/c/z;->a(Ljava/util/HashSet;ZLcom/alensw/ui/c/n;)V
-
-    goto/16 :goto_1
-
-    :cond_8
-    invoke-virtual {p0}, Lcom/alensw/ui/c/z;->q()V
 
     goto/16 :goto_1
 
@@ -2381,11 +2071,9 @@
         0x7f09004b -> :sswitch_5
         0x7f09004c -> :sswitch_6
         0x7f09004e -> :sswitch_d
-        0x7f09004f -> :sswitch_e
         0x7f090050 -> :sswitch_f
         0x7f090051 -> :sswitch_2
         0x7f090052 -> :sswitch_3
-        0x7f090053 -> :sswitch_1
         0x7f090054 -> :sswitch_7
         0x7f090055 -> :sswitch_17
         0x7f09005a -> :sswitch_11
@@ -2603,10 +2291,6 @@
 
     move-result-object v0
 
-    iget-boolean v1, p0, Lcom/alensw/ui/c/z;->m:Z
-
-    if-eqz v1, :cond_2
-
     instance-of v1, v0, Lcom/alensw/bean/CommonFolder;
 
     if-eqz v1, :cond_2
@@ -2689,10 +2373,6 @@
     if-eqz v1, :cond_2
 
     if-eqz p1, :cond_2
-
-    iget-boolean v1, p0, Lcom/alensw/ui/c/z;->m:Z
-
-    if-eqz v1, :cond_2
 
     move v1, v2
 
@@ -2837,58 +2517,6 @@
     goto :goto_0
 .end method
 
-.method protected c()Ljava/lang/String;
-    .locals 2
-
-    iget-boolean v0, p0, Lcom/alensw/ui/c/z;->m:Z
-
-    if-eqz v0, :cond_0
-
-    const-string v0, "local"
-
-    :goto_0
-    return-object v0
-
-    :cond_0
-    iget-object v0, p0, Lcom/alensw/ui/c/z;->B:Ljava/lang/String;
-
-    if-eqz v0, :cond_1
-
-    iget-object v0, p0, Lcom/alensw/ui/c/z;->B:Ljava/lang/String;
-
-    const/16 v1, 0x40
-
-    invoke-virtual {v0, v1}, Ljava/lang/String;->lastIndexOf(I)I
-
-    move-result v0
-
-    iget-object v1, p0, Lcom/alensw/ui/c/z;->B:Ljava/lang/String;
-
-    invoke-virtual {v1}, Ljava/lang/String;->length()I
-
-    move-result v1
-
-    add-int/lit8 v1, v1, -0x1
-
-    if-ge v0, v1, :cond_1
-
-    iget-object v1, p0, Lcom/alensw/ui/c/z;->B:Ljava/lang/String;
-
-    add-int/lit8 v0, v0, 0x1
-
-    invoke-virtual {v1, v0}, Ljava/lang/String;->substring(I)Ljava/lang/String;
-
-    move-result-object v0
-
-    goto :goto_0
-
-    :cond_1
-    invoke-super {p0}, Lcom/alensw/ui/c/a;->c()Ljava/lang/String;
-
-    move-result-object v0
-
-    goto :goto_0
-.end method
 
 .method public c(I)V
     .locals 7
@@ -2970,10 +2598,6 @@
 
     iget-object v1, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
 
-    iget-boolean v0, p0, Lcom/alensw/ui/c/z;->m:Z
-
-    if-eqz v0, :cond_0
-
     const v0, 0x7f0c0007
 
     :goto_0
@@ -3008,16 +2632,7 @@
 
     goto :goto_1
 
-    :cond_0
-    const v0, 0x7f0c0001
-
-    goto :goto_0
-
     :cond_1
-    iget-boolean v0, p0, Lcom/alensw/ui/c/z;->m:Z
-
-    if-eqz v0, :cond_3
-
     const v0, 0x7f09000a
 
     invoke-virtual {p0, p1, v0, v2}, Lcom/alensw/ui/c/z;->a(Landroid/view/Menu;II)V
@@ -3052,33 +2667,6 @@
 
     return v4
 
-    :cond_3
-    const v0, 0x7f09004f
-
-    invoke-virtual {p0, p1, v0, v2}, Lcom/alensw/ui/c/z;->a(Landroid/view/Menu;II)V
-
-    invoke-virtual {p0, p1, v5, v2}, Lcom/alensw/ui/c/z;->a(Landroid/view/Menu;II)V
-
-    iget-object v0, p0, Lcom/alensw/ui/c/z;->y:Lcom/alensw/bean/CommonFolder;
-
-    invoke-virtual {v0}, Lcom/alensw/bean/CommonFolder;->c()I
-
-    move-result v0
-
-    and-int/lit8 v1, v0, 0x8
-
-    if-eqz v1, :cond_4
-
-    and-int/lit8 v0, v0, 0x2
-
-    if-nez v0, :cond_2
-
-    :cond_4
-    const v0, 0x7f090050
-
-    invoke-interface {p1, v0}, Landroid/view/Menu;->removeItem(I)V
-
-    goto :goto_2
 .end method
 
 .method protected d(Landroid/view/Menu;)Z
@@ -3095,10 +2683,6 @@
     invoke-virtual {v0}, Ljava/util/LinkedHashSet;->size()I
 
     move-result v5
-
-    iget-boolean v0, p0, Lcom/alensw/ui/c/z;->m:Z
-
-    if-eqz v0, :cond_2
 
     if-ne v5, v1, :cond_3
 
@@ -3499,10 +3083,6 @@
 
     if-lez v1, :cond_3
 
-    iget-boolean v2, p0, Lcom/alensw/ui/c/z;->m:Z
-
-    if-eqz v2, :cond_2
-
     iget-boolean v2, p0, Lcom/alensw/ui/c/z;->n:Z
 
     if-nez v2, :cond_3
@@ -3614,7 +3194,7 @@
 
     const/4 v3, 0x0
 
-    iget-object v4, p0, Lcom/alensw/ui/c/z;->N:Ljava/util/Set;
+    const/4 v4, 0x0
 
     iget-object v5, p0, Lcom/alensw/ui/c/z;->b:Landroid/os/Handler;
 
@@ -3684,204 +3264,6 @@
     goto :goto_0
 .end method
 
-.method public p()V
-    .locals 5
-
-    invoke-virtual {p0}, Lcom/alensw/ui/c/z;->u()Ljava/util/HashSet;
-
-    move-result-object v1
-
-    invoke-virtual {v1}, Ljava/util/HashSet;->size()I
-
-    move-result v0
-
-    if-nez v0, :cond_0
-
-    :goto_0
-    return-void
-
-    :cond_0
-    iget-object v0, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    invoke-virtual {v0}, Lcom/alensw/ui/c/cx;->q()Z
-
-    move-result v0
-
-    if-eqz v0, :cond_1
-
-    iget-object v0, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    const/4 v2, 0x0
-
-    invoke-virtual {v0, v2}, Lcom/alensw/ui/c/cx;->d(Z)V
-
-    :cond_1
-    new-instance v0, Landroid/content/Intent;
-
-    const-string v2, "android.intent.action.PICK"
-
-    invoke-direct {v0, v2}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
-
-    const-string v2, "vnd.android.document/directory"
-
-    invoke-virtual {v0, v2}, Landroid/content/Intent;->setType(Ljava/lang/String;)Landroid/content/Intent;
-
-    const-string v2, "activity_title"
-
-    new-instance v3, Ljava/lang/StringBuilder;
-
-    invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
-
-    const v4, 0x7f0a00bd
-
-    invoke-virtual {p0, v4}, Lcom/alensw/ui/c/z;->g(I)Ljava/lang/String;
-
-    move-result-object v4
-
-    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    const-string v4, ":"
-
-    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v3
-
-    invoke-virtual {v0, v2, v3}, Landroid/content/Intent;->putExtra(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
-
-    iget-object v2, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    const-class v3, Lcom/alensw/ui/c/bz;
-
-    const/4 v4, 0x0
-
-    invoke-virtual {v2, v3, v0, v4}, Lcom/alensw/ui/c/cx;->a(Ljava/lang/Class;Landroid/content/Intent;Landroid/os/Bundle;)Lcom/alensw/ui/c/cu;
-
-    move-result-object v0
-
-    check-cast v0, Lcom/alensw/ui/c/a;
-
-    new-instance v2, Lcom/alensw/ui/c/ao;
-
-    invoke-direct {v2, p0, v1}, Lcom/alensw/ui/c/ao;-><init>(Lcom/alensw/ui/c/z;Ljava/util/HashSet;)V
-
-    invoke-virtual {v0, v2}, Lcom/alensw/ui/c/a;->a(Lcom/alensw/ui/c/m;)V
-
-    goto :goto_0
-.end method
-
-.method public q()V
-    .locals 6
-
-    const/4 v5, 0x0
-
-    invoke-virtual {p0}, Lcom/alensw/ui/c/z;->u()Ljava/util/HashSet;
-
-    move-result-object v1
-
-    invoke-virtual {v1}, Ljava/util/HashSet;->size()I
-
-    move-result v0
-
-    if-nez v0, :cond_1
-
-    :cond_0
-    :goto_0
-    return-void
-
-    :cond_1
-    iget-object v0, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    invoke-virtual {v0}, Lcom/alensw/ui/c/cx;->q()Z
-
-    move-result v0
-
-    if-eqz v0, :cond_2
-
-    iget-object v0, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    invoke-virtual {v0, v5}, Lcom/alensw/ui/c/cx;->d(Z)V
-
-    :cond_2
-    iget-object v0, p0, Lcom/alensw/ui/c/z;->B:Ljava/lang/String;
-
-    if-eqz v0, :cond_0
-
-    new-instance v0, Landroid/content/Intent;
-
-    invoke-direct {v0}, Landroid/content/Intent;-><init>()V
-
-    const-string v2, "QuickPic.catalogs"
-
-    const/4 v3, 0x1
-
-    new-array v3, v3, [I
-
-    const/4 v4, 0x2
-
-    aput v4, v3, v5
-
-    invoke-virtual {v0, v2, v3}, Landroid/content/Intent;->putExtra(Ljava/lang/String;[I)Landroid/content/Intent;
-
-    const-string v2, "QuickPic.title"
-
-    new-instance v3, Ljava/lang/StringBuilder;
-
-    invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
-
-    const v4, 0x7f0a004b
-
-    invoke-virtual {p0, v4}, Lcom/alensw/ui/c/z;->g(I)Ljava/lang/String;
-
-    move-result-object v4
-
-    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    const-string v4, ":"
-
-    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v3
-
-    invoke-virtual {v0, v2, v3}, Landroid/content/Intent;->putExtra(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
-
-    const-string v2, "QuickPic.root_id"
-
-    iget-object v3, p0, Lcom/alensw/ui/c/z;->B:Ljava/lang/String;
-
-    invoke-virtual {v0, v2, v3}, Landroid/content/Intent;->putExtra(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
-
-    iget-object v2, p0, Lcom/alensw/ui/c/z;->C:Lcom/alensw/ui/c/cx;
-
-    const-class v3, Lcom/alensw/ui/c/p;
-
-    const/4 v4, 0x0
-
-    invoke-virtual {v2, v3, v0, v4}, Lcom/alensw/ui/c/cx;->a(Ljava/lang/Class;Landroid/content/Intent;Landroid/os/Bundle;)Lcom/alensw/ui/c/cu;
-
-    move-result-object v0
-
-    check-cast v0, Lcom/alensw/ui/c/a;
-
-    new-instance v2, Lcom/alensw/ui/c/ap;
-
-    invoke-direct {v2, p0, v1}, Lcom/alensw/ui/c/ap;-><init>(Lcom/alensw/ui/c/z;Ljava/util/HashSet;)V
-
-    invoke-virtual {v0, v2}, Lcom/alensw/ui/c/a;->a(Lcom/alensw/ui/c/m;)V
-
-    goto :goto_0
-.end method
 
 .method public r()[Landroid/net/Uri;
     .locals 5

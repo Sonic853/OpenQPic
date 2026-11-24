@@ -144,11 +144,6 @@
 
     iput-object v1, v0, Lcom/alensw/bean/DocumentRoot;->o:Ljava/lang/String;
 
-    invoke-static {v6}, Lcom/alensw/PicFolder/CloudProvider;->e(Ljava/lang/String;)Lcom/alensw/cloud/z;
-
-    move-result-object v1
-
-    iput-object v1, v0, Lcom/alensw/bean/DocumentRoot;->k:Lcom/alensw/cloud/z;
 
     return-object v0
 .end method

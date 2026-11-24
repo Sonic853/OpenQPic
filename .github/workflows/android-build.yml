@@ -1,0 +1,108 @@
+name: Android build
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Sign the APK and publish a GitHub Release
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+concurrency:
+  group: ${{ inputs.publish && 'openqpic-release' || format('openqpic-build-{0}', github.run_id) }}
+  cancel-in-progress: false
+
+jobs:
+  reserve:
+    if: inputs.publish
+    runs-on: ubuntu-latest
+    # Listing draft releases (which may not have a tag yet) requires push access.
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - id: version
+        name: Allocate the Beijing version before compilation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          day=$(TZ=Asia/Shanghai date +%Y.%m.%d)
+          tags="$RUNNER_TEMP/openqpic-tags"
+          gh api --paginate "repos/$GITHUB_REPOSITORY/tags?per_page=100" --jq '.[].name' > "$tags"
+          gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[].tag_name' >> "$tags"
+          javac -d "$RUNNER_TEMP" buildSrc/src/main/java/org/openqpic/version/GalleryVersion.java tools/version/ReleaseVersion.java
+          version=$(java -cp "$RUNNER_TEMP" ReleaseVersion "$day" < "$tags")
+          echo "name=$version" >> "$GITHUB_OUTPUT"
+  build:
+    needs: reserve
+    if: ${{ !cancelled() && (!inputs.publish || needs.reserve.result == 'success') }}
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - id: version
+        env:
+          RESERVED: ${{ needs.reserve.outputs.version }}
+        run: echo "name=${RESERVED:-$(TZ=Asia/Shanghai date +%Y.%m.%d)}" >> "$GITHUB_OUTPUT"
+      - name: Build APK and verify gallery artifacts
+        env:
+          VERSION: ${{ steps.version.outputs.name }}
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0'
+          bash gradlew :app:verifyLocalSendDebug :app:assembleRelease "-PopenqpicVersion=$VERSION"
+          code=$(jq -er '.versionCode' app/build/reports/localsend-debug.json)
+          package=$("$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging app/build/outputs/apk/release/app-release-unsigned.apk)
+          [[ "${package%%$'\n'*}" == *" versionCode='$code' versionName='$VERSION' "* ]]
+      - name: Sign release APK
+        if: inputs.publish
+        env:
+          VERSION: ${{ steps.version.outputs.name }}
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASS: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          umask 077
+          store="$RUNNER_TEMP/openqpic.keystore"
+          trap 'rm -f "$store"' EXIT
+          printf '%s' "$KEYSTORE" | base64 -d > "$store"
+          signer="$ANDROID_HOME/build-tools/36.0.0/apksigner"
+          "$signer" sign --ks "$store" --ks-key-alias "$KEY_ALIAS" --ks-pass env:STORE_PASS --key-pass env:KEY_PASS \
+            --out "OpenQPic-$VERSION.apk" app/build/outputs/apk/release/app-release-unsigned.apk
+          "$signer" verify "OpenQPic-$VERSION.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OpenQPic-${{ steps.version.outputs.name }}
+          path: ${{ inputs.publish && format('OpenQPic-{0}.apk', steps.version.outputs.name) || 'app/build/outputs/apk/release/app-release-unsigned.apk' }}
+          if-no-files-found: error
+  publish:
+    needs: build
+    if: inputs.publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: OpenQPic-${{ needs.build.outputs.version }}
+      - name: Publish the signed APK at the allocated tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: gh release create "$VERSION" "OpenQPic-$VERSION.apk" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$VERSION" --generate-notes --latest

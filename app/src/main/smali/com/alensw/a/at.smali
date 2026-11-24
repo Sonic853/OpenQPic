@@ -1004,55 +1004,7 @@
     invoke-static {v1, v2}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
 
     :cond_0
-    :try_start_1
-    iget-object v1, p0, Lcom/alensw/a/at;->a:Lcom/alensw/bean/CommonFile;
-
-    invoke-virtual {v1}, Lcom/alensw/bean/CommonFile;->h()C
-
-    move-result v1
-
-    const/16 v2, 0x56
-
-    if-ne v1, v2, :cond_1
-
-    iget-object v1, p0, Lcom/alensw/a/at;->e:Landroid/net/Uri;
-
-    invoke-static {v1}, Lcom/alensw/b/j/a;->c(Landroid/net/Uri;)Z
-
-    move-result v1
-
-    if-eqz v1, :cond_1
-
-    new-instance v1, Lcom/alensw/b/c/f;
-
-    iget-object v2, p0, Lcom/alensw/a/at;->e:Landroid/net/Uri;
-
-    iget-object v3, p0, Lcom/alensw/a/at;->c:Lcom/alensw/a/ao;
-
-    invoke-static {v3}, Lcom/alensw/a/ao;->c(Lcom/alensw/a/ao;)Landroid/content/ContentResolver;
-
-    move-result-object v3
-
-    iget-object v4, p0, Lcom/alensw/a/at;->e:Landroid/net/Uri;
-
-    iget-object v5, p0, Lcom/alensw/a/at;->c:Lcom/alensw/a/ao;
-
-    invoke-static {v5}, Lcom/alensw/a/ao;->d(Lcom/alensw/a/ao;)I
-
-    move-result v5
-
-    invoke-static {v3, v4, v5}, Lcom/alensw/b/j/a;->a(Landroid/content/ContentResolver;Landroid/net/Uri;I)Landroid/os/ParcelFileDescriptor;
-
-    move-result-object v3
-
-    invoke-direct {v1, v2, v3}, Lcom/alensw/b/c/f;-><init>(Landroid/net/Uri;Landroid/os/ParcelFileDescriptor;)V
-    :try_end_1
-    .catch Lcom/alensw/b/e/a; {:try_start_1 .. :try_end_1} :catch_2
-    .catch Ljava/lang/Throwable; {:try_start_1 .. :try_end_1} :catch_3
-
-    move-object v0, v1
-
-    goto :goto_0
+    goto :cond_1
 
     :catch_1
     move-exception v1
@@ -1513,33 +1465,6 @@
 .method public a()V
     .locals 2
 
-    iget-object v0, p0, Lcom/alensw/a/at;->f:Ljava/lang/String;
-
-    if-nez v0, :cond_0
-
-    iget-object v0, p0, Lcom/alensw/a/at;->e:Landroid/net/Uri;
-
-    invoke-static {v0}, Lcom/alensw/b/j/a;->c(Landroid/net/Uri;)Z
-
-    move-result v0
-
-    if-eqz v0, :cond_0
-
-    :try_start_0
-    iget-object v0, p0, Lcom/alensw/a/at;->c:Lcom/alensw/a/ao;
-
-    invoke-static {v0}, Lcom/alensw/a/ao;->c(Lcom/alensw/a/ao;)Landroid/content/ContentResolver;
-
-    move-result-object v0
-
-    iget-object v1, p0, Lcom/alensw/a/at;->e:Landroid/net/Uri;
-
-    invoke-static {v0, v1}, Lcom/alensw/b/j/a;->a(Landroid/content/ContentResolver;Landroid/net/Uri;)V
-    :try_end_0
-    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_0
-
-    :cond_0
-    :goto_0
     monitor-enter p0
 
     :try_start_1
@@ -1565,10 +1490,6 @@
 
     throw v0
 
-    :catch_0
-    move-exception v0
-
-    goto :goto_0
 .end method
 
 .method public b()V

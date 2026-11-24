@@ -3337,21 +3337,6 @@
     .end sparse-switch
 .end method
 
-.method protected onPause()V
-    .locals 1
-
-    invoke-super {p0}, Landroid/app/Activity;->onPause()V
-
-    invoke-virtual {p0}, Lcom/alensw/ui/activity/ao;->getApplication()Landroid/app/Application;
-
-    move-result-object v0
-
-    check-cast v0, Lcom/alensw/PicFolder/QuickApp;
-
-    invoke-virtual {v0, p0}, Lcom/alensw/PicFolder/QuickApp;->f(Landroid/app/Activity;)V
-
-    return-void
-.end method
 
 .method public onPostCreate(Landroid/os/Bundle;)V
     .locals 1
@@ -3418,21 +3403,6 @@
     goto :goto_0
 .end method
 
-.method protected onResume()V
-    .locals 1
-
-    invoke-super {p0}, Landroid/app/Activity;->onResume()V
-
-    invoke-virtual {p0}, Lcom/alensw/ui/activity/ao;->getApplication()Landroid/app/Application;
-
-    move-result-object v0
-
-    check-cast v0, Lcom/alensw/PicFolder/QuickApp;
-
-    invoke-virtual {v0, p0}, Lcom/alensw/PicFolder/QuickApp;->e(Landroid/app/Activity;)V
-
-    return-void
-.end method
 
 .method public onStart()V
     .locals 1

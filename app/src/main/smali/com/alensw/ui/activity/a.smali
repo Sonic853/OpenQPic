@@ -743,122 +743,11 @@
 .end method
 
 .method public static a(Landroid/content/Context;Landroid/content/Intent;Landroid/content/pm/ResolveInfo;)V
-    .locals 7
-
-    const/4 v1, 0x1
-
+    .locals 1
     invoke-static {p1, p2}, Lcom/alensw/ui/activity/a;->a(Landroid/content/Intent;Landroid/content/pm/ResolveInfo;)Landroid/content/Intent;
-
     move-result-object v0
-
     invoke-static {p0, v0}, Lcom/alensw/ui/activity/a;->a(Landroid/content/Context;Landroid/content/Intent;)Z
-
-    iget-object v0, p2, Landroid/content/pm/ResolveInfo;->activityInfo:Landroid/content/pm/ActivityInfo;
-
-    iget-object v3, v0, Landroid/content/pm/ActivityInfo;->packageName:Ljava/lang/String;
-
-    if-eqz v3, :cond_1
-
-    invoke-virtual {p0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
-
-    move-result-object v0
-
-    invoke-virtual {v0, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-
-    move-result v0
-
-    if-nez v0, :cond_1
-
-    invoke-virtual {p1}, Landroid/content/Intent;->getAction()Ljava/lang/String;
-
-    move-result-object v4
-
-    const/4 v2, 0x0
-
-    const/4 v0, 0x0
-
-    const-string v5, "android.intent.action.SEND"
-
-    invoke-virtual {v5, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-
-    move-result v5
-
-    if-eqz v5, :cond_2
-
-    sget-object v0, Lcom/alensw/b/f/b;->j:Lcom/alensw/b/f/b;
-
-    move-object v2, v0
-
-    move v0, v1
-
-    :cond_0
-    :goto_0
-    if-eqz v2, :cond_1
-
-    if-lez v0, :cond_1
-
-    new-instance v4, Ljava/util/HashMap;
-
-    invoke-direct {v4, v1}, Ljava/util/HashMap;-><init>(I)V
-
-    const-string v1, "t"
-
-    const-string v5, "com."
-
-    const-string v6, ""
-
-    invoke-virtual {v3, v5, v6}, Ljava/lang/String;->replaceAll(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
-
-    move-result-object v3
-
-    invoke-virtual {v4, v1, v3}, Ljava/util/HashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-
-    invoke-static {p0, v2, v4, v0}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;Lcom/alensw/b/f/b;Ljava/util/Map;I)V
-
-    :cond_1
     return-void
-
-    :cond_2
-    const-string v5, "android.intent.action.SEND_MULTIPLE"
-
-    invoke-virtual {v5, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-
-    move-result v5
-
-    if-eqz v5, :cond_3
-
-    sget-object v2, Lcom/alensw/b/f/b;->j:Lcom/alensw/b/f/b;
-
-    const-string v4, "android.intent.extra.STREAM"
-
-    invoke-virtual {p1, v4}, Landroid/content/Intent;->getParcelableArrayListExtra(Ljava/lang/String;)Ljava/util/ArrayList;
-
-    move-result-object v4
-
-    if-eqz v4, :cond_0
-
-    invoke-virtual {v4}, Ljava/util/ArrayList;->size()I
-
-    move-result v0
-
-    goto :goto_0
-
-    :cond_3
-    const-string v5, "android.intent.action.EDIT"
-
-    invoke-virtual {v5, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-
-    move-result v4
-
-    if-eqz v4, :cond_0
-
-    sget-object v0, Lcom/alensw/b/f/b;->k:Lcom/alensw/b/f/b;
-
-    move-object v2, v0
-
-    move v0, v1
-
-    goto :goto_0
 .end method
 
 .method public static a(Landroid/content/Context;Landroid/net/Uri;)V
@@ -886,73 +775,9 @@
 .end method
 
 .method public static a(Landroid/content/Context;Landroid/net/Uri;Ljava/lang/String;)V
-    .locals 5
-
-    const/4 v4, 0x1
-
-    new-instance v0, Landroid/content/Intent;
-
-    const-string v1, "android.intent.action.VIEW"
-
-    invoke-direct {v0, v1}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
-
-    invoke-static {p1}, Lcom/alensw/b/j/a;->e(Landroid/net/Uri;)[Ljava/lang/String;
-
-    move-result-object v1
-
-    if-eqz v1, :cond_0
-
-    array-length v2, v1
-
-    const/4 v3, 0x2
-
-    if-lt v2, v3, :cond_0
-
-    aget-object v2, v1, v4
-
-    if-eqz v2, :cond_0
-
-    const-class v2, Lcom/alensw/PicFolder/PlayerActivity;
-
-    invoke-virtual {v0, p0, v2}, Landroid/content/Intent;->setClass(Landroid/content/Context;Ljava/lang/Class;)Landroid/content/Intent;
-
-    const/4 v2, 0x0
-
-    aget-object v2, v1, v2
-
-    invoke-static {v2}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
-
-    move-result-object v2
-
-    invoke-virtual {v0, v2, p2}, Landroid/content/Intent;->setDataAndType(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/Intent;
-
-    new-instance v2, Landroid/os/Bundle;
-
-    invoke-direct {v2}, Landroid/os/Bundle;-><init>()V
-
-    const-string v3, "Authorization"
-
-    aget-object v1, v1, v4
-
-    invoke-virtual {v2, v3, v1}, Landroid/os/Bundle;->putString(Ljava/lang/String;Ljava/lang/String;)V
-
-    const-string v1, "com.android.browser.headers"
-
-    invoke-virtual {v0, v1, v2}, Landroid/content/Intent;->putExtra(Ljava/lang/String;Landroid/os/Bundle;)Landroid/content/Intent;
-
-    :goto_0
-    invoke-static {p0, v0}, Lcom/alensw/ui/activity/a;->a(Landroid/content/Context;Landroid/content/Intent;)Z
-
-    sget-object v0, Lcom/alensw/b/f/b;->f:Lcom/alensw/b/f/b;
-
-    invoke-static {p0, v0}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;Lcom/alensw/b/f/b;)V
-
+    .locals 0
+    invoke-static {p0, p1, p2}, Lcom/alensw/video/VideoProxyService;->view(Landroid/content/Context;Landroid/net/Uri;Ljava/lang/String;)V
     return-void
-
-    :cond_0
-    invoke-virtual {v0, p1, p2}, Landroid/content/Intent;->setDataAndType(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/Intent;
-
-    goto :goto_0
 .end method
 
 .method public static a(Landroid/content/Context;Landroid/view/View;)V
@@ -992,10 +817,6 @@
 
     if-eqz v0, :cond_0
 
-    sget-object v0, Lcom/alensw/b/f/b;->l:Lcom/alensw/b/f/b;
-
-    invoke-static {p0, v0}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;Lcom/alensw/b/f/b;)V
-
     :goto_0
     return-void
 
@@ -1011,10 +832,6 @@
     move-result v0
 
     if-eqz v0, :cond_1
-
-    sget-object v0, Lcom/alensw/b/f/b;->l:Lcom/alensw/b/f/b;
-
-    invoke-static {p0, v0}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;Lcom/alensw/b/f/b;)V
 
     goto :goto_0
 

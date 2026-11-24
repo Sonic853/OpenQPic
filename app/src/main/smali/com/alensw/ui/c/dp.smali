@@ -3327,12 +3327,6 @@
 
     iput-boolean v8, p0, Lcom/alensw/ui/c/dp;->v:Z
 
-    iget-object v0, p0, Lcom/alensw/ui/c/dp;->C:Lcom/alensw/ui/c/cx;
-
-    const-string v1, "local"
-
-    invoke-static {v0, p1, v1}, Lcom/alensw/ui/c/dp;->a(Landroid/content/Context;Lcom/alensw/b/h/j;Ljava/lang/String;)V
-
     goto/16 :goto_0
 
     :cond_6
@@ -3672,12 +3666,6 @@
     iget-object v2, p0, Lcom/alensw/ui/c/dp;->P:Lcom/alensw/ui/view/q;
 
     invoke-interface {v2, v0, v1}, Lcom/alensw/ui/view/q;->a(FZ)V
-
-    iget-object v0, p0, Lcom/alensw/ui/c/dp;->C:Lcom/alensw/ui/c/cx;
-
-    sget-object v2, Lcom/alensw/b/f/b;->c:Lcom/alensw/b/f/b;
-
-    invoke-static {v0, v2}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;Lcom/alensw/b/f/b;)V
 
     goto/16 :goto_0
 

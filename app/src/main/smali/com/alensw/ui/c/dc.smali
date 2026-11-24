@@ -298,14 +298,6 @@
 
     iput-object v0, p0, Lcom/alensw/ui/c/dc;->M:Landroid/content/ContentResolver;
 
-    iget-object v0, p0, Lcom/alensw/ui/c/dc;->C:Lcom/alensw/ui/c/cx;
-
-    sget-object v1, Lcom/alensw/b/f/b;->i:Lcom/alensw/b/f/b;
-
-    iget-object v2, p0, Lcom/alensw/ui/c/dc;->B:Ljava/lang/String;
-
-    invoke-static {v0, v1, v2}, Lcom/alensw/b/f/a;->a(Landroid/content/Context;Lcom/alensw/b/f/b;Ljava/lang/String;)V
-
     return-void
 .end method
 

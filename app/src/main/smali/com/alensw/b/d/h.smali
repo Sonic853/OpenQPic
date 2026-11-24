@@ -108,8 +108,6 @@
 
     invoke-direct {v1}, Lcom/alensw/b/d/c;-><init>()V
 
-    const/4 v0, 0x0
-
     iget v2, p0, Lcom/alensw/b/d/h;->b:F
 
     iget v3, p0, Lcom/alensw/b/d/h;->c:F
@@ -117,41 +115,6 @@
     invoke-static {v2, v3}, Lcom/alensw/b/d/f;->b(FF)Z
 
     move-result v2
-
-    if-eqz v2, :cond_0
-
-    iget-object v0, p0, Lcom/alensw/b/d/h;->e:Lcom/alensw/b/d/f;
-
-    invoke-static {v0}, Lcom/alensw/b/d/f;->a(Lcom/alensw/b/d/f;)Lcom/alensw/b/d/b;
-
-    move-result-object v0
-
-    iget v3, p0, Lcom/alensw/b/d/h;->b:F
-
-    iget v4, p0, Lcom/alensw/b/d/h;->c:F
-
-    invoke-virtual {v0, v3, v4, v1}, Lcom/alensw/b/d/b;->a(FFLcom/alensw/b/d/c;)Z
-
-    move-result v0
-
-    if-nez v0, :cond_0
-
-    iget-object v0, p0, Lcom/alensw/b/d/h;->e:Lcom/alensw/b/d/f;
-
-    invoke-static {v0}, Lcom/alensw/b/d/f;->b(Lcom/alensw/b/d/f;)Lcom/alensw/b/d/a;
-
-    move-result-object v0
-
-    iget v3, p0, Lcom/alensw/b/d/h;->b:F
-
-    iget v4, p0, Lcom/alensw/b/d/h;->c:F
-
-    invoke-virtual {v0, v3, v4, v1}, Lcom/alensw/b/d/a;->a(FFLcom/alensw/b/d/c;)Z
-
-    move-result v0
-
-    :cond_0
-    if-nez v0, :cond_1
 
     iget-object v0, p0, Lcom/alensw/b/d/h;->e:Lcom/alensw/b/d/f;
 
@@ -167,7 +130,6 @@
 
     move-result v0
 
-    :cond_1
     if-eqz v0, :cond_3
 
     if-eqz v2, :cond_2
