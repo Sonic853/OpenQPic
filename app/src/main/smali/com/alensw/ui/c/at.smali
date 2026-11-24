@@ -111,7 +111,7 @@
 
     iget-object v2, p0, Lcom/alensw/ui/c/at;->b:Landroid/app/Activity;
 
-    const-class v3, Lcom/alensw/transfer/TransferService;
+    const-class v3, Lcom/alensw/video/VideoProxyService;
 
     invoke-direct {v0, v2, v3}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
 

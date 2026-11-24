@@ -879,6 +879,13 @@
     return-void
 .end method
 
+.method protected bindAddress(I)Ljava/net/InetSocketAddress;
+    .locals 1
+    new-instance v0, Ljava/net/InetSocketAddress;
+    invoke-direct {v0, p1}, Ljava/net/InetSocketAddress;-><init>(I)V
+    return-object v0
+.end method
+
 .method public c()V
     .locals 3
 
@@ -895,11 +902,10 @@
 
     iget-object v0, p0, Lcom/alensw/b/e/j;->a:Ljava/net/ServerSocket;
 
-    new-instance v1, Ljava/net/InetSocketAddress;
-
     iget v2, p0, Lcom/alensw/b/e/j;->c:I
 
-    invoke-direct {v1, v2}, Ljava/net/InetSocketAddress;-><init>(I)V
+    invoke-virtual {p0, v2}, Lcom/alensw/b/e/j;->bindAddress(I)Ljava/net/InetSocketAddress;
+    move-result-object v1
 
     invoke-virtual {v0, v1}, Ljava/net/ServerSocket;->bind(Ljava/net/SocketAddress;)V
 

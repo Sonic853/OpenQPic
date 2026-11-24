@@ -24,7 +24,7 @@ def overlay = providers.gradleProperty('stableJavaOverlay').map { rootProject.fi
 def singleJava = providers.gradleProperty('stableSingleJava').map { it.toBoolean() }.getOrElse(false)
 def builtInJava = overlay == null && !singleJava
 def ownership = builtInJava ? file('recovered-java') : overlay
-def useAbi = builtInJava || providers.gradleProperty('stableCompileAbi').map { it.toBoolean() }.getOrElse(false)
+def useAbi = true // Product Java also calls the original gallery's Smali classes.
 def readList = { File f -> f.readLines('UTF-8')*.trim().findAll { it && !it.startsWith('#') } }
 def replacements = ownership == null ? [] : readList(new File(ownership, 'replace.txt'))
 def selectedSources = overlay != null && new File(overlay, 'sources.txt').isFile() ?
@@ -68,7 +68,7 @@ android {
         targetSdk 23
         versionCode 9700000
         versionName '9.7'
-        ndk { abiFilters 'armeabi', 'x86' }
+        ndk { abiFilters 'armeabi', 'x86', 'arm64-v8a' }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -84,7 +84,7 @@ android {
         noCompress += ['svg', 'so']
     }
     packaging {
-        jniLibs.keepDebugSymbols += ['**/libqpicjni156.so']
+        jniLibs.keepDebugSymbols += ['**/libqpicjni156.so', '**/libqpiclocalsend.so']
         jniLibs.useLegacyPackaging = true
     }
     dependenciesInfo {
@@ -416,7 +416,7 @@ androidComponents {
             }
         }
         def compiled = tasks.register("select${cap}RuntimeClasses", RuntimeClasses) {
-            javaOwners.set([jniType] + replacements)
+            javaOwners.set([jniType] + replacements + readList(file('product-java.txt')))
         }
         variant.artifacts.forScope(ScopedArtifacts.Scope.PROJECT).use(compiled).toTransform(
                 ScopedArtifact.CLASSES.INSTANCE, { it.classJars }, { it.classDirs }, { it.outputJar })
@@ -449,5 +449,17 @@ tasks.register('verifyStableDebug', Exec) {
                 '--bundle', bundle.get().asFile, '--build-dir', layout.buildDirectory.get().asFile
         if (overlay != null) args '--overlay', overlay
         if (builtInJava) args '--built-in'
+    }
+}
+
+tasks.register('verifyLocalSendDebug', Exec) {
+    group = 'verification'
+    description = 'Verify the LocalSend APK/AAB, DEX ownership, gallery resource IDs and both native libraries.'
+    dependsOn 'assembleDebug', 'bundleDebug'
+    def sdk = androidComponents.sdkComponents.sdkDirectory
+    doFirst {
+        environment 'JAVA_HOME', System.getProperty('java.home')
+        commandLine providers.gradleProperty('python').getOrElse(System.getProperty('os.name').startsWith('Windows') ? 'python' : 'python3'),
+                rootProject.file('tools/verify_localsend.py'), '--build-tools', sdk.get().dir('build-tools/36.0.0').asFile
     }
 }

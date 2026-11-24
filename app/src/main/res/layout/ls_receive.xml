@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"
+    android:paddingLeft="16dp" android:paddingRight="16dp" android:paddingTop="8dp">
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/ls_receive" android:accessibilityHeading="true" android:textAppearance="?android:attr/textAppearanceLarge" />
+    <TextView android:id="@id/sender" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:maxLines="2" android:ellipsize="end" android:textAppearance="?android:attr/textAppearanceMedium" />
+    <TextView android:id="@+id/ls_destination" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:maxLines="2" android:ellipsize="middle" android:textAppearance="?android:attr/textAppearanceSmall" />
+    <TextView android:id="@+id/ls_skipped" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+    <TextView android:id="@+id/ls_selected" android:paddingTop="6dp" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textStyle="bold" android:accessibilityLiveRegion="polite" />
+    <ListView android:id="@id/list" android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:choiceMode="multipleChoice" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="end" android:orientation="horizontal">
+        <Button android:id="@+id/ls_decline" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            style="?android:attr/borderlessButtonStyle" android:text="@string/ls_decline" />
+        <Button android:id="@+id/ls_accept" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/ls_accept" />
+    </LinearLayout>
+</LinearLayout>

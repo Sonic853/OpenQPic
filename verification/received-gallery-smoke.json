@@ -1,0 +1,15 @@
+{
+  "visible_album_created": true,
+  "open_folder_count": [
+    1,
+    2,
+    3
+  ],
+  "same_gallery_activity": true,
+  "partial_hidden_and_new_thumbnail_drawn": true,
+  "video_received_while_paused": true,
+  "moments_thumbnail_updated": true,
+  "media_store_image_indexed": true,
+  "device": "Android/sdk_phone_armv7/generic:6.0/MASTER/3079352:userdebug/test-keys",
+  "apk_sha256": "ce6d8bbafb52d5a8fb1782a4e892bb7483218a1693aaa31b6bf275aea42187f0"
+}

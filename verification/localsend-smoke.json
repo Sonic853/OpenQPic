@@ -1,0 +1,30 @@
+{
+  "gallery_hidden_and_visible_multicast": true,
+  "peers_deduplicated_sorted_http_first": true,
+  "picker_and_home_hidden": true,
+  "official_to_android": {
+    "png_wav_sha256": [
+      "72a7bd8e80b6747ad50a363f928000414069e3c398d825a06937f04c2819a38e",
+      "e9a57e5478c7649d8936a07f72fe0ab5af17ef40bba1644fe3cf2bfdec633d97"
+    ],
+    "parallel": true,
+    "text_skipped": true
+  },
+  "busy_cancel_token_hash_retry_replay": true,
+  "disguised_media_rejected_before_publish": true,
+  "confirmation_selection_survives_home": true,
+  "real_video_received": true,
+  "incoming_stream_and_next_file_survive_home": true,
+  "manual_cancel_from_restored_history": true,
+  "manual_cancel_from_background_notification": true,
+  "android_to_official": {
+    "bytes": 262912,
+    "sha256": "fe4075e5a6fafd450ab76a05b3d313c2b465620122d2bd9ae0b9e5c1980feeeb",
+    "peer_from_udp_http_register": true,
+    "entry": "ACTION_SEND content://",
+    "completed_after_back": true
+  },
+  "back_and_reopen": true,
+  "apk_sha256": "ce6d8bbafb52d5a8fb1782a4e892bb7483218a1693aaa31b6bf275aea42187f0",
+  "device": "Android/sdk_phone_armv7/generic:6.0/MASTER/3079352:userdebug/test-keys"
+}

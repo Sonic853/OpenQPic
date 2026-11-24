@@ -273,6 +273,8 @@
 
     invoke-super {p0}, Lcom/alensw/ui/c/a;->a()V
 
+    invoke-static {p0}, Lcom/alensw/ui/c/ReceivedMediaUpdates;->observe(Lcom/alensw/ui/c/cu;)V
+
     iget-object v2, p0, Lcom/alensw/ui/c/bz;->C:Lcom/alensw/ui/c/cx;
 
     invoke-static {v2}, Landroid/preference/PreferenceManager;->getDefaultSharedPreferences(Landroid/content/Context;)Landroid/content/SharedPreferences;

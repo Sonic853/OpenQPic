@@ -49,10 +49,6 @@ com/alensw/b/k/k.java
 com/alensw/cloud/am.java
 com/alensw/cloud/oauth/z.java
 com/alensw/cloud/y.java
-com/alensw/transfer/bj.java
-com/alensw/transfer/c.java
-com/alensw/transfer/e.java
-com/alensw/transfer/q.java
 com/alensw/ui/a/ad.java
 com/alensw/ui/a/an.java
 com/alensw/ui/a/e.java

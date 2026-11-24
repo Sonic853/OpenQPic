@@ -1,0 +1,28 @@
+<resources>
+    <string name="ls_address">通过 IP 连接</string>
+    <string name="ls_address_hint">IPv4 地址[:端口]</string>
+    <string name="ls_here">正在查找附近的 LocalSend 设备\n%1$s</string>
+    <string name="ls_offline">请连接 Wi-Fi 或以太网以使用 LocalSend。</string>
+    <string name="ls_https">请先在对方设备关闭加密，再使用 HTTP 发送。</string>
+    <string name="ls_pick">请先添加要发送的文件。</string>
+    <string name="ls_pin">接收 PIN 码</string>
+    <string name="ls_pin_hint">可选 PIN 码（留空关闭）</string>
+    <string name="ls_save">接收来自 %1$s（%2$s）的文件\n%3$s</string>
+    <string name="ls_nearby">附近设备（%1$d）</string>
+    <string name="ls_encrypted">HTTPS · 需在对方关闭加密</string>
+    <string name="ls_mobile">手机或平板</string>
+    <string name="ls_desktop">电脑</string>
+    <string name="ls_device">设备</string>
+    <string name="ls_receive">接收媒体文件</string>
+    <string name="ls_decline">拒绝</string>
+    <string name="ls_accept">接收</string>
+    <string name="ls_folder">保存到：%1$s</string>
+    <string name="ls_skipped">已跳过 %1$d 个不支持或为空的文件</string>
+    <string name="ls_selected">已选 %1$d / %2$d 项 · %3$s</string>
+    <string name="ls_offer_from">来自 %1$s 的接收请求</string>
+    <string name="ls_running">%1$d 个传输进行中</string>
+    <string name="ls_preparing">正在准备传输…</string>
+    <string name="ls_busy">已有发送任务进行中。</string>
+    <string name="ls_no_grant">无法读取分享的文件，请重新选择并授予读取权限。</string>
+    <string name="ls_limit">最多可选择 256 个文件。</string>
+</resources>

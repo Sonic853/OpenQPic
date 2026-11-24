@@ -1,0 +1,620 @@
+{
+  "app_commit": "e4c35cbf506a4b0193dcecdbbb0b95a3dd308512",
+  "jni_commit": "761302f416d2166b26d7699ace352d6c2b18bff8",
+  "units": "bytes",
+  "pico_commit": "dd573d8fa9264c646a400e96ce9f07dea6f156e4",
+  "pico_sources_sha256": {
+    "picohttpparser.c": "8aacb701e60a3a5c600f51845d9554463773eafed88f9c4f47472ed5dac6a942",
+    "picohttpparser.h": "1fc9074dd12418b2b91e55ef3a8279bccf8d3577b790dea6f2f908ab2a157f1c"
+  },
+  "release_signing": "same throwaway RSA key and apksigner for all release rows of this run",
+  "scope": "APK and stripped parser costs; deletion-only / parser fixtures are not runnable products",
+  "abis": [
+    "armeabi",
+    "x86"
+  ],
+  "variants": {
+    "original": {
+      "debug": {
+        "bytes": 2005685,
+        "sha256": "56e9768377c074ef07334563fc835ab69eba49910db6a6eaa480fdb7412b88d7",
+        "dex": {
+          "classes.dex": {
+            "raw": 2112268,
+            "zip": 1002197,
+            "sha256": "0ab0f27e1019e8807ee9ec8be3face854eb48d1fa847060509f3aecd5d6f98da",
+            "class_defs": 2076
+          },
+          "classes2.dex": {
+            "raw": 86572,
+            "zip": 33123,
+            "sha256": "863abd2f180517fd0207f81145e2b76df3fc329e34368b3766c17ad6dafc7734",
+            "class_defs": 256
+          }
+        },
+        "libs": {
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 35004,
+            "zip": 35004,
+            "sha256": "e5fd228d0794f113b0988c1087bbdc297d48090732ae6867daa0095443da7340"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 43152,
+            "zip": 43152,
+            "sha256": "5277d455bff687ce8749709d22002dc84fcdbde951a9290c2e26fbaa268823df"
+          }
+        }
+      },
+      "unsigned_release": {
+        "bytes": 1879608,
+        "sha256": "77b7b7f59dbc39ea4c4806a35bd7d97f08499ee9e4be2aa4b25af3a4ef27234c",
+        "dex": {
+          "classes.dex": {
+            "raw": 2112268,
+            "zip": 910669,
+            "sha256": "0ab0f27e1019e8807ee9ec8be3face854eb48d1fa847060509f3aecd5d6f98da",
+            "class_defs": 2076
+          },
+          "classes2.dex": {
+            "raw": 73884,
+            "zip": 26902,
+            "sha256": "32ebf5fba47d1668beda0eb709b25538454a45ec66c82171e13a855d9712cf25",
+            "class_defs": 256
+          }
+        },
+        "libs": {
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 35004,
+            "zip": 35004,
+            "sha256": "e5fd228d0794f113b0988c1087bbdc297d48090732ae6867daa0095443da7340"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 43152,
+            "zip": 43152,
+            "sha256": "5277d455bff687ce8749709d22002dc84fcdbde951a9290c2e26fbaa268823df"
+          }
+        }
+      },
+      "signed_release": {
+        "bytes": 1937165,
+        "sha256": "3377aa2f3acd143b32398fe037a42be57b5a51e58e3eccd87db4b491b414f565",
+        "dex": {
+          "classes.dex": {
+            "raw": 2112268,
+            "zip": 910669,
+            "sha256": "0ab0f27e1019e8807ee9ec8be3face854eb48d1fa847060509f3aecd5d6f98da",
+            "class_defs": 2076
+          },
+          "classes2.dex": {
+            "raw": 73884,
+            "zip": 26902,
+            "sha256": "32ebf5fba47d1668beda0eb709b25538454a45ec66c82171e13a855d9712cf25",
+            "class_defs": 256
+          }
+        },
+        "libs": {
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 35004,
+            "zip": 35004,
+            "sha256": "e5fd228d0794f113b0988c1087bbdc297d48090732ae6867daa0095443da7340"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 43152,
+            "zip": 43152,
+            "sha256": "5277d455bff687ce8749709d22002dc84fcdbde951a9290c2e26fbaa268823df"
+          }
+        }
+      }
+    },
+    "without_85_transfer_classes": {
+      "debug": {
+        "bytes": 1978944,
+        "sha256": "1a5fe820e0b5e736c77ed1b9b605ddc43b5bbbf95682a69dda2ff07884b900a6",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 975676,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 85864,
+            "zip": 32900,
+            "sha256": "08bba9b241757db6a512242ace6665e81d40af0c305a0fe50fdc88a052dc1a63",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 35004,
+            "zip": 35004,
+            "sha256": "e5fd228d0794f113b0988c1087bbdc297d48090732ae6867daa0095443da7340"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 43152,
+            "zip": 43152,
+            "sha256": "5277d455bff687ce8749709d22002dc84fcdbde951a9290c2e26fbaa268823df"
+          }
+        }
+      },
+      "unsigned_release": {
+        "bytes": 1855640,
+        "sha256": "0350de8e394d3a8573642657e761d6fe3e9fbe136f9c596a1d7d197658a653d3",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 886877,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 73324,
+            "zip": 26726,
+            "sha256": "2164b08cbf0dd307a84da58f0fe5df56f3cd3e49c40556e99999c9df2abda5c3",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 35004,
+            "zip": 35004,
+            "sha256": "e5fd228d0794f113b0988c1087bbdc297d48090732ae6867daa0095443da7340"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 43152,
+            "zip": 43152,
+            "sha256": "5277d455bff687ce8749709d22002dc84fcdbde951a9290c2e26fbaa268823df"
+          }
+        }
+      },
+      "signed_release": {
+        "bytes": 1904397,
+        "sha256": "711cf0da608fb88d5c02c20559970e0b9bf6a86c6dda1cbf224ea60cc632c3dd",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 886877,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 73324,
+            "zip": 26726,
+            "sha256": "2164b08cbf0dd307a84da58f0fe5df56f3cd3e49c40556e99999c9df2abda5c3",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 35004,
+            "zip": 35004,
+            "sha256": "e5fd228d0794f113b0988c1087bbdc297d48090732ae6867daa0095443da7340"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 43152,
+            "zip": 43152,
+            "sha256": "5277d455bff687ce8749709d22002dc84fcdbde951a9290c2e26fbaa268823df"
+          }
+        }
+      }
+    },
+    "without_old_plus_parser_only_separate_so": {
+      "debug": {
+        "bytes": 2006820,
+        "sha256": "d37e2f8b87cd83b7fdff347616fb40b4fd6a1b7de165d80e9a52f1d437a3a5ac",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 975676,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 85864,
+            "zip": 32900,
+            "sha256": "08bba9b241757db6a512242ace6665e81d40af0c305a0fe50fdc88a052dc1a63",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 35004,
+            "zip": 35004,
+            "sha256": "e5fd228d0794f113b0988c1087bbdc297d48090732ae6867daa0095443da7340"
+          },
+          "lib/armeabi/libqpicwirecost.so": {
+            "raw": 17840,
+            "zip": 17840,
+            "sha256": "ac734edfa460508aea9e53ab564543e381baac8f403b58b3723a9526e4cdd6fe"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 43152,
+            "zip": 43152,
+            "sha256": "5277d455bff687ce8749709d22002dc84fcdbde951a9290c2e26fbaa268823df"
+          },
+          "lib/x86/libqpicwirecost.so": {
+            "raw": 9584,
+            "zip": 9584,
+            "sha256": "184715d15e1d660f50e8bdbc788d740a1103737349f8c65994a0632153a397cc"
+          }
+        }
+      },
+      "unsigned_release": {
+        "bytes": 1883328,
+        "sha256": "1ef7c24f6d378129a2cbf10ce253acd4f2919030824ed41b25cc70e82c593578",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 886877,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 73324,
+            "zip": 26726,
+            "sha256": "2164b08cbf0dd307a84da58f0fe5df56f3cd3e49c40556e99999c9df2abda5c3",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 35004,
+            "zip": 35004,
+            "sha256": "e5fd228d0794f113b0988c1087bbdc297d48090732ae6867daa0095443da7340"
+          },
+          "lib/armeabi/libqpicwirecost.so": {
+            "raw": 17840,
+            "zip": 17840,
+            "sha256": "ac734edfa460508aea9e53ab564543e381baac8f403b58b3723a9526e4cdd6fe"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 43152,
+            "zip": 43152,
+            "sha256": "5277d455bff687ce8749709d22002dc84fcdbde951a9290c2e26fbaa268823df"
+          },
+          "lib/x86/libqpicwirecost.so": {
+            "raw": 9584,
+            "zip": 9584,
+            "sha256": "184715d15e1d660f50e8bdbc788d740a1103737349f8c65994a0632153a397cc"
+          }
+        }
+      },
+      "signed_release": {
+        "bytes": 1953697,
+        "sha256": "11dba5eef75b82e756fea1d6ad2a349182cf6bcb96363159e67be00de38ee083",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 886877,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 73324,
+            "zip": 26726,
+            "sha256": "2164b08cbf0dd307a84da58f0fe5df56f3cd3e49c40556e99999c9df2abda5c3",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 35004,
+            "zip": 35004,
+            "sha256": "e5fd228d0794f113b0988c1087bbdc297d48090732ae6867daa0095443da7340"
+          },
+          "lib/armeabi/libqpicwirecost.so": {
+            "raw": 17840,
+            "zip": 17840,
+            "sha256": "ac734edfa460508aea9e53ab564543e381baac8f403b58b3723a9526e4cdd6fe"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 43152,
+            "zip": 43152,
+            "sha256": "5277d455bff687ce8749709d22002dc84fcdbde951a9290c2e26fbaa268823df"
+          },
+          "lib/x86/libqpicwirecost.so": {
+            "raw": 9584,
+            "zip": 9584,
+            "sha256": "184715d15e1d660f50e8bdbc788d740a1103737349f8c65994a0632153a397cc"
+          }
+        }
+      }
+    },
+    "without_old_with_reconstructed_image_libs": {
+      "debug": {
+        "bytes": 2473431,
+        "sha256": "956df66bcf4039aef2de8e694e1d8583b57a7ec81d2849d5b5e8daec3dadee8f",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 975676,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 85864,
+            "zip": 32900,
+            "sha256": "08bba9b241757db6a512242ace6665e81d40af0c305a0fe50fdc88a052dc1a63",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 198252,
+            "zip": 198252,
+            "sha256": "d68b2dbd74bde541f98e3bd80f23e6fe4b785dfe8c6a69b6747f832e2a7b404b"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 374400,
+            "zip": 374400,
+            "sha256": "8a9fffcbaa2c05211e6d86b224fae153c08a371b80ee6330113a8c2db1470bb2"
+          }
+        }
+      },
+      "unsigned_release": {
+        "bytes": 2350136,
+        "sha256": "59196e219eeef6726440ec270254afea223e21de7c560319d1da9b23c9c6c679",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 886877,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 73324,
+            "zip": 26726,
+            "sha256": "2164b08cbf0dd307a84da58f0fe5df56f3cd3e49c40556e99999c9df2abda5c3",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 198252,
+            "zip": 198252,
+            "sha256": "d68b2dbd74bde541f98e3bd80f23e6fe4b785dfe8c6a69b6747f832e2a7b404b"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 374400,
+            "zip": 374400,
+            "sha256": "8a9fffcbaa2c05211e6d86b224fae153c08a371b80ee6330113a8c2db1470bb2"
+          }
+        }
+      },
+      "signed_release": {
+        "bytes": 2400013,
+        "sha256": "76fe0fe81f9e4e1ee0a2be668bfc8d95e966e397d5bfd16f6a60cf85e49bdb6e",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 886877,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 73324,
+            "zip": 26726,
+            "sha256": "2164b08cbf0dd307a84da58f0fe5df56f3cd3e49c40556e99999c9df2abda5c3",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 198252,
+            "zip": 198252,
+            "sha256": "d68b2dbd74bde541f98e3bd80f23e6fe4b785dfe8c6a69b6747f832e2a7b404b"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 374400,
+            "zip": 374400,
+            "sha256": "8a9fffcbaa2c05211e6d86b224fae153c08a371b80ee6330113a8c2db1470bb2"
+          }
+        }
+      }
+    },
+    "without_old_arm64_only_reconstructed": {
+      "debug": {
+        "bytes": 2191003,
+        "sha256": "ffd3efba2aeee20aa20afbaeb9a6f598b7b670b2355e4a50126f4268a69bddc5",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 975676,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 85864,
+            "zip": 32900,
+            "sha256": "08bba9b241757db6a512242ace6665e81d40af0c305a0fe50fdc88a052dc1a63",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/arm64-v8a/libqpicjni156.so": {
+            "raw": 290432,
+            "zip": 290432,
+            "sha256": "8b46c181b0384ee1e4806413ed5ade3926f700b50d2481280df8158dd3f66304"
+          }
+        }
+      },
+      "unsigned_release": {
+        "bytes": 2067796,
+        "sha256": "5482ceb520a40fa96b310970130b5e63e6410b0257fa3952ecad29b9d6b874bb",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 886877,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 73324,
+            "zip": 26726,
+            "sha256": "2164b08cbf0dd307a84da58f0fe5df56f3cd3e49c40556e99999c9df2abda5c3",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/arm64-v8a/libqpicjni156.so": {
+            "raw": 290432,
+            "zip": 290432,
+            "sha256": "8b46c181b0384ee1e4806413ed5ade3926f700b50d2481280df8158dd3f66304"
+          }
+        }
+      },
+      "signed_release": {
+        "bytes": 2100937,
+        "sha256": "10bdfb135e7e17d853794794ce35970e5a00129b11d48cb4851bfd44084a40a2",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 886877,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 73324,
+            "zip": 26726,
+            "sha256": "2164b08cbf0dd307a84da58f0fe5df56f3cd3e49c40556e99999c9df2abda5c3",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/arm64-v8a/libqpicjni156.so": {
+            "raw": 290432,
+            "zip": 290432,
+            "sha256": "8b46c181b0384ee1e4806413ed5ade3926f700b50d2481280df8158dd3f66304"
+          }
+        }
+      }
+    },
+    "without_old_three_reconstructed": {
+      "debug": {
+        "bytes": 2764095,
+        "sha256": "5786aa33aa5f6b4ba0a393d43e5a17df000a6b6c49041715f044781223c85689",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 975676,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 85864,
+            "zip": 32900,
+            "sha256": "08bba9b241757db6a512242ace6665e81d40af0c305a0fe50fdc88a052dc1a63",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/arm64-v8a/libqpicjni156.so": {
+            "raw": 290432,
+            "zip": 290432,
+            "sha256": "8b46c181b0384ee1e4806413ed5ade3926f700b50d2481280df8158dd3f66304"
+          },
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 198252,
+            "zip": 198252,
+            "sha256": "d68b2dbd74bde541f98e3bd80f23e6fe4b785dfe8c6a69b6747f832e2a7b404b"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 374400,
+            "zip": 374400,
+            "sha256": "8a9fffcbaa2c05211e6d86b224fae153c08a371b80ee6330113a8c2db1470bb2"
+          }
+        }
+      },
+      "unsigned_release": {
+        "bytes": 2640708,
+        "sha256": "e29f79263f9d6509e884f2da28b8cd0bee41f61cd53e9e5fc3cd03386f901f16",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 886877,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 73324,
+            "zip": 26726,
+            "sha256": "2164b08cbf0dd307a84da58f0fe5df56f3cd3e49c40556e99999c9df2abda5c3",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/arm64-v8a/libqpicjni156.so": {
+            "raw": 290432,
+            "zip": 290432,
+            "sha256": "8b46c181b0384ee1e4806413ed5ade3926f700b50d2481280df8158dd3f66304"
+          },
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 198252,
+            "zip": 198252,
+            "sha256": "d68b2dbd74bde541f98e3bd80f23e6fe4b785dfe8c6a69b6747f832e2a7b404b"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 374400,
+            "zip": 374400,
+            "sha256": "8a9fffcbaa2c05211e6d86b224fae153c08a371b80ee6330113a8c2db1470bb2"
+          }
+        }
+      },
+      "signed_release": {
+        "bytes": 2695001,
+        "sha256": "38be619672007afacc7da82676b77d54477445959d75790c73dcbc785edf3382",
+        "dex": {
+          "classes.dex": {
+            "raw": 2057384,
+            "zip": 886877,
+            "sha256": "0bbce2b9f1d860bcba8f060742e8d4d5a1e84a4599f7a4cd3a5604e1615255f5",
+            "class_defs": 1995
+          },
+          "classes2.dex": {
+            "raw": 73324,
+            "zip": 26726,
+            "sha256": "2164b08cbf0dd307a84da58f0fe5df56f3cd3e49c40556e99999c9df2abda5c3",
+            "class_defs": 252
+          }
+        },
+        "libs": {
+          "lib/arm64-v8a/libqpicjni156.so": {
+            "raw": 290432,
+            "zip": 290432,
+            "sha256": "8b46c181b0384ee1e4806413ed5ade3926f700b50d2481280df8158dd3f66304"
+          },
+          "lib/armeabi/libqpicjni156.so": {
+            "raw": 198252,
+            "zip": 198252,
+            "sha256": "d68b2dbd74bde541f98e3bd80f23e6fe4b785dfe8c6a69b6747f832e2a7b404b"
+          },
+          "lib/x86/libqpicjni156.so": {
+            "raw": 374400,
+            "zip": 374400,
+            "sha256": "8a9fffcbaa2c05211e6d86b224fae153c08a371b80ee6330113a8c2db1470bb2"
+          }
+        }
+      }
+    }
+  },
+  "ndks": [
+    "16.1.4479499",
+    "28.2.13676358"
+  ],
+  "removed_smali_files": 85,
+  "removed_java_files": 4,
+  "stripped_elf_probes": {
+    "armeabi": {
+      "elf_floor": 13696,
+      "http_parser": 17840
+    },
+    "x86": {
+      "elf_floor": 5440,
+      "http_parser": 9584
+    },
+    "arm64-v8a": {
+      "elf_floor": 3984,
+      "http_parser": 8488
+    }
+  }
+}

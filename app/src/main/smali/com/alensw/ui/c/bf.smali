@@ -168,6 +168,8 @@
 
     invoke-super {p0}, Lcom/alensw/ui/c/a;->a()V
 
+    invoke-static {p0}, Lcom/alensw/ui/c/ReceivedMediaUpdates;->observe(Lcom/alensw/ui/c/cu;)V
+
     iget v0, p0, Lcom/alensw/ui/c/bf;->n:I
 
     if-eqz v0, :cond_0
@@ -2080,6 +2082,19 @@
 
     invoke-super {p0, v0, p1, v1}, Lcom/alensw/ui/c/a;->a(Lcom/alensw/a/e;ILcom/alensw/ui/c/o;)V
 
+    return-void
+.end method
+
+.method public c(Z)V
+    .locals 0
+
+    invoke-super {p0, p1}, Lcom/alensw/ui/c/a;->c(Z)V
+
+    if-nez p1, :done
+
+    invoke-static {p0}, Lcom/alensw/ui/c/ReceivedMediaUpdates;->observe(Lcom/alensw/ui/c/cu;)V
+
+    :done
     return-void
 .end method
 

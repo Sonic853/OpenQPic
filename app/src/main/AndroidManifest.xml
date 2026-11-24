@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-permission android:name="android.permission.ACCESS_SEARCH_ENGINE"/>
@@ -141,7 +142,8 @@
             </intent-filter>
         </activity>
         <provider android:authorities="com.alensw.PicFolder.FileProvider" android:exported="false" android:grantUriPermissions="true" android:name=".FileProvider"/>
-        <service android:exported="false" android:foregroundServiceType="mediaPlayback" android:name="com.alensw.transfer.TransferService"/>
+        <service android:exported="false" android:foregroundServiceType="dataSync" android:stopWithTask="false" android:name="com.alensw.transfer.TransferSessionService"/>
+        <service android:exported="false" android:name="com.alensw.video.VideoProxyService"/>
         <uses-library android:name="com.sec.android.app.multiwindow" android:required="false"/>
         <meta-data android:name="com.sec.android.support.multiwindow" android:value="true"/>
     </application>
