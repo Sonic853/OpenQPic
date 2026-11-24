@@ -1,15 +1,9 @@
-import com.android.build.api.artifact.ScopedArtifact
 import com.android.build.api.artifact.SingleArtifact
-import com.android.build.api.variant.ScopedArtifacts
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.InternalMultipleArtifactType
 import com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask
 import com.android.build.gradle.internal.res.LinkAndroidResForBundleTask
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
-import java.util.zip.ZipOutputStream
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
@@ -20,44 +14,10 @@ plugins {
     id 'com.android.application'
 }
 
-def jniType = 'Lcom/alensw/jni/JniUtils;'
 def galleryVersion = providers.gradleProperty('openqpicVersion')
         .getOrElse(GalleryVersion.beijingDate(System.currentTimeMillis()))
-def overlay = providers.gradleProperty('stableJavaOverlay').map { rootProject.file(it) }.orNull
-def singleJava = providers.gradleProperty('stableSingleJava').map { it.toBoolean() }.getOrElse(false)
-def builtInJava = overlay == null && !singleJava
-def ownership = builtInJava ? file('recovered-java') : overlay
-def useAbi = true // Product Java also calls the original gallery's Smali classes.
-def readList = { File f -> f.readLines('UTF-8')*.trim().findAll { it && !it.startsWith('#') } }
-def replacements = ownership == null ? [] : readList(new File(ownership, 'replace.txt'))
-def selectedSources = overlay != null && new File(overlay, 'sources.txt').isFile() ?
-        readList(new File(overlay, 'sources.txt')) : []
-if (ownership != null && (!replacements || replacements.contains(jniType) ||
-        replacements.size() != replacements.toSet().size() ||
-        !replacements.every { it ==~ /L[^\s.;]+;/ })) {
-    throw new GradleException('replace.txt must contain unique additional DEX descriptors, including owned inner classes.')
-}
-if (overlay != null)
-    layout.buildDirectory.set(rootProject.layout.projectDirectory.dir('build/java-overlay/app'))
-else if (singleJava)
-    layout.buildDirectory.set(rootProject.layout.projectDirectory.dir('build/single-java/app'))
-if (ownership != null) {
-    // JADX invents local/parameter names. Do not add these invented names to
-    // DEX debug metadata when measuring a new replacement.
-    tasks.withType(JavaCompile).configureEach { options.debugOptions.debugLevel = 'source,lines' }
-}
-// Optional reading/verification inputs: sibling checkout or the original portable layout.
-def configuredRecovery = providers.environmentVariable('OPENPIC_RECOVERY_ROOT').orNull
-def recoveryCandidates = [rootProject.file('../OpenPic'), rootProject.file('..')]
-def recoveryRoot = configuredRecovery ? rootProject.file(configuredRecovery) :
-        (recoveryCandidates.find { new File(it, 'reference/java').isDirectory() } ?: recoveryCandidates.first())
-def readingRoot = new File(recoveryRoot, 'reference/java')
-// AGP requires at least one directory for a registered source type, even when there are no files.
-def ideReadingRoot = readingRoot.isDirectory() ? readingRoot : file('src/main/reading')
-selectedSources.each { path ->
-    if (!path.endsWith('.java') || path.startsWith('/') || path.contains('\\') ||
-            path.split('/').any { it in ['.', '..', ''] } || !(new File(readingRoot, path)).isFile())
-        throw new GradleException("Invalid canonical Java path in sources.txt: $path")
+tasks.withType(JavaCompile).configureEach {
+    options.debugOptions.debugLevel = 'source,lines'
 }
 
 android {
@@ -94,35 +54,13 @@ android {
         includeInApk = false
         includeInBundle = false
     }
-    if (builtInJava)
-        sourceSets.main.java.srcDir('src/recovered/java')
+    sourceSets.main.java.srcDir('src/recovered/java')
     sourceSets.main.java.srcDir(rootProject.file('buildSrc/src/main/java'))
-    if (overlay != null && new File(overlay, 'java').isDirectory())
-        sourceSets.main.java.srcDir(new File(overlay, 'java'))
 }
 
-// This is a build tool, never an app dependency.
-configurations { smaliAssembler }
-dependencies {
-    smaliAssembler 'com.android.tools.smali:smali:3.0.9'
-    if (useAbi) {
-        def abi = file('compileOnly/stable-dex-abi.jar')
-        if (!abi.isFile() || java.security.MessageDigest.getInstance('SHA-256').digest(abi.bytes).encodeHex().toString()
-                != 'c81c7e8312e73aa8abd6f7fadd12efed2875d71d6fc6ebd5eb5e61b828e6957f')
-            throw new GradleException('Missing or unexpected stable-dex-abi.jar (compile-only).')
-        compileOnly files(abi)
-    }
-}
-
-abstract class StageOverlayJava extends DefaultTask {
-    @InputFiles @PathSensitive(PathSensitivity.RELATIVE)
-    abstract ConfigurableFileCollection getSelected()
-    @OutputDirectory abstract DirectoryProperty getOutputDir()
-    @Inject abstract FileSystemOperations getFileOps()
-    @TaskAction void stage() {
-        fileOps.sync { from selected; into outputDir }
-    }
-}
+// Signatures of external JNDI/JGSS, servlet and logging APIs that Apache optionally
+// calls on a desktop JVM. No gallery code or method bodies; never packaged by D8.
+dependencies { compileOnly files('compileOnly/apache-optional-api.jar') }
 
 // The Java-side Android resource merger rejects string/default and
 // string/interface even though Android itself supports these shipped names.
@@ -248,116 +186,9 @@ abstract class LinkStableResources extends DefaultTask {
     }
 }
 
-@CacheableTask
-abstract class AssembleSmali extends DefaultTask {
-    @InputDirectory @PathSensitive(PathSensitivity.RELATIVE)
-    abstract DirectoryProperty getSourcesDir()
-    @Classpath abstract ConfigurableFileCollection getAssembler()
-    @Input abstract ListProperty<String> getJavaReplacements()
-    @OutputDirectory abstract DirectoryProperty getDexDir()
-    @Inject abstract ExecOperations getExecOperations()
-    @Inject abstract FileSystemOperations getFileOps()
-
-    @TaskAction void assemble() {
-        File out = dexDir.get().file('classes.dex').asFile
-        out.parentFile.mkdirs()
-        def src = sourcesDir.get().asFile
-        def requested = javaReplacements.get().toSet()
-        if (!requested.empty) {
-            def staged = new File(temporaryDir, 'remaining-smali')
-            def removed = [] as Set
-            fileOps.sync {
-                from src
-                into staged
-                include '**/*.smali'
-                eachFile { entry ->
-                    def type = entry.file.withReader('UTF-8') { it.readLine().tokenize().last() }
-                    if (requested.contains(type)) {
-                        if (!removed.add(type)) throw new GradleException("Duplicate smali definition $type")
-                        entry.exclude()
-                    }
-                }
-            }
-            if (requested != removed) throw new GradleException("No original Smali for ${requested - removed}")
-            src = staged
-        }
-        execOperations.javaexec {
-            classpath = assembler
-            mainClass = 'com.android.tools.smali.smali.Main'
-            maxHeapSize = '1g'
-            args 'assemble', '--api', '23', '--jobs', '1', '--output', out, src
-        }
-    }
-}
-
-// Stable inlined its R constants and has no R/R$* class definitions. Keep the
-// normal AGP R on the *compile* classpath, but not in the runtime DEX. Filtering
-// by exact, case-sensitive entry name is important: a real PicFolder/r exists.
-@CacheableTask
-abstract class RuntimeClasses extends DefaultTask {
-    @Classpath abstract ListProperty<RegularFile> getClassJars()
-    @InputFiles @PathSensitive(PathSensitivity.RELATIVE)
-    abstract ListProperty<Directory> getClassDirs()
-    @Input abstract ListProperty<String> getJavaOwners()
-    @OutputFile abstract RegularFileProperty getOutputJar()
-
-    @TaskAction void select() {
-        def classes = new TreeMap<String, byte[]>()
-        def add = { String name, byte[] bytes ->
-            if (!name.endsWith('.class') || name == 'com/alensw/PicFolder/R.class' ||
-                    name.startsWith('com/alensw/PicFolder/R$')) return
-            if (classes.put(name, bytes) != null) throw new GradleException("Duplicate class: $name")
-        }
-        classDirs.get().each { root ->
-            root.asFileTree.matching { include '**/*.class' }.visit { entry ->
-                if (!entry.directory) add(entry.relativePath.pathString, entry.file.bytes)
-            }
-        }
-        classJars.get().each { jar ->
-            new ZipFile(jar.asFile).withCloseable { zip ->
-                zip.entries().each { entry ->
-                    if (entry.name.endsWith('.class')) add(entry.name, zip.getInputStream(entry).bytes)
-                }
-            }
-        }
-        def expected = javaOwners.get().collect { it.substring(1, it.length() - 1) + '.class' }.toSet()
-        if (classes.keySet() != expected)
-            throw new GradleException("javac ownership mismatch: missing=${expected - classes.keySet()}, " +
-                    "unexpected=${classes.keySet() - expected}")
-        def out = outputJar.get().asFile
-        out.parentFile.mkdirs()
-        new ZipOutputStream(out.newOutputStream()).withCloseable { zip ->
-            classes.each { name, bytes ->
-                def entry = new ZipEntry(name)
-                entry.time = 315532800000L
-                zip.putNextEntry(entry)
-                zip.write(bytes)
-                zip.closeEntry()
-            }
-        }
-    }
-}
-
-// The reading and Smali roots are distinct from the two compiled Java roots.
 androidComponents {
-    registerSourceType('smali')
-    registerSourceType('reading')
-    // AGP 9's Studio V2 model takes custom dirs from the DSL source provider,
-    // not from variant.sources.getByName(...). No mirrored Java tree or symlink.
-    finalizeDsl { dsl ->
-        dsl.sourceSets.main.'getExtras$gradle_core'().configureEach { directory ->
-            if (directory.sourceSetName == 'reading')
-                directory.setSrcDirs([ideReadingRoot])
-        }
-    }
     onVariants(selector().all()) { variant ->
         def cap = variant.name.capitalize()
-        if (!selectedSources.empty) {
-            def stage = tasks.register("stage${cap}OverlayJava", StageOverlayJava) {
-                selected.from(fileTree(readingRoot) { include selectedSources })
-            }
-            variant.sources.java.addGeneratedSourceDirectory(stage, { it.outputDir })
-        }
         def aapt = sdkComponents.aapt2.flatMap { it.executable }
         def flats = tasks.register("compile${cap}StableResources", CompileStableResources) {
             galleryVersionName.set(galleryVersion)
@@ -383,33 +214,6 @@ androidComponents {
         }
         def binary = linker(false).flatMap { it.archive }
         def bundle = linker(true).flatMap { it.archive }
-        if (overlay != null) {
-            // D8 can synthesize or rewrite code. Don't let an "it compiled"
-            // candidate, including a JADX fallback, reach either packager.
-            def merge = variant.debuggable ? "mergeProjectDex${cap}" : "mergeDex${cap}"
-            def javaDex = layout.buildDirectory.dir("intermediates/dex/${variant.name}/$merge")
-            def out = layout.buildDirectory.file("reports/java-overlay/${variant.name}.json")
-            def checker = rootProject.file('tools/check_overlay_dex.py')
-            def gate = tasks.register("check${cap}JavaOverlay", Exec) {
-                dependsOn merge
-                inputs.dir(javaDex)
-                inputs.dir(file('src/main/smali'))
-                inputs.files(binary, checker, rootProject.file('tools/verify_apk.py'), rootProject.file('tools/recovery_paths.py'),
-                        new File(recoveryRoot, 'tools/apktool-2.12.1.jar'), new File(overlay, 'replace.txt'))
-                outputs.file(out)
-                doFirst {
-                    environment 'JAVA_HOME', System.getProperty('java.home')
-                    environment 'OPENPIC_RECOVERY_ROOT', recoveryRoot.absolutePath
-                    environment 'PYTHONDONTWRITEBYTECODE', '1'
-                    commandLine providers.gradleProperty('python').getOrElse(
-                            System.getProperty('os.name').startsWith('Windows') ? 'python' : 'python3'),
-                            checker, '--overlay', overlay, '--resources', binary.get().asFile,
-                            '--dex-dir', javaDex.get().asFile, '--report', out.get().asFile
-                }
-            }
-            tasks.matching { it.name == "package${cap}" || it.name == "build${cap}PreBundle" }
-                    .configureEach { dependsOn gate }
-        }
         // Keep AGP's own R.jar, R.txt, BuiltArtifacts metadata, signing and
         // deployment. Only replace the *unsigned resource archive* at link time.
         tasks.withType(LinkApplicationAndroidResourcesTask).configureEach { task ->
@@ -430,40 +234,6 @@ androidComponents {
                 }
             }
         }
-        def compiled = tasks.register("select${cap}RuntimeClasses", RuntimeClasses) {
-            javaOwners.set([jniType] + replacements + readList(file('product-java.txt')))
-        }
-        variant.artifacts.forScope(ScopedArtifacts.Scope.PROJECT).use(compiled).toTransform(
-                ScopedArtifact.CLASSES.INSTANCE, { it.classJars }, { it.classDirs }, { it.outputJar })
-
-        def assembled = tasks.register("assemble${cap}Smali", AssembleSmali) {
-            sourcesDir.set(layout.projectDirectory.dir('src/main/smali'))
-            assembler.from(configurations.smaliAssembler)
-            javaReplacements.set(replacements)
-        }
-        // AGP exposes no public pre-dex artifact. This AGP-9.0.1-specific
-        // type is used by both its APK and bundle packagers, before signing.
-        variant.artifacts.use(assembled).wiredWith({ it.dexDir })
-                .toAppendTo(InternalMultipleArtifactType.DEX.INSTANCE)
-    }
-}
-
-tasks.register('verifyStableDebug', Exec) {
-    group = 'verification'
-    description = 'Compare the signed APK and bundle against the user-selected stable release.'
-    dependsOn 'assembleDebug', 'bundleDebug'
-    def checkTool = rootProject.file('tools/verify_apk.py')
-    def sdk = androidComponents.sdkComponents.sdkDirectory
-    def bundle = layout.buildDirectory.file('outputs/bundle/debug/app-debug.aab')
-    doFirst {
-        def windows = System.getProperty('os.name').startsWith('Windows')
-        environment 'JAVA_HOME', System.getProperty('java.home')
-        environment 'OPENPIC_RECOVERY_ROOT', recoveryRoot.absolutePath
-        commandLine providers.gradleProperty('python').getOrElse(windows ? 'python' : 'python3'),
-                checkTool, '--build-tools', sdk.get().dir('build-tools/36.0.0').asFile,
-                '--bundle', bundle.get().asFile, '--build-dir', layout.buildDirectory.get().asFile
-        if (overlay != null) args '--overlay', overlay
-        if (builtInJava) args '--built-in'
     }
 }
 

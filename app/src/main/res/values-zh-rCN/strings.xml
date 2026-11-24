@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">图库</string>
+    <string name="app_name">快图</string>
+    <string name="app_name_alt">@string/app_name</string>
+    <string name="app_name_full">@string/app_name</string>
     <string name="mod_base">该MOD基于版本4.5.2</string>
     <string name="telegram_channel">Telegram 频道</string>
     <string name="app_translator">翻译</string>
@@ -124,6 +126,7 @@ Android 4.4不允许任何非系统APP修改外置SD卡上的公共文件！
     <string name="set_as">设为</string>
     <string name="settings">设置</string>
     <string name="share">分享</string>
+    <string name="share_other">其它…</string>
     <string name="share_message">%s</string>
     <string name="show_controls">在屏幕底部显示</string>
     <string name="show_hidden">显示隐藏项</string>

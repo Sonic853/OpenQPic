@@ -1,6 +1,6 @@
 # OpenPic Stable 恢复基线（OpenQPic `e4c35cb`）
 
-以下构建命令、类数、原版 ELF 和验证数据对应历史提交 `e4c35cb`。当前产品使用 LocalSend，见 [README](README.md)。
+以下构建命令、源码链接、原版 ELF 和验证数据对应[历史提交 `e4c35cb`](https://github.com/Sonic853/OpenQPic/tree/e4c35cb)。当前产品从 Java 构建并使用 LocalSend，见 [README](README.md) 和 [Java 恢复记录](docs/recovery/gallery-java.md)。
 
 **用 Android Studio 打开本仓库根目录 `OpenQPic/`，运行 `app`。** 这是独立的 Gradle build，只有一个 `com.android.application` 模块。默认 `debug` 是完整相册：`com.alensw.PicFolder`，版本 `9.7`（`9700000`），启动入口 `.GalleryActivity`。普通 `:app:assembleDebug` 就会编译 Java、汇编 Smali、链接资源并签名，无需事后拼接 APK。
 

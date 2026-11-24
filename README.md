@@ -15,6 +15,8 @@ Android 相册，保留原图库、播放、分享和「WiFi 快传」界面。*
 
 ## 本地图库与更新
 
+在看图时或多选照片、视频后，点顶部分享图标先打开快图自己的菜单。点 **「其它…」** 进入 Android 系统分享面板，也可以直接点菜单中的应用或 WiFi 快传。两种入口都只授权读取所选媒体。
+
 侧栏只列出相册、活动、相机、快传和设置。旧网盘登录、500px、云备份和友盟统计已移除。照片地点使用 Android 系统 Geocoder，不再把坐标发给旧版内置的百度或阿里接口。
 
 「设置 → 更新」从 [Sonic853/OpenQPic 的正式 GitHub Releases](https://github.com/Sonic853/OpenQPic/releases) 检查新版本。启动时检查默认关闭。发现新版后可打开该 Release 的 APK 下载；如果没有标准名称的附件，则打开对应发布页。
@@ -38,15 +40,16 @@ Android 相册，保留原图库、播放、分享和「WiFi 快传」界面。*
 
 | 模块 | 来源 / 编辑位置 |
 |---|---|
-| 图库、原控件、资源 ID | `app/src/recovered/java`、`app/src/main/smali`、`app/src/main/res`；DEX 恢复与构建机制见[原版基线](STABLE-BASELINE.md)。 |
+| 图库、播放器、原控件和随包库 | `app/src/recovered/java/`；与 `app/src/main/java/` 一起由 javac 编译，再由 D8 生成 DEX。见 [Java 恢复记录](docs/recovery/gallery-java.md)。 |
+| 资源、系统分享 | `app/src/main/res/`、`app/resource-ids.txt`、`app/src/main/java/com/alensw/ui/activity/GalleryShareMenu.java`。 |
 | Android 快传界面、授权与文件提交 | `app/src/main/java/com/alensw/transfer/`；复用 `transfer_send`、`list_view`、`transfer_list_item`、`ImageGridView` 和原双页导航。 |
 | 图像 JNI | **OpenQPicJni** 的 `libqpicjni156.so`，含该仓库从 32 位源码移植的 arm64 版本。 |
 | 发现、HTTP、FD 传输、会话与 JNI 桥 | 独立仓库 **OpenQPicLocalSend**。`libqpiclocalsend.so` 进入快传才加载；应用内 `org/openqpic/localsend` 是与该库配套的源码副本。 |
 
-原生开发时，将 `OpenQPicJni`、`OpenQPicLocalSend` 与本仓库并排放置，分别按其 README 构建库，再运行 `python tools/sync_localsend.py`。同步后的文件摘要在 [`app/native-inputs.json`](app/native-inputs.json)。新增 Java 归属见 [`app/product-java.txt`](app/product-java.txt)；不再编译原 QPIC/PeerHub 或反向拉取代码。
+原生开发时，将 `OpenQPicJni`、`OpenQPicLocalSend` 与本仓库并排放置，分别按其 README 构建库，再运行 `python tools/sync_localsend.py`。同步后的文件摘要在 [`app/native-inputs.json`](app/native-inputs.json)。[保留的图库类型](app/recovered-types.txt)及[新增产品类](app/product-java.txt)都在最终制品中检查。
 
 ## 验证
 
 `verifyLocalSendDebug` 检查实际 APK/AAB 的最低和目标 SDK、两套 JNI、DEX、原有 918 个资源 ID、签名与对齐。`tools/localsend_smoke.py` 和 `tools/multisend_smoke.py` 用官方 Rust HTTP 核心作对端，验证单机及多机收发、文件内容、取消和后台行为。详见[实现与实测](docs/localsend-http/IMPLEMENTATION.md)及 [targetSdk 32 兼容记录](verification/target-sdk-32.md)。
 
-[原版保真验证](verification/README.md)及[早期协议与定容分析](docs/localsend-http/README.md)保留作历史对照；`verifyStableDebug` 仍按原版判定。
+[`tools/gallery_share_smoke.py`](tools/gallery_share_smoke.py) 用无存储权限的独立应用从系统面板和直达菜单读取单张、多张、视频及混合媒体并核对 SHA-256。[原版保真验证](STABLE-BASELINE.md)及[早期协议与定容分析](docs/localsend-http/README.md)是历史记录。

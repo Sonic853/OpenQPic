@@ -1,0 +1,94 @@
+{
+  "tested_apk_sha256": "e082a16114d6fdfbb3f0933d2baf23262abee2b0c0813149fea7704d6ccf0ddb",
+  "final_apk_sha256": "9973433a3a635b738f2da36e1b1abdc64fec15f726b81a97c7a2429d849baefe",
+  "retuned_methods_after_this_run": [
+    "Lcom/alensw/PicFolder/q;->a(Landroid/content/Intent;ZLandroid/os/Handler;Lcom/alensw/a/ba;)Z",
+    "Lcom/alensw/ui/view/ao;->a(II)Lcom/alensw/ui/view/ao;",
+    "Lcom/alensw/ui/view/bn;->c(Z)V"
+  ],
+  "other_dex_methods_equal_except_debug": 10496,
+  "gallery_refresh": {
+    "visible_album_created": true,
+    "open_folder_count": [
+      1,
+      2,
+      3
+    ],
+    "same_gallery_activity": true,
+    "partial_hidden_and_new_thumbnail_drawn": true,
+    "video_received_while_paused": true,
+    "moments_thumbnail_updated": true,
+    "media_store_image_indexed": true,
+    "device": "Android/sdk_phone_armv7/generic:6.0/MASTER/3079352:userdebug/test-keys",
+    "apk_sha256": "e082a16114d6fdfbb3f0933d2baf23262abee2b0c0813149fea7704d6ccf0ddb"
+  },
+  "localsend": {
+    "gallery_hidden_and_visible_multicast": true,
+    "peers_deduplicated_sorted_http_first": true,
+    "picker_and_home_hidden": true,
+    "official_to_android": {
+      "png_wav_sha256": [
+        "72a7bd8e80b6747ad50a363f928000414069e3c398d825a06937f04c2819a38e",
+        "e9a57e5478c7649d8936a07f72fe0ab5af17ef40bba1644fe3cf2bfdec633d97"
+      ],
+      "parallel": true,
+      "text_skipped": true
+    },
+    "busy_cancel_token_hash_retry_replay": true,
+    "disguised_media_rejected_before_publish": true,
+    "confirmation_selection_survives_home": true,
+    "real_video_received": true,
+    "incoming_stream_and_next_file_survive_home": true,
+    "manual_cancel_from_restored_history": true,
+    "manual_cancel_from_background_notification": true,
+    "android_to_official": {
+      "bytes": 262912,
+      "sha256": "fe4075e5a6fafd450ab76a05b3d313c2b465620122d2bd9ae0b9e5c1980feeeb",
+      "peer_from_udp_http_register": true,
+      "entry": "ACTION_SEND content://",
+      "completed_after_back": true
+    },
+    "back_and_reopen": true,
+    "apk_sha256": "e082a16114d6fdfbb3f0933d2baf23262abee2b0c0813149fea7704d6ccf0ddb",
+    "device": "Android/sdk_phone_armv7/generic:6.0/MASTER/3079352:userdebug/test-keys"
+  },
+  "multisend": {
+    "selected_devices": 5,
+    "concurrent_pending_offers": 3,
+    "independent_completed_recipients": 2,
+    "file_sha256_at_each_receiver": [
+      "35c50e10adff9004fe4ae0a97efcb203b2a523bbdb7c63a395530418e39c2b39",
+      "6bfc47d7e032361ccf8d38c90a5895797e0f2137de8cf9f9a03d8b6736c25908"
+    ],
+    "running_cancelled": true,
+    "queued_cancelled_before_offer": true,
+    "peer_declined_and_queue_advanced_while_hidden": true,
+    "completed_after_activity_closed": true,
+    "apk_sha256": "e082a16114d6fdfbb3f0933d2baf23262abee2b0c0813149fea7704d6ccf0ddb",
+    "device": "Android/sdk_phone_armv7/generic:6.0/MASTER/3079352:userdebug/test-keys"
+  },
+  "video_proxy_http_status": [
+    200,
+    206,
+    206,
+    416
+  ],
+  "video_rendered_frames": {
+    "content": {
+      "expected": "blue",
+      "central_blue_fraction": 1.0
+    },
+    "loopback": {
+      "expected": "blue",
+      "central_blue_fraction": 1.0
+    }
+  },
+  "github_release_fixtures": [
+    "apk",
+    "release-page fallback",
+    "date ordering",
+    "no release",
+    "HTTP error",
+    "invalid metadata"
+  ]
+}

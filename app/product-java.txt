@@ -1,5 +1,8 @@
-# New product owners. There are no original Smali inputs to exclude for these.
+# Product classes added to the recovered gallery; checked in javac output and final DEX.
 Lcom/alensw/PicFolder/GalleryStorage;
+Lcom/alensw/compat/LegacyPlatform;
+Lcom/alensw/compat/LegacyPlatform$CanvasFlags;
+Lcom/alensw/ui/activity/GalleryShareMenu;
 Lcom/alensw/updater/GitHubRelease;
 Lcom/alensw/updater/GitHubUpdates;
 Lorg/openqpic/version/GalleryVersion;

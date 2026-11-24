@@ -2,7 +2,9 @@
 
 以下是原版恢复基线 `e4c35cb` 的交付记录。当前 LocalSend 产品使用 `:app:verifyLocalSendDebug`；见[当前产品验证](../docs/localsend-http/IMPLEMENTATION.md)。需要重验历史保真时，在基线提交运行 `:app:verifyStableDebug`。
 
-当前快传：[APK/AAB 摘要](localsend-product.json) · [官方对端收发](localsend-smoke.json) · [多设备发送](multisend-smoke.json) · [接收后图库自动刷新](received-gallery-smoke.json)。
+[全 Java 制品与原成员核对](java-build.json) · [系统分享面板端到端记录](java-gallery-share.json) · [图库、播放与快传回归](java-gallery-regression.json) · [源码恢复与验证说明](../docs/recovery/gallery-java.md)。
+
+迁移前的 targetSdk 32 快传：[APK/AAB 摘要](localsend-product.json) · [官方对端收发](localsend-smoke.json) · [多设备发送](multisend-smoke.json) · [接收后图库自动刷新](received-gallery-smoke.json)。
 
 [本地图库、日期版本与 GitHub 更新验收](local-gallery.md) · [targetSdk 32 兼容性与实测范围](target-sdk-32.md)。
 

@@ -1,0 +1,109 @@
+{
+  "apk_sha256": "9973433a3a635b738f2da36e1b1abdc64fec15f726b81a97c7a2429d849baefe",
+  "bytes": 2814853,
+  "dex_classes": 1593,
+  "java_compiled_classes": 1523,
+  "retained_gallery_types": 1472,
+  "versionName": "2026.11.24",
+  "versionCode": 175085184,
+  "minSdk": 23,
+  "targetSdk": 32,
+  "retired_legacy_types": 775,
+  "original_resource_ids": 918,
+  "native_sha256": {
+    "lib/armeabi/libqpicjni156.so": "d68b2dbd74bde541f98e3bd80f23e6fe4b785dfe8c6a69b6747f832e2a7b404b",
+    "lib/armeabi/libqpiclocalsend.so": "ff81822e7ece381d72eff9a46fff86140bbbee30d3daa0cf307a806b5751fe6b",
+    "lib/x86/libqpicjni156.so": "8a9fffcbaa2c05211e6d86b224fae153c08a371b80ee6330113a8c2db1470bb2",
+    "lib/x86/libqpiclocalsend.so": "1532453bd5e5f4061912d195c27e1127410d0b1dafd4efcbb80fcf1edd3d8502",
+    "lib/arm64-v8a/libqpicjni156.so": "8b46c181b0384ee1e4806413ed5ade3926f700b50d2481280df8158dd3f66304",
+    "lib/arm64-v8a/libqpiclocalsend.so": "995271746a5ffa1a74c973474ab8b31855d70306280b37d4425b1309c2e5e3b9"
+  },
+  "baseline": {
+    "commit": "aa0043e",
+    "apk_sha256": "15eb10ad578f08253938c2d198268b2405a4cf8bf59324c50cbf2a344fcdb321",
+    "smali_files": 1471
+  },
+  "class_and_member_comparison": {
+    "app-debug.apk": {
+      "types": 1472,
+      "fields": 4553,
+      "methods": 9929,
+      "concrete": 9318
+    },
+    "app-release-unsigned.apk": {
+      "types": 1472,
+      "fields": 4553,
+      "methods": 9929,
+      "concrete": 9318
+    }
+  },
+  "source_files": {
+    "app/src/main/java": 16,
+    "app/src/recovered/java": 1338,
+    "buildSrc/src/main/java": 1
+  },
+  "artifacts": {
+    "app-debug.apk": {
+      "bytes": 2814853,
+      "sha256": "9973433a3a635b738f2da36e1b1abdc64fec15f726b81a97c7a2429d849baefe",
+      "dex_files": 16
+    },
+    "app-debug.aab": {
+      "bytes": 1940649,
+      "sha256": "9c4059dc8b240d976802b50fe34139ef5baefdf194f56bcbe49e90ec5e884039",
+      "dex_files": 16
+    },
+    "app-release-unsigned.apk": {
+      "bytes": 2504824,
+      "sha256": "a3ed74df34f35ca68412953d0d0f47717ba340b1a7e791a0a602d6c7cdcc514f",
+      "dex_files": 1
+    }
+  },
+  "external_declarations": {
+    "compile_only": 23,
+    "shipped": 0
+  },
+  "sdk_tools": {
+    "platform": 36,
+    "build_tools": "36.0.0",
+    "agp": "9.0.1",
+    "jdk": "25"
+  },
+  "standalone_jdk21": {
+    "offline": true,
+    "build_cache": false,
+    "previous_outputs": false,
+    "neighboring_recovery_checkout_required": false,
+    "tasks_executed": 83,
+    "dex_classes": 1593,
+    "javac_classes": 1523,
+    "artifacts": {
+      "app-debug.apk": {
+        "bytes": 2814865,
+        "sha256": "43b2930ea9e1a8df6aaf0edef0b9a7a3e14df4e933f0c7cfb7e7198059ae837a"
+      },
+      "app-debug.aab": {
+        "bytes": 1941086,
+        "sha256": "a7e57bea48f49624cccc89aa6d27613998bc39220b823c8e2bcd76ebf283de21"
+      },
+      "app-release-unsigned.apk": {
+        "bytes": 2504764,
+        "sha256": "e20b0ccd8a3f8ed20ae25355747add22aeda6dedace72e495089e16aed4e3e91"
+      }
+    },
+    "class_and_member_comparison": {
+      "app-debug.apk": {
+        "types": 1472,
+        "fields": 4553,
+        "methods": 9929,
+        "concrete": 9318
+      },
+      "app-release-unsigned.apk": {
+        "types": 1472,
+        "fields": 4553,
+        "methods": 9929,
+        "concrete": 9318
+      }
+    }
+  }
+}

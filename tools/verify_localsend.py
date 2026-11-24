@@ -1,4 +1,4 @@
-"""Verify the shipped LocalSend product (distinct from the original stable equivalence gate)."""
+"""Check the shipped Java gallery, its native libraries and LocalSend in both Android packages."""
 import argparse
 from datetime import date
 import hashlib
@@ -75,19 +75,27 @@ def verify(apk, aab, tools):
     image=declared(java/"com/alensw/jni/JniUtils.java",image_prefix) | {image_prefix+"fuCopyFile",image_prefix+"fuSocketPair"}
     wire=declared(java/"org/openqpic/localsend/Wire.java","Java_org_openqpic_localsend_Wire_")
     assert len(image)==34 and len(wire)>=1
-    expected = {f.read_text("utf-8").splitlines()[0].split()[-1] for f in (APP/"src/main/smali").rglob("*.smali")}
-    expected.add("Lcom/alensw/jni/JniUtils;")
+    # Fixed names from the last mixed build, including the JNI bridge. Keep this
+    # independent of current sources so deleting a Java file cannot shrink the gate.
+    inventory=[s.split() for s in (APP/"recovered-types.txt").read_text().splitlines() if s.startswith("L")]
+    old={r[0] for r in inventory}
+    expected={r[-1] for r in inventory}
+    assert len(old)==len(expected)==len(inventory)==1472
+    assert all(len(r) in (1,2) for r in inventory)
+    assert not next((APP/"src").rglob("*.smali"),None), "Smali in product sources"
+    for suffix in ("*.class","*.dex","*.jar"):
+        assert not next((APP/"src").rglob(suffix),None), "Precompiled Java input: "+suffix
+    classdir=APP/"build/intermediates/javac/debug/compileDebugJavaWithJavac/classes"
+    javac={"L"+f.relative_to(classdir).as_posix()[:-6]+";" for f in classdir.rglob("*.class")}
+    api=APP/"compileOnly/apache-optional-api.jar"
+    assert sha(api.read_bytes())=="5ab8dee1fd4b16c056e64e4a8ab04eba922046423454c3850d4b1f3f778536fa"
+    with ZipFile(api) as external:
+        optional={"L"+p[:-6]+";" for p in external.namelist() if p.endswith(".class")}
+    assert len(optional)==23 and not optional & javac
     expected.update(s for s in (APP/"product-java.txt").read_text().splitlines() if s.startswith("L"))
-    # An accidentally deleted unrelated gallery class must fail even if it is
-    # missing from both the edited source tree and the resulting APK.
-    abi_jar=APP/"compileOnly/stable-dex-abi.jar"
-    assert sha(abi_jar.read_bytes())=="c81c7e8312e73aa8abd6f7fadd12efed2875d71d6fc6ebd5eb5e61b828e6957f"
-    with ZipFile(abi_jar) as headers:
-        old={"L"+n[:-6]+";" for n in headers.namelist() if n.endswith(".class")}
-    original={t for t in old if not t.startswith(PREFIX)}
+    assert expected <= javac, ("not compiled from Java", sorted(expected-javac))
     retired={t for t in (APP/"removed-legacy-types.txt").read_text().splitlines() if t.startswith("L")}
-    assert len(original)==2247 and retired < original and not retired & expected
-    assert original-retired <= expected, original-retired-expected
+    assert len(old | retired)==2247 and not retired & expected
     with ZipFile(apk) as z, ZipFile(aab) as bundle:
         assert {p for p in z.namelist() if p.startswith("lib/")} == libs.keys()
         assert {p[5:] for p in bundle.namelist() if p.startswith("base/lib/")} == libs.keys()
@@ -97,6 +105,9 @@ def verify(apk, aab, tools):
             check_elf(elf,name.split("/")[1],image if name.endswith("/libqpicjni156.so") else wire)
         notice="assets/licenses/picohttpparser.txt"
         assert b"Copyright" in z.read(notice) and z.read(notice)==bundle.read("base/"+notice)
+        for source in (APP/"src/main/assets/licenses").rglob("*.txt"):
+            name="assets/"+source.relative_to(APP/"src/main/assets").as_posix()
+            assert source.read_bytes()==z.read(name)==bundle.read("base/"+name),name
         defs, refs = set(), set()
         for name in z.namelist():
             if not re.fullmatch(r"classes\d*\.dex", name):
@@ -110,13 +121,13 @@ def verify(apk, aab, tools):
             for stale in (b"PeerHub", b"224.0.0.251", b"CloudProvider", b"ver.q-supreme.com", b"QP-Gallery-Releases",
                           b"last_check_update", b"quickpic.authorization", b"quickpic.account", b"failed_upload_tasks", b"umeng"):
                 assert stale.lower() not in data.lower(), stale
-        generated = defs - expected
-        assert not expected - defs, expected - defs
-        assert all("$$ExternalSynthetic" in d and d.startswith((PREFIX, "Lcom/alensw/ui/c/ReceivedMediaUpdates$$ExternalSynthetic",
-                   "Lcom/alensw/video/", "Lcom/alensw/updater/GitHubUpdates$$ExternalSynthetic", "Lorg/openqpic/localsend/"))
-                   for d in generated), generated
+        assert expected <= defs, ("missing from DEX", sorted(expected-defs))
+        assert not optional & defs, ("external declarations in APK", optional & defs)
+        unexpected={d for d in defs-javac if not re.fullmatch(r"Lcom/alensw/PicFolder/R(?:\$\w+)?;", d)
+                    and not ("$$ExternalSynthetic" in d and d.split("$$ExternalSynthetic")[0]+";" in javac)}
+        assert not unexpected, ("DEX classes not traceable to javac, D8 or R", sorted(unexpected))
         assert not {t for t in refs if t.startswith(PREFIX)} - {d for d in defs if d.startswith(PREFIX)}
-        removed=retired | {t for t in old if t.startswith(PREFIX) and t!=PREFIX+"TransferActivity;"}
+        removed=retired | {r[0] for r in inventory if len(r)==2}
         assert not removed & (defs|refs), removed & (defs|refs)
         assert not any(t.startswith(("Lcom/alensw/cloud/", "Lb/a/", "Lcom/c/a/")) for t in refs)
         api=b"https://api.github.com/repos/Sonic853/OpenQPic/releases/latest"
@@ -140,6 +151,7 @@ def verify(apk, aab, tools):
         assert int(code)==expected_code and 9700000<int(code)<=2100000000
         return tag, int(code)
     tag,code=version(apk)
+    assert re.search(r"(?m)^application-label-zh-CN:'快图'$",run(aapt,"dump","badging",apk))
     assert "android.permission.WRITE_SYNC_SETTINGS" not in manifest and "android.permission.REQUEST_INSTALL_PACKAGES" not in manifest
     for s in ["com.alensw.transfer.TransferActivity","com.alensw.transfer.TransferSessionService",
               "android.permission.FOREGROUND_SERVICE_DATA_SYNC","com.alensw.video.VideoProxyService","android.intent.action.SEND_MULTIPLE",".StreamingActivity"]:
@@ -157,7 +169,7 @@ def verify(apk, aab, tools):
     update_labels={"string/update_"+s for s in ("no_release","check_failed","view_release","open_failed")}
     about_labels={"string/about_"+s for s in ("sonic853","sonic853_email","sonic853_card","sonic853_github",
                   "sonic853_bilibili","sonic853_x","v97_developer","contact","send_email","profile_card","follow","bilibili")}
-    product_resources=update_labels | about_labels | {"drawable/ic_bilibili"}
+    product_resources=update_labels | about_labels | {"drawable/ic_bilibili","string/share_other"}
     assert product_resources <= table.keys()
     assert all(re.fullmatch(r"(string|id|layout|drawable)/ls_\w+",k) or k in product_resources for k in table.keys()-stable.keys())
     symbols = (APP/"build/intermediates/runtime_symbol_list/debug/processDebugResources/R.txt").read_text()
@@ -165,9 +177,9 @@ def verify(apk, aab, tools):
         assert "int "+k.replace("/"," ")+" "+table[k] in symbols, k
     run(tools/("zipalign.exe" if os.name=="nt" else "zipalign"),"-c","4",apk)
     java = Path(os.environ["JAVA_HOME"])/"bin/java" if "JAVA_HOME" in os.environ else "java"
-    javac = Path(java).with_name("javac")
+    javac_exe = Path(java).with_name("javac")
     with tempfile.TemporaryDirectory() as temp:
-        run(javac,"-d",temp,ROOT/"buildSrc/src/main/java/org/openqpic/version/GalleryVersion.java",
+        run(javac_exe,"-d",temp,ROOT/"buildSrc/src/main/java/org/openqpic/version/GalleryVersion.java",
             ROOT/"tools/version/ReleaseVersion.java",ROOT/"tools/version/VersionTest.java")
         run(java,"-ea","-cp",temp,"VersionTest")
         with ZipFile(aab) as bundle, ZipFile(Path(temp)/"bundle.zip","w") as proto:
@@ -180,6 +192,7 @@ def verify(apk, aab, tools):
         check_sdk(binary)
     run(java,"-Xmx128m","-XX:+UseSerialGC","-jar",tools/"lib/apksigner.jar","verify",apk)
     return {"apk_sha256":sha(apk.read_bytes()), "bytes":apk.stat().st_size, "dex_classes":len(defs),
+            "java_compiled_classes":len(javac),"retained_gallery_types":len(inventory),
             "versionName":tag,"versionCode":code,"minSdk":23,"targetSdk":32,"retired_legacy_types":len(retired),
             "original_resource_ids":len(stable),"native_sha256":libs}
 

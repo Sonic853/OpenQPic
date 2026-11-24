@@ -1,0 +1,278 @@
+{
+  "device": "Android/sdk_phone_armv7/generic:6.0/MASTER/3079352:userdebug/test-keys",
+  "apk_sha256": "9973433a3a635b738f2da36e1b1abdc64fec15f726b81a97c7a2429d849baefe",
+  "cases": [
+    {
+      "route": "chooser",
+      "selection": [
+        "png"
+      ],
+      "chooser": "android/com.android.internal.app.ChooserActivity",
+      "action": "android.intent.action.SEND",
+      "type": "image/png",
+      "flags": 453509121,
+      "uid": 10056,
+      "directTargets": 3,
+      "galleryUid": 10055,
+      "zhCN": [
+        "快图",
+        "快图",
+        "其它…"
+      ],
+      "privatePaths": false,
+      "clipTypes": [
+        "image/png"
+      ],
+      "sha256": [
+        "65ae088b16d0c788b6974ee31a6db0ad399ba7d32e451cdd9070ca7aa6b701e1"
+      ]
+    },
+    {
+      "route": "chooser",
+      "selection": [
+        "png",
+        "jpg"
+      ],
+      "chooser": "android/com.android.internal.app.ChooserActivity",
+      "action": "android.intent.action.SEND_MULTIPLE",
+      "type": "image/*",
+      "flags": 453509121,
+      "uid": 10056,
+      "directTargets": 3,
+      "galleryUid": 10055,
+      "zhCN": [
+        "快图",
+        "快图",
+        "其它…"
+      ],
+      "privatePaths": false,
+      "clipTypes": [
+        "image/png",
+        "image/jpeg"
+      ],
+      "sha256": [
+        "65ae088b16d0c788b6974ee31a6db0ad399ba7d32e451cdd9070ca7aa6b701e1",
+        "44989a521c628819c9645e792c9d4fe9390ac75c07417705d470536bbfa0256b"
+      ]
+    },
+    {
+      "route": "chooser",
+      "selection": [
+        "mp4"
+      ],
+      "chooser": "android/com.android.internal.app.ChooserActivity",
+      "action": "android.intent.action.SEND",
+      "type": "video/mp4",
+      "flags": 453509121,
+      "uid": 10056,
+      "directTargets": 2,
+      "galleryUid": 10055,
+      "zhCN": [
+        "快图",
+        "快图",
+        "其它…"
+      ],
+      "privatePaths": false,
+      "clipTypes": [
+        "video/mp4"
+      ],
+      "sha256": [
+        "d046ee1a0b2c061451788426e0d5bfa823f906a0e04338a53e8f73688385194c"
+      ]
+    },
+    {
+      "route": "chooser",
+      "selection": [
+        "jpg",
+        "mp4"
+      ],
+      "chooser": "android/com.android.internal.app.ChooserActivity",
+      "action": "android.intent.action.SEND_MULTIPLE",
+      "type": "*/*",
+      "flags": 453509121,
+      "uid": 10056,
+      "directTargets": 3,
+      "galleryUid": 10055,
+      "zhCN": [
+        "快图",
+        "快图",
+        "其它…"
+      ],
+      "privatePaths": false,
+      "clipTypes": [
+        "image/jpeg",
+        "video/mp4"
+      ],
+      "sha256": [
+        "44989a521c628819c9645e792c9d4fe9390ac75c07417705d470536bbfa0256b",
+        "d046ee1a0b2c061451788426e0d5bfa823f906a0e04338a53e8f73688385194c"
+      ]
+    },
+    {
+      "route": "direct",
+      "selection": [
+        "png"
+      ],
+      "chooser": null,
+      "action": "android.intent.action.SEND",
+      "type": "image/png",
+      "flags": 50331649,
+      "uid": 10056,
+      "directTargets": 3,
+      "galleryUid": 10055,
+      "zhCN": [
+        "快图",
+        "快图",
+        "其它…"
+      ],
+      "privatePaths": false,
+      "clipTypes": [
+        "image/png"
+      ],
+      "sha256": [
+        "65ae088b16d0c788b6974ee31a6db0ad399ba7d32e451cdd9070ca7aa6b701e1"
+      ]
+    },
+    {
+      "route": "direct",
+      "selection": [
+        "png",
+        "jpg"
+      ],
+      "chooser": null,
+      "action": "android.intent.action.SEND_MULTIPLE",
+      "type": "image/*",
+      "flags": 50331649,
+      "uid": 10056,
+      "directTargets": 3,
+      "galleryUid": 10055,
+      "zhCN": [
+        "快图",
+        "快图",
+        "其它…"
+      ],
+      "privatePaths": false,
+      "clipTypes": [
+        "image/png",
+        "image/jpeg"
+      ],
+      "sha256": [
+        "65ae088b16d0c788b6974ee31a6db0ad399ba7d32e451cdd9070ca7aa6b701e1",
+        "44989a521c628819c9645e792c9d4fe9390ac75c07417705d470536bbfa0256b"
+      ]
+    },
+    {
+      "route": "direct-submenu",
+      "selection": [
+        "png"
+      ],
+      "action": "android.intent.action.SEND",
+      "type": "image/png",
+      "flags": 50331649,
+      "uid": 10056,
+      "directTargets": 10,
+      "galleryUid": 10055,
+      "zhCN": [
+        "快图",
+        "快图",
+        "其它…"
+      ],
+      "privatePaths": false,
+      "clipTypes": [
+        "image/png"
+      ],
+      "sha256": [
+        "65ae088b16d0c788b6974ee31a6db0ad399ba7d32e451cdd9070ca7aa6b701e1"
+      ]
+    },
+    {
+      "route": "crop-chooser",
+      "selection": [
+        "rendered-jpeg"
+      ],
+      "width": 72,
+      "height": 48,
+      "chooser": "android/com.android.internal.app.ChooserActivity",
+      "action": "android.intent.action.SEND",
+      "type": "image/jpeg",
+      "flags": 453509121,
+      "uid": 10056,
+      "directTargets": 10,
+      "galleryUid": 10055,
+      "zhCN": [
+        "快图",
+        "快图",
+        "其它…"
+      ],
+      "privatePaths": false,
+      "clipTypes": [
+        "image/jpeg"
+      ],
+      "sha256": [
+        "86d4360a242b89a930c56eb962257eeac6bf1f2d2d41827421c397a1b8002a40"
+      ]
+    }
+  ],
+  "compact": [
+    {
+      "selection": [
+        "png"
+      ],
+      "direct_targets": 3,
+      "root_menu": [
+        "其它…",
+        "OpenQPic share probe",
+        "WiFi 快传",
+        "短信"
+      ]
+    },
+    {
+      "selection": [
+        "png",
+        "jpg"
+      ],
+      "direct_targets": 3,
+      "root_menu": [
+        "其它…",
+        "OpenQPic share probe",
+        "WiFi 快传",
+        "短信"
+      ]
+    },
+    {
+      "selection": [
+        "mp4"
+      ],
+      "direct_targets": 2,
+      "root_menu": [
+        "其它…",
+        "OpenQPic share probe",
+        "WiFi 快传"
+      ]
+    },
+    {
+      "selection": [
+        "jpg",
+        "mp4"
+      ],
+      "direct_targets": 3,
+      "root_menu": [
+        "其它…",
+        "OpenQPic share probe",
+        "WiFi 快传",
+        "短信"
+      ]
+    }
+  ],
+  "overflow_root": [
+    "其它…",
+    "OpenQPic share probe",
+    "WiFi 快传",
+    "OQP extra 3",
+    "短信",
+    "OQP extra 1",
+    "更多…"
+  ],
+  "overflow_chooser": "android/com.android.internal.app.ChooserActivity",
+  "localsend_direct_count": 2
+}
