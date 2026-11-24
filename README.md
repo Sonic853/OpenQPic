@@ -19,6 +19,8 @@ Android 相册，保留原图库、播放、分享和「WiFi 快传」界面。*
 
 侧栏只列出相册、活动、相机、快传和设置。旧网盘登录、500px、云备份和友盟统计已移除。照片地点使用 Android 系统 Geocoder，不再把坐标发给旧版内置的百度或阿里接口。
 
+「设置 → 关于 → 开源代码许可」打开本仓库的 [`licenses/`](licenses/) 目录。许可及版权声明只保存在仓库，不打包进 APK/AAB。
+
 「设置 → 更新」从 [Sonic853/OpenQPic 的正式 GitHub Releases](https://github.com/Sonic853/OpenQPic/releases) 检查新版本。启动时检查默认关闭。发现新版后可打开该 Release 的 APK 下载；如果没有标准名称的附件，则打开对应发布页。
 
 版本按北京时间 UTC+8 取 `yyyy.MM.dd`，同日再次发布为 `p1`、`p2`……。本地构建默认使用当天日期。PowerShell 示例：`.\gradlew.bat :app:assembleDebug '-PopenqpicVersion=2026.11.24p1'`。APK、AAB、更新设置和关于页使用同一个版本。`versionCode` 为 `10000000 + 距 2020-01-01 的天数 × 65536 + 当日补丁号`，可从同签名的 `9.7` 升级。

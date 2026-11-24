@@ -1,6 +1,7 @@
 package com.alensw.ui.activity;
 
 import android.annotation.TargetApi;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -220,6 +221,17 @@ public class MainPreference extends com.alensw.ui.activity.ba {
    protected void a(PreferenceScreen var1) {
       this.a__$appendSource2(var1);
       this.a__$appendPatch2(var1);
+      Preference licenses = var1.findPreference("open_source_licenses");
+      if (licenses != null) {
+         licenses.setOnPreferenceClickListener(preference -> {
+            try {
+               startActivity(preference.getIntent());
+            } catch (ActivityNotFoundException e) {
+               a(com.alensw.PicFolder.R.string.update_open_failed);
+            }
+            return true;
+         });
+      }
    }
 
    protected void a(boolean var1, SwitchPreference var2) {

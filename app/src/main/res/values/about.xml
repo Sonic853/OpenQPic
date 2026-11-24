@@ -11,4 +11,6 @@
     <string name="about_profile_card">Profile card</string>
     <string name="about_follow">@string/follow_category</string>
     <string name="about_bilibili">Bilibili</string>
+    <string name="about_open_source_licenses">Open-source licenses</string>
+    <string name="about_open_source_licenses_url" translatable="false">https://github.com/Sonic853/OpenQPic/tree/main/licenses</string>
 </resources>

@@ -7,7 +7,7 @@
 | 图像 JNI | `OpenQPicJni` `761302f416d2166b26d7699ace352d6c2b18bff8`，34 个 `JniUtils` JNI 导出 |
 | 独立快传库及控制层 | `OpenQPicLocalSend`：`src/transport.c`、`java/org/openqpic/localsend/`；构建所用的基线与源码摘要见[制品记录](../../verification/localsend-product.json) |
 | Android 集成 | [`TransferActivity`](../../app/src/main/java/com/alensw/transfer/TransferActivity.java)、[`TransferSessionService`](../../app/src/main/java/com/alensw/transfer/TransferSessionService.java)、[`ReceivePage`](../../app/src/main/java/com/alensw/transfer/ReceivePage.java)、[`TransferMedia`](../../app/src/main/java/com/alensw/transfer/TransferMedia.java) |
-| 随包输入 | [各 ABI、桥接源码及许可的 SHA-256](../../app/native-inputs.json) |
+| 固定输入 | [各 ABI、桥接源码及仓库许可文本的 SHA-256](../../app/native-inputs.json)；[picohttpparser 许可](../../licenses/picohttpparser.txt)不打包 |
 | 互通对端 | 官方 `localsend/localsend` `d8702511dfb074d795452a9204ba3c9473f4f01f` 的 Rust HTTP 客户端和服务端 |
 
 ## 界面与可发现性

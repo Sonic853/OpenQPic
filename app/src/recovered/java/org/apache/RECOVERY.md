@@ -58,4 +58,4 @@ python "$r/verify.py" --jdk "$env:JAVA_HOME" --android-jar "$sdk/platforms/andro
 
 ## 许可
 
-四个组件均为 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)。[assets/licenses/apache/](../../../../main/assets/licenses/apache/) 保留四份发行版各自完整的 LICENSE 和 NOTICE，并随 APK/AAB 分发。HttpCore 的 `org.apache.http.annotation` 含源自 Brian Goetz、Tim Peierls 的 JCIP 注解；其附加 [CC BY 2.5](https://creativecommons.org/licenses/by/2.5/) 条款全文保留在 HttpCore LICENSE 中。
+四个组件均为 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)。仓库的 [`licenses/apache/`](../../../../../../licenses/apache/) 保留四份发行版各自完整的 LICENSE 和 NOTICE；应用的「关于」页可打开该仓库的许可目录。HttpCore 的 `org.apache.http.annotation` 含源自 Brian Goetz、Tim Peierls 的 JCIP 注解；其附加 [CC BY 2.5](https://creativecommons.org/licenses/by/2.5/) 条款全文保留在 HttpCore LICENSE 中。

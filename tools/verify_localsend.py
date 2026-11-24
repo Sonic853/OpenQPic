@@ -14,6 +14,7 @@ from zipfile import ZipFile
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT/"app"
 PREFIX = "Lcom/alensw/transfer/"
+LICENSES_URL = "https://github.com/Sonic853/OpenQPic/tree/main/licenses"
 
 
 def sha(data):
@@ -68,6 +69,9 @@ def verify(apk, aab, tools):
         if rel.endswith(".so"):
             libs["lib/"+rel.split("/jniLibs/")[1]] = digest
     assert len(libs) == 6
+    licenses = ROOT/"licenses"
+    assert (licenses/"README.md").is_file()
+    license_files = {p.name for p in licenses.rglob("*.txt")}
     def declared(path,prefix):
         return {prefix+n for n in re.findall(r"\bnative\s+\S+\s+(\w+)\(",path.read_text("utf-8"))}
     java=APP/"src/main/java"
@@ -103,11 +107,10 @@ def verify(apk, aab, tools):
             elf=z.read(name)
             assert sha(elf) == sha(bundle.read("base/"+name)) == digest, name
             check_elf(elf,name.split("/")[1],image if name.endswith("/libqpicjni156.so") else wire)
-        notice="assets/licenses/picohttpparser.txt"
-        assert b"Copyright" in z.read(notice) and z.read(notice)==bundle.read("base/"+notice)
-        for source in (APP/"src/main/assets/licenses").rglob("*.txt"):
-            name="assets/"+source.relative_to(APP/"src/main/assets").as_posix()
-            assert source.read_bytes()==z.read(name)==bundle.read("base/"+name),name
+        for package in (z, bundle):
+            packaged = [n for n in package.namelist() if re.search(r"(^|/)assets/licenses(/|$)", n)
+                        or n.rsplit("/", 1)[-1] in license_files]
+            assert not packaged, ("Repository-only license files packaged", packaged)
         defs, refs = set(), set()
         for name in z.namelist():
             if not re.fullmatch(r"classes\d*\.dex", name):
@@ -168,13 +171,27 @@ def verify(apk, aab, tools):
     assert stable.items() <= table.items()
     update_labels={"string/update_"+s for s in ("no_release","check_failed","view_release","open_failed")}
     about_labels={"string/about_"+s for s in ("sonic853","sonic853_email","sonic853_card","sonic853_github",
-                  "sonic853_bilibili","sonic853_x","v97_developer","contact","send_email","profile_card","follow","bilibili")}
+                   "sonic853_bilibili","sonic853_x","v97_developer","contact","send_email","profile_card","follow",
+                   "bilibili","open_source_licenses","open_source_licenses_url")}
     product_resources=update_labels | about_labels | {"drawable/ic_bilibili","string/share_other"}
     assert product_resources <= table.keys()
     assert all(re.fullmatch(r"(string|id|layout|drawable)/ls_\w+",k) or k in product_resources for k in table.keys()-stable.keys())
     symbols = (APP/"build/intermediates/runtime_symbol_list/debug/processDebugResources/R.txt").read_text()
     for k in table.keys()-stable.keys():
         assert "int "+k.replace("/"," ")+" "+table[k] in symbols, k
+    def check_license_link(package, resource_dump):
+        label = "string/about_open_source_licenses"
+        url = label + "_url"
+        assert re.search(fr'resource {table[url]} {url}[^\n]*\n[^\n]*"{re.escape(LICENSES_URL)}"', resource_dump)
+        for variant in ("xml", "xml-v28", "xml-v33"):
+            tree = run(aapt,"dump","xmltree",package,"--file",f"res/{variant}/main_pref.xml")
+            about, = [node for node in re.split(r"(?m)^ {6}E: ", tree)
+                      if f")=@{table['string/about']}\n" in node]
+            entry, = [node for node in re.split(r"(?m)^ {10}E: ", about)
+                      if f")=@{table[label]}\n" in node]
+            assert entry.startswith("Preference ") and "E: intent " in entry, (package, variant)
+            assert '"android.intent.action.VIEW"' in entry and f")=@{table[url]}\n" in entry, (package, variant)
+    check_license_link(apk, resources)
     run(tools/("zipalign.exe" if os.name=="nt" else "zipalign"),"-c","4",apk)
     java = Path(os.environ["JAVA_HOME"])/"bin/java" if "JAVA_HOME" in os.environ else "java"
     javac_exe = Path(java).with_name("javac")
@@ -190,11 +207,13 @@ def verify(apk, aab, tools):
         run(aapt,"convert","--output-format","binary","-o",binary,Path(temp)/"bundle.zip")
         assert version(binary)==(tag,code)
         check_sdk(binary)
+        check_license_link(binary, run(aapt,"dump","resources",binary))
     run(java,"-Xmx128m","-XX:+UseSerialGC","-jar",tools/"lib/apksigner.jar","verify",apk)
     return {"apk_sha256":sha(apk.read_bytes()), "bytes":apk.stat().st_size, "dex_classes":len(defs),
             "java_compiled_classes":len(javac),"retained_gallery_types":len(inventory),
             "versionName":tag,"versionCode":code,"minSdk":23,"targetSdk":32,"retired_legacy_types":len(retired),
-            "original_resource_ids":len(stable),"native_sha256":libs}
+            "original_resource_ids":len(stable),"native_sha256":libs,"licenses_url":LICENSES_URL,
+            "packaged_license_files":0}
 
 
 if __name__ == "__main__":

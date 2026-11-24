@@ -7,5 +7,5 @@
   "app/src/main/jniLibs/arm64-v8a/libqpiclocalsend.so": "995271746a5ffa1a74c973474ab8b31855d70306280b37d4425b1309c2e5e3b9",
   "app/src/main/java/org/openqpic/localsend/Wire.java": "9e1054d1418ca962cae0197c9e256a6b9245d13368826421d552290b04984839",
   "app/src/main/java/org/openqpic/localsend/LocalSend.java": "d2e109064fd906d6987325396b1013094ba4b0611b653b984e43976882ed3b29",
-  "app/src/main/assets/licenses/picohttpparser.txt": "8d4b08f09904cce333419c67d0ec1b10ec93dc806ce5d5ffa6fa37286f002887"
+  "licenses/picohttpparser.txt": "8d4b08f09904cce333419c67d0ec1b10ec93dc806ce5d5ffa6fa37286f002887"
 }

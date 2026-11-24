@@ -1,4 +1,4 @@
-"""Import the two independently built JNI libraries and the matching transport bridge.
+"""Import the two JNI libraries, matching transport bridge and repository-only license.
 The app remains buildable without the native source checkouts or an NDK."""
 import argparse
 import hashlib
@@ -17,7 +17,7 @@ def inputs(image, transport):
     for name in ("Wire.java", "LocalSend.java"):
         path = Path("org/openqpic/localsend")/name
         yield transport/"java"/path, Path("app/src/main/java")/path
-    yield transport/"third_party/picohttpparser/NOTICE", Path("app/src/main/assets/licenses/picohttpparser.txt")
+    yield transport/"third_party/picohttpparser/NOTICE", Path("licenses/picohttpparser.txt")
 
 
 def main():

@@ -83,6 +83,9 @@
         <Preference android:layout="@layout/about_version">
             <intent android:action="android.settings.APPLICATION_DETAILS_SETTINGS" android:data="package:com.alensw.PicFolder" />
         </Preference>
+        <Preference android:icon="@drawable/ic_link_share" android:key="open_source_licenses" android:title="@string/about_open_source_licenses" android:singleLineTitle="false">
+            <intent android:action="android.intent.action.VIEW" android:data="@string/about_open_source_licenses_url" />
+        </Preference>
         <PreferenceScreen android:icon="@drawable/ic_contributors" android:title="@string/about_sonic853" android:summary="@string/developer" android:singleLineTitle="false">
             <PreferenceCategory android:layout="@layout/pref_category" android:title="@string/about_contact" android:singleLineTitle="false">
                 <Preference android:icon="@drawable/ic_email" android:title="@string/about_send_email" android:singleLineTitle="false">

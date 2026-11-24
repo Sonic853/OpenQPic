@@ -5,5 +5,6 @@
     <string name="about_profile_card">个人名片</string>
     <string name="about_follow">关注我</string>
     <string name="about_bilibili">哔哩哔哩</string>
+    <string name="about_open_source_licenses">开源代码许可</string>
     <string name="x">X（Twitter）</string>
 </resources>

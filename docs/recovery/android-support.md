@@ -45,7 +45,7 @@
 - 行为依据：当前 Smali。`OpenPic/reference/java` 是阅读对照，来自 `OpenPic_stable.apk`（SHA-256 `23ed7071608dc05465c6885a98c5884478defddc9731580929533bd3d9a6b107`）。旁边的 `OpenPic/structure/evidence/apk-structure.bundle.json` 中，包清单证据 ID 为 `ev_3e8220cb203cad62e3240e4fe6f352e0dce4b86b2df583cccea8f923fa1f997c`；本次成员统计则直接来自限定的 78 份 Smali。
 - Google Maven 源码：[`androidx.documentfile:documentfile:1.0.1`](https://dl.google.com/dl/android/maven2/androidx/documentfile/documentfile/1.0.1/documentfile-1.0.1-sources.jar)、[`androidx.core:core:1.1.0`](https://dl.google.com/dl/android/maven2/androidx/core/core/1.1.0/core-1.1.0-sources.jar) 中的四个 core 外层类，以及 [`com.android.support:support-core-utils:27.1.1`](https://dl.google.com/dl/android/maven2/com/android/support/support-core-utils/27.1.1/support-core-utils-27.1.1-sources.jar) 的 `FileProvider`。这是选取的可核对源码版本，不是从 APK 调出的依赖锁文件。
 - AOSP `platform/frameworks/support` 的 [`android-5.1.1_r1`](https://android.googlesource.com/platform/frameworks/support/+/android-5.1.1_r1/v4/java/android/support/v4/)：按实际描述符和分支适配 `ViewPager`、`ViewDragHelper`、`DrawerLayout` 的对应方法。`android.support.a.a` 等混淆代码按图库 Smali 和阅读稿恢复，没有直接替换成同名现代控件。
-- 使用的 AOSP / AndroidX 上游源码版权属于 The Android Open Source Project，许可为 [Apache License 2.0（全文）](android-support-apache-2.0.txt)。选用上游源的文件保留原版权头并标注此项目的修改；原 APK 私有修改的确切作者和独立许可未由 Smali 证明。本说明不将图库其他代码重新许可。
+- 使用的 AOSP / AndroidX 上游源码版权属于 The Android Open Source Project，许可为 [Apache License 2.0（全文）](../../licenses/android-support-apache-2.0.txt)。选用上游源的文件保留原版权头并标注此项目的修改；原 APK 私有修改的确切作者和独立许可未由 Smali 证明。本说明不将图库其他代码重新许可。
 
 ## 独立验证
 
