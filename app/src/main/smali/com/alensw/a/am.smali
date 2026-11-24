@@ -78,8 +78,6 @@
 
     aput-object v1, v2, v3
 
-    const-string v1, "1) GROUP BY (1"
-
     sget-object v8, Lcom/alensw/PicFolder/QuickApp;->p:Lcom/alensw/a/bh;
 
     invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
@@ -98,15 +96,7 @@
     aget-object v1, v9, v7
 
     :try_start_0
-    const-string v3, "1) GROUP BY (1"
-
-    const/4 v4, 0x0
-
-    const/4 v5, 0x0
-
-    move-object v0, p0
-
-    invoke-virtual/range {v0 .. v5}, Landroid/content/ContentResolver;->query(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;
+    invoke-static {p0, v1, v2}, Lcom/alensw/PicFolder/GalleryStorage;->buckets(Landroid/content/ContentResolver;Landroid/net/Uri;[Ljava/lang/String;)Landroid/database/Cursor;
     :try_end_0
     .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0

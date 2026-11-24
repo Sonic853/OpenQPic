@@ -1,4 +1,5 @@
 # New product owners. There are no original Smali inputs to exclude for these.
+Lcom/alensw/PicFolder/GalleryStorage;
 Lcom/alensw/updater/GitHubRelease;
 Lcom/alensw/updater/GitHubUpdates;
 Lorg/openqpic/version/GalleryVersion;

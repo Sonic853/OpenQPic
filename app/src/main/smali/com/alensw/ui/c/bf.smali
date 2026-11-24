@@ -3042,15 +3042,14 @@
 
     :cond_1
     :goto_2
-    invoke-static {v8}, Landroid/net/Uri;->fromFile(Ljava/io/File;)Landroid/net/Uri;
+    invoke-virtual {v8}, Ljava/io/File;->getPath()Ljava/lang/String;
+    move-result-object v8
+
+    invoke-static {v8, v9}, Lcom/alensw/ui/c/df;->a(Ljava/lang/String;C)Landroid/net/Uri;
 
     move-result-object v9
 
     invoke-virtual {v5, v9}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
-
-    invoke-virtual {v8}, Ljava/io/File;->getPath()Ljava/lang/String;
-
-    move-result-object v8
 
     invoke-virtual {v6, v8}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 
@@ -3104,6 +3103,8 @@
     invoke-virtual {v0, v1, v7}, Landroid/content/Intent;->putIntegerArrayListExtra(Ljava/lang/String;Ljava/util/ArrayList;)Landroid/content/Intent;
 
     :goto_4
+    invoke-static {v0, v5}, Lcom/alensw/PicFolder/GalleryStorage;->clipStreams(Landroid/content/Intent;Ljava/util/List;)V
+
     invoke-virtual {v0, v3}, Landroid/content/Intent;->setType(Ljava/lang/String;)Landroid/content/Intent;
 
     invoke-virtual {v0, v11}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;

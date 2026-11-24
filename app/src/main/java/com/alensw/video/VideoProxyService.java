@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.*;
 import android.provider.OpenableColumns;
 import android.util.Log;
+import com.alensw.PicFolder.PlayerActivity;
+import com.alensw.PicFolder.QuickApp;
 import com.alensw.b.e.j;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -27,6 +29,18 @@ public final class VideoProxyService extends Service {
     private final Map<String,Uri> grants=new ConcurrentHashMap<>();
 
     public static void view(Context context, Uri uri, String mime) {
+        if("file".equals(uri.getScheme()) && uri.getPath()!=null) {
+            try {
+                String path=new File(uri.getPath()).getCanonicalPath();
+                if(!QuickApp.p.b(path) || QuickApp.p.g(path)) {
+                    // Do not turn a private file path into a grant for another app.
+                    context.startActivity(new Intent(context,PlayerActivity.class).setDataAndType(uri,mime));
+                    return;
+                }
+                // Reuse the gallery's MediaStore / read-only provider fallback for unindexed videos.
+                uri=com.alensw.ui.c.df.a(path,'V');
+            } catch(IOException e) { Log.w("VideoProxy","Cannot resolve local video",e); return; }
+        }
         Intent intent=new Intent(Intent.ACTION_VIEW).setDataAndType(uri,mime)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         if(!com.alensw.ui.activity.a.a(context,intent) && "content".equals(uri.getScheme())

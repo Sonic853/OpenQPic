@@ -4,7 +4,7 @@
 
 当前快传：[APK/AAB 摘要](localsend-product.json) · [官方对端收发](localsend-smoke.json) · [多设备发送](multisend-smoke.json) · [接收后图库自动刷新](received-gallery-smoke.json)。
 
-[本地图库、日期版本与 GitHub 更新验收](local-gallery.md)。
+[本地图库、日期版本与 GitHub 更新验收](local-gallery.md) · [targetSdk 32 兼容性与实测范围](target-sdk-32.md)。
 
 | 记录 | 含义 |
 |---|---|

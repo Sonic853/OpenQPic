@@ -105,6 +105,13 @@
     invoke-direct {v9, v0}, Ljava/util/HashMap;-><init>(I)V
 
     :try_start_0
+    sget v0, Landroid/os/Build$VERSION;->SDK_INT:I
+    const/16 v1, 0x1e
+    if-lt v0, v1, :legacy_volumes
+    invoke-static {p1, v7, v8, v9}, Lcom/alensw/PicFolder/GalleryStorage;->volumes(Landroid/content/Context;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;)V
+    goto/16 :cond_2
+
+    :legacy_volumes
     const-string v0, "storage"
 
     invoke-virtual {p1, v0}, Landroid/content/Context;->getSystemService(Ljava/lang/String;)Ljava/lang/Object;

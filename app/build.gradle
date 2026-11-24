@@ -68,7 +68,7 @@ android {
     defaultConfig {
         applicationId 'com.alensw.PicFolder'
         minSdk 23
-        targetSdk 23
+        targetSdk 32
         versionCode GalleryVersion.code(galleryVersion)
         versionName galleryVersion
         ndk { abiFilters 'armeabi', 'x86', 'arm64-v8a' }

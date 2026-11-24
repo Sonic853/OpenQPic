@@ -25,7 +25,7 @@ Android 相册，保留原图库、播放、分享和「WiFi 快传」界面。*
 
 ## 构建
 
-用 Android Studio 打开本仓库根目录。需要 JDK 21 或 25、Android SDK Platform 36 和 Build Tools 36.0.0。默认产物 `com.alensw.PicFolder`，min/target 23；已包含 `armeabi`、`x86` 和 `arm64-v8a` 三组匹配的 JNI 库。**普通构建不需要 NDK、恢复材料或相邻仓库**。
+用 Android Studio 打开本仓库根目录。需要 JDK 21 或 25、Android SDK Platform 36 和 Build Tools 36.0.0。默认产物 `com.alensw.PicFolder` 最低支持 Android 6.0（`minSdk 23`），目标为 Android 12L（`targetSdk 32`）；已包含 `armeabi`、`x86` 和 `arm64-v8a` 三组匹配的 JNI 库。**普通构建不需要 NDK、恢复材料或相邻仓库**。
 
 ```powershell
 .\gradlew.bat :app:assembleDebug          # app/build/outputs/apk/debug/app-debug.apk
@@ -47,6 +47,6 @@ Android 相册，保留原图库、播放、分享和「WiFi 快传」界面。*
 
 ## 验证
 
-`verifyLocalSendDebug` 检查实际 APK/AAB 的两套 JNI、DEX、Manifest、原有 918 个资源 ID、签名与对齐。`tools/localsend_smoke.py` 和 `tools/multisend_smoke.py` 用官方 Rust HTTP 核心作对端，验证单机及多机收发、文件内容、取消和后台行为。详见[实现与实测](docs/localsend-http/IMPLEMENTATION.md)。
+`verifyLocalSendDebug` 检查实际 APK/AAB 的最低和目标 SDK、两套 JNI、DEX、原有 918 个资源 ID、签名与对齐。`tools/localsend_smoke.py` 和 `tools/multisend_smoke.py` 用官方 Rust HTTP 核心作对端，验证单机及多机收发、文件内容、取消和后台行为。详见[实现与实测](docs/localsend-http/IMPLEMENTATION.md)及 [targetSdk 32 兼容记录](verification/target-sdk-32.md)。
 
 [原版保真验证](verification/README.md)及[早期协议与定容分析](docs/localsend-http/README.md)保留作历史对照；`verifyStableDebug` 仍按原版判定。

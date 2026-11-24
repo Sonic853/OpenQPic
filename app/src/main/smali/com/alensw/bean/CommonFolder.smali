@@ -353,6 +353,9 @@
 
     move-result-object v0
 
+    invoke-static {v0}, Lcom/alensw/PicFolder/GalleryStorage;->observerUri(Landroid/net/Uri;)Landroid/net/Uri;
+    move-result-object v0
+
     const/4 v1, 0x0
 
     invoke-virtual {p1, v0, v1, p2}, Landroid/content/ContentResolver;->registerContentObserver(Landroid/net/Uri;ZLandroid/database/ContentObserver;)V

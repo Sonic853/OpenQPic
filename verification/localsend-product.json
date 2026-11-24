@@ -1,9 +1,11 @@
 {
-  "apk_sha256": "ebf5cbd0e299881dd1be71e19eabccf2b5ed7272fcb848b0c94f9f00996f1532",
-  "bytes": 2527510,
-  "dex_classes": 1568,
+  "apk_sha256": "15eb10ad578f08253938c2d198268b2405a4cf8bf59324c50cbf2a344fcdb321",
+  "bytes": 2533460,
+  "dex_classes": 1569,
   "versionName": "2026.11.24",
   "versionCode": 175085184,
+  "minSdk": 23,
+  "targetSdk": 32,
   "retired_legacy_types": 775,
   "original_resource_ids": 918,
   "native_sha256": {
@@ -27,20 +29,20 @@
   },
   "artifacts": {
     "app-debug.apk": {
-      "bytes": 2527510,
-      "sha256": "ebf5cbd0e299881dd1be71e19eabccf2b5ed7272fcb848b0c94f9f00996f1532"
+      "bytes": 2533460,
+      "sha256": "15eb10ad578f08253938c2d198268b2405a4cf8bf59324c50cbf2a344fcdb321"
     },
     "app-debug.aab": {
-      "bytes": 1659100,
-      "sha256": "1de5088cf6f7f16977f5b451fd7bb28b108ae73f18f51a47f0d0f836aa79c9b3"
+      "bytes": 1664371,
+      "sha256": "85016bfd544d2abf986ab4f543b3fabbcd31e869ec3dc9be7c4c5452dba1275f"
     },
     "app-release-unsigned.apk": {
-      "bytes": 2427079,
-      "sha256": "f609f7219487cc09bcc842cabb6a19181828705dcec034c185b69acb2a339b06"
+      "bytes": 2432881,
+      "sha256": "981971efd5f414bcf97be09fd0cd52d07a6f22f19eafc1b173cb81c3f95dce2d"
     },
     "app-release-test-signed.apk": {
-      "bytes": 2497210,
-      "sha256": "c449ae5f05fbcf09410ebb99c45097e2ab97facb5eea43ffc1f3f4256a309f81"
+      "bytes": 2517764,
+      "sha256": "966503ced40cae58c02d9401c2176e0594f7f26cf3292d59fdb7e7eb8f6da28f"
     }
   },
   "release_test_signer": "local Android debug certificate; v1/v2/v3 verified; zipalign -c 4 passed"

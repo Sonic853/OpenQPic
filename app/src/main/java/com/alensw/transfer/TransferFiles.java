@@ -120,9 +120,7 @@ final class TransferFiles {
                 type.startsWith("video/")?MediaStore.Video.Media.EXTERNAL_CONTENT_URI:MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         try {
             resolver.notifyChange(collection,null,false);
-            // Older LocalFolder observers register their exact file:// directory. Android O+
-            // requires provider-backed observer URIs; the filesystem grids use the in-process update.
-            if(Build.VERSION.SDK_INT<26) resolver.notifyChange(Uri.fromFile(directory),null,false);
+            resolver.notifyChange(com.alensw.PicFolder.GalleryStorage.observerUri(Uri.fromFile(directory)),null,false);
         }
         catch(RuntimeException e) { Log.w("LocalSend","Cannot notify media collection",e); }
     }

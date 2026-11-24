@@ -3387,6 +3387,9 @@
 
     move-result-object v0
 
+    invoke-static {v0, v6}, Lcom/alensw/ui/c/df;->a(Landroid/net/Uri;C)Landroid/net/Uri;
+    move-result-object v0
+
     invoke-virtual {v5, v0}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 
     goto :goto_1
@@ -3425,6 +3428,8 @@
     invoke-virtual {v0, v1, v5}, Landroid/content/Intent;->putParcelableArrayListExtra(Ljava/lang/String;Ljava/util/ArrayList;)Landroid/content/Intent;
 
     :goto_4
+    invoke-static {v0, v5}, Lcom/alensw/PicFolder/GalleryStorage;->clipStreams(Landroid/content/Intent;Ljava/util/List;)V
+
     invoke-virtual {v0, v3}, Landroid/content/Intent;->setType(Ljava/lang/String;)Landroid/content/Intent;
 
     invoke-virtual {v0, v8}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;

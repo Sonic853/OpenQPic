@@ -124,7 +124,13 @@ def verify(apk, aab, tools):
     def run(*args):
         return subprocess.check_output([str(x) for x in args], text=True, encoding="utf-8", errors="replace")
     aapt = tools/("aapt2.exe" if os.name=="nt" else "aapt2")
-    manifest = run(aapt,"dump","xmltree",apk,"--file","AndroidManifest.xml")
+    def check_sdk(package):
+        manifest=run(aapt,"dump","xmltree",package,"--file","AndroidManifest.xml")
+        sdk,=re.findall(r"(?m)^\s*E: uses-sdk\b[^\n]*\n((?:[ \t]*A: [^\n]*\n)+)",manifest)
+        for key,value in (("minSdkVersion",23),("targetSdkVersion",32)):
+            assert re.search(r"android:"+key+r"\(0x[0-9a-f]+\)="+str(value)+r"\b",sdk),(package,key,sdk)
+        return manifest
+    manifest = check_sdk(apk)
     def version(package):
         badging=run(aapt,"dump","badging",package).splitlines()[0]
         code, tag = re.search(r"\bversionCode='(\d+)' versionName='([^']+)'",badging).groups()
@@ -171,9 +177,10 @@ def verify(apk, aab, tools):
         binary=Path(temp)/"bundle.apk"
         run(aapt,"convert","--output-format","binary","-o",binary,Path(temp)/"bundle.zip")
         assert version(binary)==(tag,code)
+        check_sdk(binary)
     run(java,"-Xmx128m","-XX:+UseSerialGC","-jar",tools/"lib/apksigner.jar","verify",apk)
     return {"apk_sha256":sha(apk.read_bytes()), "bytes":apk.stat().st_size, "dex_classes":len(defs),
-            "versionName":tag,"versionCode":code,"retired_legacy_types":len(retired),
+            "versionName":tag,"versionCode":code,"minSdk":23,"targetSdk":32,"retired_legacy_types":len(retired),
             "original_resource_ids":len(stable),"native_sha256":libs}
 
 

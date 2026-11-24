@@ -730,6 +730,11 @@
 
     if-eqz v0, :cond_1
 
+    # Gallery selections already contain the same grantable streams in ClipData and EXTRA_STREAM.
+    invoke-virtual {p1}, Landroid/content/Intent;->getClipData()Landroid/content/ClipData;
+    move-result-object v0
+    if-nez v0, :cond_1
+
     const-string v0, "multiple_files"
 
     invoke-virtual {p1, v0}, Landroid/content/Intent;->hasExtra(Ljava/lang/String;)Z

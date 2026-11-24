@@ -16,6 +16,8 @@
 
 .field private j:I
 
+.field private waitingForStorage:Z
+
 
 # direct methods
 .method public constructor <init>()V
@@ -341,36 +343,14 @@
 .end method
 
 .method private onCreate__$appendPatch4(Landroid/os/Bundle;)V
-    .locals 2
+    .locals 1
 
-    sget v0, Landroid/os/Build$VERSION;->SDK_INT:I
-
-    const/16 v1, 0x1e
-
-    if-lt v0, v1, :cond_0
-
-    invoke-static {}, Landroid/os/Environment;->isExternalStorageManager()Z
-
+    invoke-virtual {p0}, Lcom/alensw/PicFolder/GalleryActivity;->isStoragePermissionGranted()Z
     move-result v0
-
     if-nez v0, :cond_0
-
-    new-instance v0, Landroid/content/Intent;
-
-    const-string v1, "android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION"
-
-    invoke-direct {v0, v1}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
-
-    const-string v1, "package:com.alensw.PicFolder"
-
-    invoke-static {v1}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
-
-    move-result-object v1
-
-    invoke-virtual {v0, v1}, Landroid/content/Intent;->setData(Landroid/net/Uri;)Landroid/content/Intent;
-
-    invoke-virtual {p0, v0}, Lcom/alensw/PicFolder/GalleryActivity;->startActivity(Landroid/content/Intent;)V
-
+    const/4 v0, 0x1
+    iput-boolean v0, p0, Lcom/alensw/PicFolder/GalleryActivity;->waitingForStorage:Z
+    invoke-static {p0}, Lcom/alensw/PicFolder/GalleryStorage;->requestAccess(Landroid/app/Activity;)V
     :cond_0
     return-void
 .end method
@@ -757,8 +737,6 @@
 
     invoke-direct/range {p0 .. p1}, Lcom/alensw/PicFolder/GalleryActivity;->onCreate__$appendPatch(Landroid/os/Bundle;)V
 
-    invoke-virtual {p0}, Lcom/alensw/PicFolder/GalleryActivity;->isStoragePermissionGranted()Z
-
     return-void
 .end method
 
@@ -1008,40 +986,25 @@
 
 
 .method public isStoragePermissionGranted()Z
-    .locals 4
-
-    const/4 v3, 0x1
-
-    const/4 v2, 0x0
-
-    sget v0, Landroid/os/Build$VERSION;->SDK_INT:I
-
-    const/16 v1, 0x17
-
-    if-lt v0, v1, :cond_0
-
-    const-string v0, "android.permission.WRITE_EXTERNAL_STORAGE"
-
-    invoke-virtual {p0, v0}, Lcom/alensw/PicFolder/GalleryActivity;->checkSelfPermission(Ljava/lang/String;)I
-
+    .locals 1
+    invoke-static {p0}, Lcom/alensw/PicFolder/GalleryStorage;->hasAccess(Landroid/content/Context;)Z
     move-result v0
+    return v0
+.end method
 
-    if-nez v0, :cond_1
-
-    :cond_0
-    :goto_0
-    return v2
-
-    :cond_1
-    new-array v0, v3, [Ljava/lang/String;
-
-    const-string v1, "android.permission.WRITE_EXTERNAL_STORAGE"
-
-    aput-object v1, v0, v2
-
-    invoke-static {p0, v0, v3}, Landroidx/core/app/ActivityCompat;->requestPermissions(Landroid/app/Activity;[Ljava/lang/String;I)V
-
-    goto :goto_0
+.method public onResume()V
+    .locals 1
+    iget-boolean v0, p0, Lcom/alensw/PicFolder/GalleryActivity;->waitingForStorage:Z
+    if-eqz v0, :resume
+    invoke-virtual {p0}, Lcom/alensw/PicFolder/GalleryActivity;->isStoragePermissionGranted()Z
+    move-result v0
+    if-eqz v0, :resume
+    const/4 v0, 0x0
+    iput-boolean v0, p0, Lcom/alensw/PicFolder/GalleryActivity;->waitingForStorage:Z
+    invoke-static {p0}, Lcom/alensw/PicFolder/GalleryStorage;->accessGranted(Landroid/content/Context;)V
+    :resume
+    invoke-super {p0}, Lcom/alensw/ui/c/cx;->onResume()V
+    return-void
 .end method
 
 .method public onBackPressed()V
