@@ -1,4 +1,9 @@
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.instrumentation.AsmClassVisitorFactory
+import com.android.build.api.instrumentation.ClassContext
+import com.android.build.api.instrumentation.ClassData
+import com.android.build.api.instrumentation.InstrumentationParameters
+import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask
 import com.android.build.gradle.internal.res.LinkAndroidResForBundleTask
@@ -9,9 +14,29 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 import org.openqpic.version.GalleryVersion
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.Opcodes
 
 plugins {
     id 'com.android.application'
+}
+
+def httpCore = 'org.apache.httpcomponents:httpcore:4.4.16'
+def documentFile = 'androidx.documentfile:documentfile:1.1.0'
+
+dependencies {
+    implementation httpCore
+    implementation(documentFile) {
+        exclude group: 'androidx.core', module: 'core'
+        exclude group: 'androidx.annotation', module: 'annotation'
+        exclude group: 'org.jspecify', module: 'jspecify'
+    }
+    // Keep DocumentFile's API annotations visible to javac/lint but out of the package.
+    compileOnly('androidx.annotation:annotation:1.8.1') {
+        exclude group: 'org.jetbrains.kotlin'
+    }
+    compileOnly 'org.jspecify:jspecify:1.0.0'
 }
 
 def galleryVersion = providers.gradleProperty('openqpicVersion')
@@ -49,6 +74,12 @@ android {
     packaging {
         jniLibs.keepDebugSymbols += ['**/libqpicjni156.so', '**/libqpiclocalsend.so']
         jniLibs.useLegacyPackaging = true
+        // Keep licenses in the repository and preserve the original library resource set.
+        resources.excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/NOTICE',
+                               'META-INF/maven/org.apache.httpcomponents/httpcore/**',
+                               'org/apache/http/version.properties',
+                               'META-INF/androidx/documentfile/documentfile/LICENSE.txt',
+                               'META-INF/androidx.documentfile_documentfile.version']
     }
     dependenciesInfo {
         includeInApk = false
@@ -58,9 +89,50 @@ android {
     sourceSets.main.java.srcDir(rootProject.file('buildSrc/src/main/java'))
 }
 
-// Signatures of external JNDI/JGSS, servlet and logging APIs that Apache optionally
-// calls on a desktop JVM. No gallery code or method bodies; never packaged by D8.
-dependencies { compileOnly files('compileOnly/apache-optional-api.jar') }
+// DocumentFile 1.1.0 uses four DocumentsContractCompat wrappers. On API 21+
+// they delegate to the same platform methods; link those calls without androidx.core.
+abstract class LinkPlatformDocumentsContract implements AsmClassVisitorFactory<InstrumentationParameters.None> {
+    static final String COMPAT = 'androidx/core/provider/DocumentsContractCompat'
+    static final Set<String> PLATFORM_METHODS = [
+            'isDocumentUri(Landroid/content/Context;Landroid/net/Uri;)Z',
+            'getDocumentId(Landroid/net/Uri;)Ljava/lang/String;',
+            'getTreeDocumentId(Landroid/net/Uri;)Ljava/lang/String;',
+            'buildDocumentUriUsingTree(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;'
+    ].toSet()
+
+    @Override boolean isInstrumentable(ClassData data) {
+        data.className in ['androidx.documentfile.provider.DocumentFile',
+                           'androidx.documentfile.provider.DocumentsContractApi19']
+    }
+
+    @Override ClassVisitor createClassVisitor(ClassContext context, ClassVisitor next) {
+        new ClassVisitor(Opcodes.ASM9, next) {
+            @Override MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
+                                                String[] exceptions) {
+                new MethodVisitor(Opcodes.ASM9, super.visitMethod(access, name, descriptor, signature, exceptions)) {
+                    @Override void visitMethodInsn(int opcode, String owner, String method, String desc,
+                                                   boolean isInterface) {
+                        if (owner == LinkPlatformDocumentsContract.COMPAT) {
+                            if (opcode != Opcodes.INVOKESTATIC || isInterface ||
+                                    !LinkPlatformDocumentsContract.PLATFORM_METHODS.contains(method + desc)) {
+                                throw new GradleException("Unexpected DocumentFile call: ${owner}.${method}${desc}")
+                            }
+                            owner = 'android/provider/DocumentsContract'
+                        }
+                        super.visitMethodInsn(opcode, owner, method, desc, isInterface)
+                    }
+                }
+            }
+
+            @Override void visitInnerClass(String name, String owner, String innerName, int access) {
+                // FLAG_VIRTUAL_DOCUMENT is inlined; this entry alone names its enclosing library.
+                if (name != LinkPlatformDocumentsContract.COMPAT + '$DocumentCompat') {
+                    super.visitInnerClass(name, owner, innerName, access)
+                }
+            }
+        }
+    }
+}
 
 // The Java-side Android resource merger rejects string/default and
 // string/interface even though Android itself supports these shipped names.
@@ -113,7 +185,7 @@ abstract class CompileStableResources extends DefaultTask {
                     '--dir', safe, '-o', archive
         }
         fileOps.sync { from archives.zipTree(archive); into flats }
-        // There are no library overlays to map back to other source sets.
+        // DocumentFile ships no Android resources, so there are no library overlays.
         blame.get().asFile.mkdirs()
     }
 }
@@ -188,6 +260,10 @@ abstract class LinkStableResources extends DefaultTask {
 
 androidComponents {
     onVariants(selector().all()) { variant ->
+        if (variant.minSdk.apiLevel < 21) {
+            throw new GradleException('DocumentFile platform linking requires minSdk 21 or higher.')
+        }
+        variant.instrumentation.transformClassesWith(LinkPlatformDocumentsContract, InstrumentationScope.ALL) {}
         def cap = variant.name.capitalize()
         def aapt = sdkComponents.aapt2.flatMap { it.executable }
         def flats = tasks.register("compile${cap}StableResources", CompileStableResources) {
@@ -243,8 +319,15 @@ tasks.register('verifyLocalSendDebug', Exec) {
     dependsOn 'assembleDebug', 'bundleDebug'
     def sdk = androidComponents.sdkComponents.sdkDirectory
     doFirst {
+        def archives = configurations.debugRuntimeClasspath.incoming.artifacts.artifacts.collectEntries { artifact ->
+            [(artifact.id.componentIdentifier.displayName): artifact.file]
+        }
+        if (archives.keySet() != [httpCore, documentFile].toSet()) {
+            throw new GradleException("Unexpected runtime libraries: ${archives.keySet()}")
+        }
         environment 'JAVA_HOME', System.getProperty('java.home')
         commandLine providers.gradleProperty('python').getOrElse(System.getProperty('os.name').startsWith('Windows') ? 'python' : 'python3'),
-                rootProject.file('tools/verify_localsend.py'), '--build-tools', sdk.get().dir('build-tools/36.0.0').asFile
+                rootProject.file('tools/verify_localsend.py'), '--build-tools', sdk.get().dir('build-tools/36.0.0').asFile,
+                '--httpcore', archives[httpCore], '--documentfile', archives[documentFile]
     }
 }

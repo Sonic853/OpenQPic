@@ -1,7 +1,8 @@
-"""Check the shipped Java gallery, its native libraries and LocalSend in both Android packages."""
+"""Check gallery code, external libraries, native libraries and LocalSend in both Android packages."""
 import argparse
 from datetime import date
 import hashlib
+from io import BytesIO
 import json
 import os
 from pathlib import Path
@@ -15,6 +16,21 @@ ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT/"app"
 PREFIX = "Lcom/alensw/transfer/"
 LICENSES_URL = "https://github.com/Sonic853/OpenQPic/tree/main/licenses"
+HTTP_CORE_SHA = "6c9b3dd142a09dc468e23ad39aad6f75a0f2b85125104469f026e52a474e464f"
+DOCUMENT_FILE_SHA = "684e0ffcb21a660c939d1bb814521f42c4bd74816f4a117291fe6a101cf3a822"
+# Removed upstream between the original HttpCore 4.4.1 and the shipped 4.4.16.
+RETIRED_HTTP_CORE_TYPES = {
+    "Lorg/apache/http/annotation/GuardedBy;",
+    "Lorg/apache/http/annotation/Immutable;",
+    "Lorg/apache/http/annotation/NotThreadSafe;",
+    "Lorg/apache/http/annotation/ThreadSafe;",
+    "Lorg/apache/http/pool/PoolEntryFuture;",
+}
+EXCLUDED_LIBRARY_RESOURCES = {
+    "META-INF/DEPENDENCIES", "META-INF/LICENSE", "META-INF/NOTICE",
+    "META-INF/androidx/documentfile/documentfile/LICENSE.txt",
+    "org/apache/http/version.properties", "META-INF/androidx.documentfile_documentfile.version",
+}
 
 
 def sha(data):
@@ -55,11 +71,22 @@ def dex(data):
             p += 1
         p += 1
         return data[p:data.index(b"\0", p)].decode("utf-8", "replace")
-    types = [string(u(u(68)+i*4)) for i in range(u(64))]
-    return set(types), {types[u(u(100)+i*32)] for i in range(u(96))}
+    strings = [string(i) for i in range(u(56))]
+    types = [strings[u(u(68)+i*4)] for i in range(u(64))]
+    return set(types), {types[u(u(100)+i*32)] for i in range(u(96))}, strings
 
 
-def verify(apk, aab, tools):
+def library_classes(archive, digest):
+    data = archive.read_bytes()
+    assert sha(data) == digest, ("unexpected Maven artifact", archive, sha(data))
+    if archive.suffix == ".aar":
+        with ZipFile(BytesIO(data)) as aar:
+            data = aar.read("classes.jar")
+    with ZipFile(BytesIO(data)) as jar:
+        return {"L"+name[:-6]+";" for name in jar.namelist() if name.endswith(".class")}
+
+
+def verify(apk, aab, tools, httpcore, documentfile):
     pinned = json.loads((APP/"native-inputs.json").read_text())
     libs = {}
     for rel, digest in pinned.items():
@@ -83,23 +110,38 @@ def verify(apk, aab, tools):
     # independent of current sources so deleting a Java file cannot shrink the gate.
     inventory=[s.split() for s in (APP/"recovered-types.txt").read_text().splitlines() if s.startswith("L")]
     old={r[0] for r in inventory}
-    expected={r[-1] for r in inventory}
-    assert len(old)==len(expected)==len(inventory)==1472
+    assert len(old)==len({r[-1] for r in inventory})==len(inventory)==1472
     assert all(len(r) in (1,2) for r in inventory)
+    unused={s for s in (APP/"removed-unused-library-types.txt").read_text().splitlines() if s.startswith("L")}
+    assert len(unused)==587 and unused <= old
+    removed_libraries = unused | RETIRED_HTTP_CORE_TYPES
+    # Reflected class names (and JNI-style names) need not appear in type_ids.
+    unused_names = {name for t in removed_libraries for name in (t, t[1:-1], t[1:-1].replace("/", "."))}
+    assert RETIRED_HTTP_CORE_TYPES <= old - unused
+    expected={r[-1] for r in inventory if r[0] not in removed_libraries}
+    assert len(expected)==880 and not removed_libraries & expected
+    external = set()
+    for archive, digest, prefix, count in (
+        (httpcore, HTTP_CORE_SHA, "Lorg/apache/http/", 253),
+        (documentfile, DOCUMENT_FILE_SHA, "Landroidx/documentfile/", 5),
+    ):
+        required = {t for t in expected if t.startswith(prefix)}
+        actual = library_classes(archive, digest)
+        assert required <= actual, (archive, "missing original classes", sorted(required - actual))
+        assert len(actual) == count and all(t.startswith(prefix) for t in actual), archive
+        external |= actual
+    expected.update(external)
     assert not next((APP/"src").rglob("*.smali"),None), "Smali in product sources"
     for suffix in ("*.class","*.dex","*.jar"):
         assert not next((APP/"src").rglob(suffix),None), "Precompiled Java input: "+suffix
     classdir=APP/"build/intermediates/javac/debug/compileDebugJavaWithJavac/classes"
     javac={"L"+f.relative_to(classdir).as_posix()[:-6]+";" for f in classdir.rglob("*.class")}
-    api=APP/"compileOnly/apache-optional-api.jar"
-    assert sha(api.read_bytes())=="5ab8dee1fd4b16c056e64e4a8ab04eba922046423454c3850d4b1f3f778536fa"
-    with ZipFile(api) as external:
-        optional={"L"+p[:-6]+";" for p in external.namelist() if p.endswith(".class")}
-    assert len(optional)==23 and not optional & javac
     expected.update(s for s in (APP/"product-java.txt").read_text().splitlines() if s.startswith("L"))
-    assert expected <= javac, ("not compiled from Java", sorted(expected-javac))
+    assert expected-external <= javac, ("not compiled from Java", sorted(expected-external-javac))
+    assert not external & javac, ("external classes also compiled from source", sorted(external & javac))
+    assert not removed_libraries & javac, ("removed library still compiled", sorted(removed_libraries & javac))
     retired={t for t in (APP/"removed-legacy-types.txt").read_text().splitlines() if t.startswith("L")}
-    assert len(old | retired)==2247 and not retired & expected
+    assert len(retired)==775 and len(old | retired)==2247 and not retired & expected
     with ZipFile(apk) as z, ZipFile(aab) as bundle:
         assert {p for p in z.namelist() if p.startswith("lib/")} == libs.keys()
         assert {p[5:] for p in bundle.namelist() if p.startswith("base/lib/")} == libs.keys()
@@ -111,28 +153,37 @@ def verify(apk, aab, tools):
             packaged = [n for n in package.namelist() if re.search(r"(^|/)assets/licenses(/|$)", n)
                         or n.rsplit("/", 1)[-1] in license_files]
             assert not packaged, ("Repository-only license files packaged", packaged)
+            resources = {n.removeprefix("base/root/") for n in package.namelist()}
+            assert not resources & EXCLUDED_LIBRARY_RESOURCES, resources & EXCLUDED_LIBRARY_RESOURCES
+            assert not any(n.startswith("META-INF/maven/org.apache.httpcomponents/httpcore/") for n in resources)
+        dex_names = {name for name in z.namelist() if re.fullmatch(r"classes\d*\.dex", name)}
+        assert {name for name in bundle.namelist() if name.startswith("base/dex/") and name.endswith(".dex")} == {
+            "base/dex/"+name for name in dex_names
+        }
         defs, refs = set(), set()
-        for name in z.namelist():
-            if not re.fullmatch(r"classes\d*\.dex", name):
-                continue
+        for name in sorted(dex_names):
             data = z.read(name)
             assert data == bundle.read("base/dex/"+name)
-            types, classes = dex(data)
+            types, classes, strings = dex(data)
             assert not classes & defs
             defs |= classes
             refs |= {t.lstrip("[") for t in types}
+            stale_names = unused_names.intersection(strings)
+            assert not stale_names, ("removed library class names in DEX", sorted(stale_names))
             for stale in (b"PeerHub", b"224.0.0.251", b"CloudProvider", b"ver.q-supreme.com", b"QP-Gallery-Releases",
                           b"last_check_update", b"quickpic.authorization", b"quickpic.account", b"failed_upload_tasks", b"umeng"):
                 assert stale.lower() not in data.lower(), stale
         assert expected <= defs, ("missing from DEX", sorted(expected-defs))
-        assert not optional & defs, ("external declarations in APK", optional & defs)
-        unexpected={d for d in defs-javac if not re.fullmatch(r"Lcom/alensw/PicFolder/R(?:\$\w+)?;", d)
-                    and not ("$$ExternalSynthetic" in d and d.split("$$ExternalSynthetic")[0]+";" in javac)}
-        assert not unexpected, ("DEX classes not traceable to javac, D8 or R", sorted(unexpected))
+        program = javac | external
+        # AGP generates an empty R class for the resource-free DocumentFile AAR.
+        unexpected={d for d in defs-program if d != "Landroidx/documentfile/R;"
+                    and not re.fullmatch(r"Lcom/alensw/PicFolder/R(?:\$\w+)?;", d)
+                    and not ("$$ExternalSynthetic" in d and d.split("$$ExternalSynthetic")[0]+";" in program)}
+        assert not unexpected, ("DEX classes not traceable to source, Maven libraries, D8 or R", sorted(unexpected))
         assert not {t for t in refs if t.startswith(PREFIX)} - {d for d in defs if d.startswith(PREFIX)}
-        removed=retired | {r[0] for r in inventory if len(r)==2}
+        removed=retired | removed_libraries | {r[0] for r in inventory if len(r)==2}
         assert not removed & (defs|refs), removed & (defs|refs)
-        assert not any(t.startswith(("Lcom/alensw/cloud/", "Lb/a/", "Lcom/c/a/")) for t in refs)
+        assert not any(t.startswith(("Landroidx/core/", "Lcom/alensw/cloud/", "Lb/a/", "Lcom/c/a/")) for t in refs)
         api=b"https://api.github.com/repos/Sonic853/OpenQPic/releases/latest"
         assert any(api in z.read(n) for n in z.namelist() if re.fullmatch(r"classes\d*\.dex",n))
     def run(*args):
@@ -210,8 +261,11 @@ def verify(apk, aab, tools):
         check_license_link(binary, run(aapt,"dump","resources",binary))
     run(java,"-Xmx128m","-XX:+UseSerialGC","-jar",tools/"lib/apksigner.jar","verify",apk)
     return {"apk_sha256":sha(apk.read_bytes()), "bytes":apk.stat().st_size, "dex_classes":len(defs),
-            "java_compiled_classes":len(javac),"retained_gallery_types":len(inventory),
+            "java_compiled_classes":len(javac),"retained_gallery_types":len(old-removed_libraries),
+            "external_library_types":len(external),
             "versionName":tag,"versionCode":code,"minSdk":23,"targetSdk":32,"retired_legacy_types":len(retired),
+            "removed_unused_library_types":len(unused),
+            "retired_httpcore_types":len(RETIRED_HTTP_CORE_TYPES),
             "original_resource_ids":len(stable),"native_sha256":libs,"licenses_url":LICENSES_URL,
             "packaged_license_files":0}
 
@@ -219,8 +273,11 @@ def verify(apk, aab, tools):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--build-tools", type=Path, required=True)
+    ap.add_argument("--httpcore", type=Path, required=True)
+    ap.add_argument("--documentfile", type=Path, required=True)
     args = ap.parse_args()
-    data = verify(APP/"build/outputs/apk/debug/app-debug.apk",APP/"build/outputs/bundle/debug/app-debug.aab",args.build_tools)
+    data = verify(APP/"build/outputs/apk/debug/app-debug.apk",APP/"build/outputs/bundle/debug/app-debug.aab",
+                  args.build_tools,args.httpcore,args.documentfile)
     report = APP/"build/reports/localsend-debug.json"
     report.parent.mkdir(parents=True,exist_ok=True)
     report.write_text(json.dumps(data,indent=2)+"\n","utf-8")

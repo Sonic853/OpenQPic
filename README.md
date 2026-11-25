@@ -38,17 +38,18 @@ Android 相册，保留原图库、播放、分享和「WiFi 快传」界面。*
 .\gradlew.bat :app:verifyLocalSendDebug   # 额外需要 Python 3.10+
 ```
 
-从原保真版本切换且已有旧构建缓存时，先运行一次 `:app:clean`。本工作区的离线依赖可设 `$env:GRADLE_USER_HOME=(Resolve-Path '..\OpenPic\.local\android-project\gradle').Path`，追加 `--offline`。
+首次构建从 Maven Central 和 Google Maven 下载依赖；缓存后可追加 `--offline`。从旧版本切换且已有旧构建缓存时，先运行一次 `:app:clean`。本工作区可用 `$env:GRADLE_USER_HOME=(Resolve-Path '..\OpenPic\.local\android-project\gradle').Path` 复用缓存。
 
 | 模块 | 来源 / 编辑位置 |
 |---|---|
-| 图库、播放器、原控件和随包库 | `app/src/recovered/java/`；与 `app/src/main/java/` 一起由 javac 编译，再由 D8 生成 DEX。见 [Java 恢复记录](docs/recovery/gallery-java.md)。 |
+| 图库、播放器、定制 Support 控件 | `app/src/recovered/java/`，与 `app/src/main/java/` 一起由 javac 编译。见 [Java 恢复记录](docs/recovery/gallery-java.md)。 |
+| HTTP 与 Android 文档访问 | Gradle 从 Maven 引入 [HttpCore 4.4.16](docs/recovery/httpcore.md) 和 [AndroidX DocumentFile 1.1.0](docs/recovery/android-support.md)；不引入 `androidx.core`。 |
 | 资源、系统分享 | `app/src/main/res/`、`app/resource-ids.txt`、`app/src/main/java/com/alensw/ui/activity/GalleryShareMenu.java`。 |
 | Android 快传界面、授权与文件提交 | `app/src/main/java/com/alensw/transfer/`；复用 `transfer_send`、`list_view`、`transfer_list_item`、`ImageGridView` 和原双页导航。 |
 | 图像 JNI | **OpenQPicJni** 的 `libqpicjni156.so`，含该仓库从 32 位源码移植的 arm64 版本。 |
 | 发现、HTTP、FD 传输、会话与 JNI 桥 | 独立仓库 **OpenQPicLocalSend**。`libqpiclocalsend.so` 进入快传才加载；应用内 `org/openqpic/localsend` 是与该库配套的源码副本。 |
 
-原生开发时，将 `OpenQPicJni`、`OpenQPicLocalSend` 与本仓库并排放置，分别按其 README 构建库，再运行 `python tools/sync_localsend.py`。同步后的文件摘要在 [`app/native-inputs.json`](app/native-inputs.json)。[保留的图库类型](app/recovered-types.txt)及[新增产品类](app/product-java.txt)都在最终制品中检查。
+原生开发时，将 `OpenQPicJni`、`OpenQPicLocalSend` 与本仓库并排放置，分别按其 README 构建库，再运行 `python tools/sync_localsend.py`。同步后的文件摘要在 [`app/native-inputs.json`](app/native-inputs.json)。最终制品按[原始类型清单](app/recovered-types.txt)、[已移除的未用库](app/removed-unused-library-types.txt)及[新增产品类](app/product-java.txt)核对。
 
 ## 验证
 

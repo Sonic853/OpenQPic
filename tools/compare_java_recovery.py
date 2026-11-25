@@ -84,17 +84,21 @@ def apk_types(path):
     return result
 
 
-def compare(baseline, rebuilt):
+def compare(baseline, rebuilt, *, local_only=False):
     old, new = apk_types(baseline), apk_types(rebuilt)
     aliases = dict((row[0], row[-1]) for row in (s.split() for s in
                    (APP/"recovered-types.txt").read_text().splitlines() if s.startswith("L")))
+    unused = {s for s in (APP/"removed-unused-library-types.txt").read_text().splitlines() if s.startswith("L")}
+    assert unused <= aliases.keys()
 
     def renamed(signature):
         return re.sub(r"L[^;(:]+;", lambda m: aliases.get(m[0], m[0]), signature)
 
-    missing = []
+    missing = [f"removed type reappeared: {t}" for t in unused & new.keys()]
     count = dict(types=0, fields=0, methods=0, concrete=0)
     for before, after in aliases.items():
+        if before in unused or (local_only and before.startswith(("Lorg/apache/http/", "Landroidx/documentfile/"))):
+            continue
         if before not in old or after not in new:
             missing.append(f"type: {before} → {after}")
             continue
@@ -127,5 +131,6 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("baseline", type=Path, help="APK built from aa0043e before the Java migration")
     p.add_argument("rebuilt", type=Path, nargs="?", default=APP/"build/outputs/apk/debug/app-debug.apk")
+    p.add_argument("--local-only", action="store_true", help="Skip the external libraries, which may be upgraded")
     args = p.parse_args()
-    print(compare(args.baseline, args.rebuilt))
+    print(compare(args.baseline, args.rebuilt, local_only=args.local_only))
