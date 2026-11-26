@@ -27,4 +27,7 @@
     <string name="ls_preparing">正在准备传输…</string>
     <string name="ls_no_grant">无法读取分享的文件，请重新选择并授予读取权限。</string>
     <string name="ls_limit">最多可选择 256 个文件。</string>
+    <plurals name="ls_cancel_sending_files">
+        <item quantity="other">取消发送%1$d份媒体文件？</item>
+    </plurals>
 </resources>

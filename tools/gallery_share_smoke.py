@@ -296,7 +296,7 @@ def main():
         receive("direct", ["png", "jpg"], "image/*")
         assert compact, "No compact gallery menu was exercised; use an AOSP emulator with fewer share handlers"
 
-        nodes, _ = menu(["png", "mp4"])
+        nodes, _ = menu(["png", "jpg", "mp4"])
         transfer = ("WiFi transfer", "WiFi 快传")
         target = d.match(nodes, transfer)
         if target is None:
@@ -304,11 +304,32 @@ def main():
             target = d.find(*transfer, scroll=True)
         d.tap(target)
         d.foreground(activity=APP + "/com.alensw.transfer.TransferActivity")
-        assert d.find(APP + ":id/files_to_send").get("text", "").endswith("(2)")
+        pending = APP + ":id/files_to_send"
+        clear = APP + ":id/clear"
+        assert d.find(pending).get("text", "").endswith("(3)")
+        d.tap(d.find(clear))
+        d.find("Cancel sending 3 media files?", "取消发送3份媒体文件？")
+        d.tap(d.find("android:id/button2"))
+        assert d.find(pending).get("text", "").endswith("(3)")
+
+        d.thumb("png")
+        d.thumb("jpg")
+        d.tap(d.find(clear))
+        assert d.find(pending).get("text", "").endswith("(1)")
+        d.thumb("mp4")
+        d.thumb("mp4")  # deselect the remaining thumbnail
+        d.tap(d.find(clear))
+        d.find("Cancel sending 1 media file?", "取消发送1份媒体文件？")
+        d.tap(d.find("android:id/button1"))
+        assert d.find(pending).get("text") in ("Files to send", "待发送的文件")
+        assert d.find(clear).get("enabled") == "false"
+        for kind, file in files.items():
+            assert hashlib.sha256(d.adb("exec-out", "cat", f"{folder}/{file.name}")).hexdigest() == hashes[kind]
 
         # Exercise the original More submenu and the separate, still top-level Sharesheet row.
         d.clear_result()
-        d.sh(f"am start -W -n {PEER}/.ShareProbe -a org.openqpic.shareprobe.ENABLE_OVERFLOW")
+        # This probe finishes in onCreate without drawing a window; wait for its result file.
+        d.sh(f"am start -n {PEER}/.ShareProbe -a org.openqpic.shareprobe.ENABLE_OVERFLOW")
         assert d.probe_result() == {"overflow": True}
         nodes, dense = menu(["png"])
         assert d.match(nodes, MORE) is not None, ("Expected the direct-target overflow", dense)
@@ -332,8 +353,9 @@ def main():
         clean.callback(d.sh, "rm -f " + source + " " + rendered)
         d.clear_result()
         d.sh("am force-stop " + APP)
-        d.sh(f"am start -W -n {APP}/.CropActivity -a android.intent.action.EDIT -d file://{source} "
+        d.sh(f"am start -n {APP}/.CropActivity -a android.intent.action.EDIT -d file://{source} "
              "-t image/jpeg --ei aspectX 3 --ei aspectY 2 --ei outputX 72 --ei outputY 48 --ez noFaceDetection true")
+        d.foreground(activity=APP + "/.CropActivity")
         d.tap(d.find(APP + ":id/share"))
         d.tap(d.find(*other))
         crop_chooser = d.foreground(chooser=True)
@@ -350,11 +372,12 @@ def main():
         apk = d.sh("pm path " + APP).splitlines()[0].removeprefix("package:")
         report = {"device": d.sh("getprop ro.build.fingerprint"), "apk_sha256": hashlib.sha256(
             d.adb("exec-out", "cat", apk)).hexdigest(), "cases": cases, "compact": compact,
-            "overflow_root": dense, "overflow_chooser": overflow_chooser, "localsend_direct_count": 2}
+             "overflow_root": dense, "overflow_chooser": overflow_chooser, "localsend_direct_count": 3,
+             "localsend_pending_removal": True}
     if opt.report:
         opt.report.parent.mkdir(parents=True, exist_ok=True)
         opt.report.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf8")
-    print("Sharesheet, rendered crop, compact/overflow menus, direct receiver, LocalSend and zh-CN labels passed.")
+    print("Sharesheet, rendered crop, compact/overflow menus, direct receiver, LocalSend pending removal and zh-CN labels passed.")
 
 
 if __name__ == "__main__":

@@ -26,7 +26,8 @@ import static com.alensw.PicFolder.R.*;
 
 /** The original gallery, system share target and launcher shortcut all enter here. */
 public final class TransferActivity extends ao implements TransferSessionService.Client {
-    private final ArrayList<Uri> selection=new ArrayList<>();
+    private final ArrayList<Uri> pendingFiles=new ArrayList<>();
+    private final Set<Uri> selectedForRemoval=new HashSet<>();
     private final Map<Uri,CommonFile> thumbs=new HashMap<>();
     private final ExecutorService metadata=Executors.newSingleThreadExecutor();
     private final ArrayList<NearbyDevices.Entry> devices=new ArrayList<>();
@@ -39,9 +40,10 @@ public final class TransferActivity extends ao implements TransferSessionService
     private final View[] pages=new View[2];
     private final TextView[] tabs=new TextView[2];
     private View send; private p pager; private TextView tip, count; private ImageGridView grid;
+    private ImageView clearFilesButton;
     private Devices deviceAdapter; private History historyAdapter;
     private FrameLayout root; private View tabBar; private TextView nearby;
-    private ReceivePage receive; private AlertDialog pinDialog; private String pinKey;
+    private ReceivePage receive; private AlertDialog pinDialog,clearFilesDialog; private String pinKey;
     private SharedPreferences prefs;
     private TransferSessionService service; private boolean bound,resumed;
     private static final int PICK=1, CONNECT=0x4c5301, PIN=0x4c5302, TLS=0x4c5303;
@@ -85,13 +87,15 @@ public final class TransferActivity extends ao implements TransferSessionService
         history.setOnItemClickListener((parent,v,pos,n)->{
             String key=rows.get(pos).key; deferred.remove(key); promptsChanged();
         });
-        grid=send.findViewById(id.grid); grid.setTextMode(1);
+        grid=send.findViewById(id.grid); grid.setTextMode(1); grid.setMultiSelect(true);
         grid.a(new Thumbnails(),QuickApp.r.d,QuickApp.r.e);
+        clearFilesButton=send.findViewById(id.clear);
         icon(send.findViewById(id.add),raw.add_2);
-        icon(send.findViewById(id.clear),raw.delete_2);
+        icon(clearFilesButton,raw.delete_2);
         send.findViewById(id.add).setContentDescription(getString(string.files_to_send));
         send.findViewById(id.add).setOnClickListener(v->pick());
-        send.findViewById(id.clear).setOnClickListener(v->{ selection.clear(); thumbs.clear(); selectionChanged(); });
+        clearFilesButton.setContentDescription(getString(string.delete));
+        clearFilesButton.setOnClickListener(v->removeFiles());
         pager.setOnPageChangeListener(new android.support.v4.a.x() {
             public void a(int n) { if(J!=null) J.setSelectedNavigationItem(n); else select(n); }
             public void a(int n,float f,int px) {} public void b(int n) {}
@@ -122,9 +126,15 @@ public final class TransferActivity extends ao implements TransferSessionService
         }
         orient(getResources().getConfiguration());
         if(state!=null && state.containsKey("deferred")) deferred.addAll(state.getStringArrayList("deferred"));
-        if(state!=null && state.containsKey("uris")) add(state.getParcelableArrayList("uris"));
-        else collect(getIntent());
-        selectionChanged(); peersChanged(); a((CharSequence)alias());
+        if(state!=null && state.containsKey("uris")) {
+            add(state.getParcelableArrayList("uris"));
+            ArrayList<Uri> checked=state.getParcelableArrayList("files_to_remove");
+            if(checked!=null) {
+                selectedForRemoval.addAll(checked);
+                selectedForRemoval.retainAll(pendingFiles);
+            }
+        } else collect(getIntent());
+        pendingFilesChanged(); peersChanged(); a((CharSequence)alias());
         if(TransferSessionService.VIEW.equals(getIntent().getAction()) || state!=null && state.getInt("page")==1) pager.setCurrentItem(1);
     }
     private String alias() { return prefs.getString("transfer_name",Build.MODEL); }
@@ -142,7 +152,8 @@ public final class TransferActivity extends ao implements TransferSessionService
     }
     @Override public void onConfigurationChanged(Configuration c) { super.onConfigurationChanged(c); orient(c); }
     @Override protected void onSaveInstanceState(Bundle b) {
-        super.onSaveInstanceState(b); b.putParcelableArrayList("uris",selection);
+        super.onSaveInstanceState(b); b.putParcelableArrayList("uris",new ArrayList<>(pendingFiles));
+        b.putParcelableArrayList("files_to_remove",new ArrayList<>(selectedForRemoval));
         b.putBoolean("multi",multi); b.putStringArrayList("recipients",new ArrayList<>(recipients));
         b.putStringArrayList("deferred",new ArrayList<>(deferred)); b.putInt("page",pager.getCurrentItem());
     }
@@ -170,43 +181,82 @@ public final class TransferActivity extends ao implements TransferSessionService
     private void add(Collection<Uri> uris) {
         if(uris==null) return;
         for(Uri uri:uris) {
-            if(!TransferFiles.allowed(uri) || selection.contains(uri)) continue;
-            if(selection.size()>=LocalSend.MAX_FILES) { toast(getString(string.ls_limit)); break; }
-            selection.add(uri);
+            if(!TransferFiles.allowed(uri) || pendingFiles.contains(uri)) continue;
+            if(pendingFiles.size()>=LocalSend.MAX_FILES) { toast(getString(string.ls_limit)); break; }
+            pendingFiles.add(uri);
             metadata.execute(()->{
                 try { CommonFile f=UriFile.a(uri); main.post(()->{
-                    if(!isDestroyed() && selection.contains(uri)) { thumbs.put(uri,f); grid.requestLayout(); grid.invalidate(); }
+                    if(!isDestroyed() && pendingFiles.contains(uri)) { thumbs.put(uri,f); grid.requestLayout(); grid.invalidate(); }
                 }); } catch(RuntimeException ignored) {}
             });
         }
-        selectionChanged();
+        pendingFilesChanged();
     }
-    private void selectionChanged() {
-        count.setText(getString(string.files_to_send)+(selection.isEmpty()?"":" ("+selection.size()+")"));
-        grid.requestLayout(); grid.invalidate();
+    private void pendingFilesChanged() {
+        boolean hasFiles=!pendingFiles.isEmpty();
+        count.setText(getString(string.files_to_send)+(hasFiles?" ("+pendingFiles.size()+")":""));
+        clearFilesButton.setEnabled(hasFiles);
+        clearFilesButton.setAlpha(hasFiles?1f:.5f);
+        grid.requestLayout(); grid.b();
+    }
+    private void removeFiles() {
+        if(pendingFiles.isEmpty() || clearFilesDialog!=null) return;
+        if(!selectedForRemoval.isEmpty()) {
+            removePendingFiles(selectedForRemoval);
+            return;
+        }
+        // Only remove the files counted in the confirmation, even if a share intent adds more.
+        List<Uri> files=new ArrayList<>(pendingFiles);
+        int fileCount=files.size();
+        clearFilesDialog=new AlertDialog.Builder(this)
+                .setMessage(getResources().getQuantityString(plurals.ls_cancel_sending_files,fileCount,fileCount))
+                .setPositiveButton(android.R.string.ok,(dialog,which)->removePendingFiles(files))
+                .setNegativeButton(android.R.string.cancel,null)
+                .setOnDismissListener(dialog->clearFilesDialog=null).show();
+    }
+    private void removePendingFiles(Collection<Uri> files) {
+        pendingFiles.removeAll(files);
+        thumbs.keySet().removeAll(files);
+        selectedForRemoval.retainAll(pendingFiles);
+        grid.b(-1,false);
+        pendingFilesChanged();
     }
     private void pick() {
         startActivityForResult(new Intent("com.alensw.PicFolder.action.PICK_MULTIPLE").setClass(this,GalleryActivity.class),PICK);
     }
     private final class Thumbnails implements com.alensw.ui.view.aj {
-        public int a() { return selection.size(); } public String a(int i) { return null; }
+        public int a() { return pendingFiles.size(); } public String a(int i) { return null; }
         public void a(int from,int to,int speed) {
-            for(int i=Math.max(0,from);i<Math.min(to,selection.size());i++) {
-                CommonFile f=thumbs.get(selection.get(i));
+            for(int i=Math.max(0,from);i<Math.min(to,pendingFiles.size());i++) {
+                CommonFile f=thumbs.get(pendingFiles.get(i));
                 if(f!=null && !QuickApp.w.a(f)) QuickApp.t.a(f,false,(key,image)->{
                     QuickApp.w.a(key,(com.alensw.b.a.c)image.l()); grid.postInvalidate();
                 });
             }
         }
         public void a(int i,com.alensw.ui.view.ak cell) {
-            if(i<0 || i>=selection.size()) return;
-            Uri u=selection.get(i); CommonFile f=thumbs.get(u);
+            if(i<0 || i>=pendingFiles.size()) return;
+            Uri u=pendingFiles.get(i); CommonFile f=thumbs.get(u);
             cell.a=f==null?null:(com.alensw.b.h.h)QuickApp.w.b(f);
             if(cell.a!=null) cell.a.l();
             cell.c=f==null?u.getLastPathSegment():f.h()=='I'?null:f.a();
+            if(selectedForRemoval.contains(u)) cell.b|=2; // existing ImageGridView checkmark
         }
-        public void a(int i,int j,boolean b) {} public void a(int i,Canvas c,RectF r) {}
-        public void b(int i) {} public void c(int i) {}
+        public void a(int from,int to,boolean checked) {
+            for(int i=Math.max(0,from);i<Math.min(to,pendingFiles.size());i++) {
+                Uri file=pendingFiles.get(i);
+                if(checked) selectedForRemoval.add(file);
+                else selectedForRemoval.remove(file);
+            }
+            grid.b();
+        }
+        public void a(int i,Canvas c,RectF r) {}
+        public void b(int i) {
+            Uri file=pendingFiles.get(i);
+            if(!selectedForRemoval.remove(file)) selectedForRemoval.add(file);
+            grid.d(i);
+        }
+        public void c(int i) {}
     }
     private static final class DeviceRow {
         final TextView name,detail; final ImageView image; final CheckBox check;
@@ -279,8 +329,8 @@ public final class TransferActivity extends ao implements TransferSessionService
     }
     private void sendTo(List<LocalSend.Peer> peers) {
         if(service==null) return;
-        if(selection.isEmpty()) { toast(getString(string.ls_pick)); pick(); return; }
-        if(service.send(peers,selection)) { setMulti(false); pager.setCurrentItem(1); }
+        if(pendingFiles.isEmpty()) { toast(getString(string.ls_pick)); pick(); return; }
+        if(service.send(peers,pendingFiles)) { setMulti(false); pager.setCurrentItem(1); }
     }
     private void toast(String msg) { Toast.makeText(this,msg,Toast.LENGTH_LONG).show(); }
     @Override public void problem(String msg) { toast(msg); }
@@ -342,7 +392,11 @@ public final class TransferActivity extends ao implements TransferSessionService
         if(bound) { unbindService(connection); bound=false; }
         service=null; dismissPin(); hideReceive(); super.onPause();
     }
-    @Override public void onDestroy() { metadata.shutdownNow(); super.onDestroy(); }
+    @Override public void onDestroy() {
+        if(clearFilesDialog!=null) clearFilesDialog.dismiss();
+        metadata.shutdownNow();
+        super.onDestroy();
+    }
     private void manual() {
         if(service==null) return;
         if(service.address()==null) { service.refreshNetwork(); if(service.address()==null) { toast(getString(string.ls_offline)); return; } }

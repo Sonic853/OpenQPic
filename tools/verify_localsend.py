@@ -215,7 +215,7 @@ def verify(apk, aab, tools, documentfile):
     about_labels={"string/about_"+s for s in ("sonic853","sonic853_email","sonic853_card","sonic853_github",
                    "sonic853_bilibili","sonic853_x","v97_developer","contact","send_email","profile_card","follow",
                    "bilibili","open_source_licenses","open_source_licenses_url")}
-    product_resources=update_labels | about_labels | {"drawable/ic_bilibili","string/share_other"}
+    product_resources=update_labels | about_labels | {"drawable/ic_bilibili","string/share_other","plurals/ls_cancel_sending_files"}
     assert product_resources <= table.keys()
     assert all(re.fullmatch(r"(string|id|layout|drawable)/ls_\w+",k) or k in product_resources for k in table.keys()-stable.keys())
     symbols = (APP/"build/intermediates/runtime_symbol_list/debug/processDebugResources/R.txt").read_text()
