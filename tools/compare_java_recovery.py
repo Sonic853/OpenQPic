@@ -90,6 +90,8 @@ def compare(baseline, rebuilt, *, local_only=False):
                    (APP/"recovered-types.txt").read_text().splitlines() if s.startswith("L")))
     unused = {s for s in (APP/"removed-unused-library-types.txt").read_text().splitlines() if s.startswith("L")}
     assert unused <= aliases.keys()
+    replaced = {s for s in (APP/"replaced-video-adapters.txt").read_text().splitlines() if s.startswith("L")}
+    assert len(replaced) == 5 and replaced <= aliases.keys()
 
     def renamed(signature):
         return re.sub(r"L[^;(:]+;", lambda m: aliases.get(m[0], m[0]), signature)
@@ -97,7 +99,8 @@ def compare(baseline, rebuilt, *, local_only=False):
     missing = [f"removed type reappeared: {t}" for t in unused & new.keys()]
     count = dict(types=0, fields=0, methods=0, concrete=0)
     for before, after in aliases.items():
-        if before in unused or (local_only and before.startswith(("Lorg/apache/http/", "Landroidx/documentfile/"))):
+        if before in unused or (local_only and
+                                (before in replaced or before.startswith(("Lorg/apache/http/", "Landroidx/documentfile/")))):
             continue
         if before not in old or after not in new:
             missing.append(f"type: {before} → {after}")
@@ -131,6 +134,6 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("baseline", type=Path, help="APK built from aa0043e before the Java migration")
     p.add_argument("rebuilt", type=Path, nargs="?", default=APP/"build/outputs/apk/debug/app-debug.apk")
-    p.add_argument("--local-only", action="store_true", help="Skip the external libraries, which may be upgraded")
+    p.add_argument("--local-only", action="store_true", help="Compare current app types, skipping external libraries and the old video server")
     args = p.parse_args()
     print(compare(args.baseline, args.rebuilt, local_only=args.local_only))

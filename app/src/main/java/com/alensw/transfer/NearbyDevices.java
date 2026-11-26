@@ -11,7 +11,6 @@ final class NearbyDevices {
         LocalSend.Peer peer;
         long seen, probed;
         Entry(long id,LocalSend.Peer p) { this.id=id; peer=p; }
-        boolean available() { return "http".equals(peer.protocol); }
     }
     final List<Entry> rows=new ArrayList<>();
     private long nextId=1;
@@ -34,7 +33,6 @@ final class NearbyDevices {
         }
         entry.seen=now;
         if(changed) Collections.sort(rows,(a,b)->{
-            if(a.available()!=b.available()) return a.available()?-1:1;
             int c=a.peer.alias.compareToIgnoreCase(b.peer.alias);
             return c!=0?c:a.peer.fingerprint.compareTo(b.peer.fingerprint);
         });
@@ -45,8 +43,8 @@ final class NearbyDevices {
         for(Iterator<Entry> it=rows.iterator();it.hasNext();) {
             Entry e=it.next(); long age=now-e.seen;
             if(age>90000) { it.remove(); changed=true; }
-            else if(age>45000 && now-e.probed>15000 && e.available()) {
-                e.probed=now; endpoint.probe(e.peer.ip,e.peer.port,false);
+            else if(age>45000 && now-e.probed>15000) {
+                e.probed=now; endpoint.probe(e.peer);
             }
         }
         return changed;

@@ -8,24 +8,25 @@
 |---|---|
 | 图库、编辑、缩略图、播放、设置、媒体模型 | `app/src/recovered/java/com/`。依据当前产品的 DEX/Smali 恢复；使用 dex2jar、Vineflower、JADX 和 CFR 交叉结构化，再按原指令修正控制流和 Java 重载。现有类型及对外调用尽量沿用原来的名字。 |
 | 定制 Support 库 | [`android/support/` 的逐类映射和版本说明](android-support.md)，60 个类型。本地源码编译。 |
-| Maven 库 | [HttpCore 4.4.16](httpcore.md) 的 253 个类型和 [DocumentFile 1.1.0](android-support.md#从-google-maven-引入-documentfile) 的 5 个类型；不再保留源码副本。 |
+| Maven 库 | [DocumentFile 1.1.0](android-support.md#从-google-maven-引入-documentfile) 的 5 个类型；不保留源码副本。 |
+| HTTP 回环视频 | `app/src/main/java/com/alensw/video/` 调用配套的 `org.openqpic.localsend.LoopbackHttp` 与 `libqpiclocalsend.so`。不再使用 [HttpCore](httpcore.md)。 |
 | 系统分享、存储兼容、快传、JNI 桥、更新 | `app/src/main/java/`。`GalleryShareMenu` 作为原菜单的 Java 实现；裁剪界面等图片渲染完毕才分享结果 URI。 |
 
-`app/src/main/smali` 原有 1,471 份文件；其中 216 个类型在迁移前已有 Java 实现，另外 1,255 个由单独的 Smali DEX 提供。连同一直用 Java 编译的 `JniUtils`，迁移时共保留了 **1,472 个类型**。后续移除了 [587 个无调用入口的库类型](../../app/removed-unused-library-types.txt)（HttpClient、Commons Codec、Commons Logging、`androidx.core`）；升级 HttpCore 后又有 5 个旧类型由上游移除，当前保留 **880 个原图库类型**。[原始类型清单](../../app/recovered-types.txt)仍记录以下两个必要的类名变化：
+`app/src/main/smali` 原有 1,471 份文件；其中 216 个类型在迁移前已有 Java 实现，另外 1,255 个由单独的 Smali DEX 提供。连同一直用 Java 编译的 `JniUtils`，迁移时共保留了 **1,472 个类型**。后续移除了 [587 个无调用入口的库类型](../../app/removed-unused-library-types.txt)。回环视频切换后再移除 HttpCore 的 254 个原类型和[五个旧服务器适配器](../../app/replaced-video-adapters.txt)，当前保留 **626 个原图库类型**。[原始类型清单](../../app/recovered-types.txt)仍记录以下两个必要的类名变化：
 
 | 旧名 | 源码及 DEX 新名 | 原因 |
 |---|---|---|
 | `com.alensw.ui.c.do` | `com.alensw.ui.c.DateChangedCallback` | `do` 是 Java 关键字。 |
 | `com.alensw.PicFolder.r` | `com.alensw.PicFolder.FaceDetectionTask` | 在 Windows 的文件系统上会和 Android 生成的 `R.class` 冲突。 |
 
-构建走 AGP 的 `javac / Maven 依赖 → D8 → APK/AAB`。恢复源目录现有 622 份 `.java`；内部类与匿名类可以与外层类同文件。保留的 880 个原类型中，254 个由 Maven 库提供、626 个由本地 Java 编译；新版 HttpCore 另外提供 4 个上游新增类型。
+构建走 AGP 的 `javac / Maven 依赖 → D8 → APK/AAB`。恢复源目录现有 617 份 `.java`；内部类与匿名类可以与外层类同文件。保留的 626 个原类型中，5 个由 Google Maven 的 DocumentFile 提供、621 个由本地 Java 编译。
 
 恢复时也对照了调用的具体签名。例如，设置相册标题的 `b(CharSequence)` 和查询字符串的 `b(String)` 不能互换；选目录的 `a(File)` 不同于打开相册的 `a(e)`。裁剪宽高比及快速滚动条的滑块长度保留原来的浮点除法。图库模型还核对了游标关闭、SQLite 事务和写入队列的锁范围。宿主 JVM 上，52 组模型行为、83,168 条 SVG 数字扫描轨迹、2,000 条 SVG 路径和 576 条图像/GIF 轨迹与 DEX 转译对照一致。这些是受控差分，不替代 Android 实机或模拟器测试。
 
 ## 如何核对
 
 - `:app:verifyLocalSendDebug` 将固定保留类型逐一与 **javac 的 `.class`、Maven 库的 `.class` 和最终 DEX** 对照，也检查已移除类型没有定义或引用；另检查 APK/AAB 一致性、运行库归属、原有资源 ID、简中名称、SDK、签名和六份 JNI。
-- 手头有迁移前的 APK 时，运行 `python tools/compare_java_recovery.py <旧.apk> <新.apk> --local-only` 核对应用自身类型的父类、接口、字段、方法签名和方法体是否仍存在。独立升级的两库由制品验收核对；对照迁移时未升级的 APK 则可去掉 `--local-only`。现代 javac 和 D8 会重排分支、生成新的辅助成员，这不是字节码一致性证明。
+- 手头有迁移前的 APK 时，运行 `python tools/compare_java_recovery.py <旧.apk> <新.apk> --local-only` 核对应用保留类型的父类、接口、字段、方法签名和方法体是否仍存在。该选项排除后来被替换的旧视频服务器与外部库；DocumentFile 的归属由制品验收核对。现代 javac 和 D8 会重排分支、生成新的辅助成员，这不是字节码一致性证明。
 - 普通构建和验证不需要反编译器、旧 APK 或相邻源码仓库。`tools/gallery_share_smoke.py` 与 `tools/*send_smoke.py` 可另外在专用设备验证系统面板、跨应用读取和实际传输。
 
 ## 初次 Java 迁移的制品与分享

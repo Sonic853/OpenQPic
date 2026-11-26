@@ -14,7 +14,7 @@ def inputs(image, transport):
         for build, lib in ((image/"native-src/build", "libqpicjni156.so"),
                            (transport/"build", "libqpiclocalsend.so")):
             yield build/"libs"/abi/lib, Path("app/src/main/jniLibs")/abi/lib
-    for name in ("Wire.java", "LocalSend.java"):
+    for name in ("Wire.java", "LocalSend.java", "LoopbackHttp.java", "SystemTls.java", "HttpChannel.java"):
         path = Path("org/openqpic/localsend")/name
         yield transport/"java"/path, Path("app/src/main/java")/path
     yield transport/"third_party/picohttpparser/NOTICE", Path("licenses/picohttpparser.txt")

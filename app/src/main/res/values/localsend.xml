@@ -1,9 +1,9 @@
 <resources>
     <string name="ls_address">Connect by IP</string>
-    <string name="ls_address_hint">IPv4 address[:port]</string>
+    <string name="ls_address_hint">IPv4[:port], optionally with http:// or https://</string>
     <string name="ls_here">Looking for nearby devices\n%1$s</string>
     <string name="ls_offline">Connect to Wi-Fi or Ethernet to use LocalSend.</string>
-    <string name="ls_https">Turn off encryption on the other device to send over HTTP.</string>
+    <string name="ls_https">Encryption</string>
     <string name="ls_pick">Add files to send first.</string>
     <string name="ls_pin">Receive PIN</string>
     <string name="ls_pin_hint">Optional PIN (leave blank to disable)</string>
@@ -13,7 +13,6 @@
     <string name="ls_send_selected">Send (%1$d)</string>
     <string name="ls_wait_devices">Waiting (%1$d/%2$d)</string>
     <string name="ls_sending_to">Sending to this device</string>
-    <string name="ls_encrypted">HTTPS · turn off encryption on peer</string>
     <string name="ls_mobile">Phone or tablet</string>
     <string name="ls_desktop">Computer</string>
     <string name="ls_device">Device</string>

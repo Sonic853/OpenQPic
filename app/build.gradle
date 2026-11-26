@@ -22,11 +22,9 @@ plugins {
     id 'com.android.application'
 }
 
-def httpCore = 'org.apache.httpcomponents:httpcore:4.4.16'
 def documentFile = 'androidx.documentfile:documentfile:1.1.0'
 
 dependencies {
-    implementation httpCore
     implementation(documentFile) {
         exclude group: 'androidx.core', module: 'core'
         exclude group: 'androidx.annotation', module: 'annotation'
@@ -74,10 +72,8 @@ android {
     packaging {
         jniLibs.keepDebugSymbols += ['**/libqpicjni156.so', '**/libqpiclocalsend.so']
         jniLibs.useLegacyPackaging = true
-        // Keep licenses in the repository and preserve the original library resource set.
+        // Keep licenses and library metadata out of the package.
         resources.excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/NOTICE',
-                               'META-INF/maven/org.apache.httpcomponents/httpcore/**',
-                               'org/apache/http/version.properties',
                                'META-INF/androidx/documentfile/documentfile/LICENSE.txt',
                                'META-INF/androidx.documentfile_documentfile.version']
     }
@@ -322,12 +318,12 @@ tasks.register('verifyLocalSendDebug', Exec) {
         def archives = configurations.debugRuntimeClasspath.incoming.artifacts.artifacts.collectEntries { artifact ->
             [(artifact.id.componentIdentifier.displayName): artifact.file]
         }
-        if (archives.keySet() != [httpCore, documentFile].toSet()) {
+        if (archives.keySet() != [documentFile].toSet()) {
             throw new GradleException("Unexpected runtime libraries: ${archives.keySet()}")
         }
         environment 'JAVA_HOME', System.getProperty('java.home')
         commandLine providers.gradleProperty('python').getOrElse(System.getProperty('os.name').startsWith('Windows') ? 'python' : 'python3'),
                 rootProject.file('tools/verify_localsend.py'), '--build-tools', sdk.get().dir('build-tools/36.0.0').asFile,
-                '--httpcore', archives[httpCore], '--documentfile', archives[documentFile]
+                '--documentfile', archives[documentFile]
     }
 }

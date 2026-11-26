@@ -1,0 +1,6 @@
+# Original Java HTTP server adapters replaced by the standalone native loopback transport.
+Lcom/alensw/b/e/j;
+Lcom/alensw/b/e/k;
+Lcom/alensw/b/e/l;
+Lcom/alensw/b/e/m;
+Lcom/alensw/b/e/n;

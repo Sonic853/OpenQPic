@@ -422,12 +422,30 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
    }
 
    @Override
+   protected void onNewIntent(Intent intent) {
+      super.onNewIntent(intent);
+      Uri uri=intent.getData();
+      if (uri==null || uri.equals(getIntent().getData())) return;
+      // singleTask receives a new URI when content playback falls back to our HTTPS listener.
+      this.j.b();
+      setIntent(intent);
+      this.q=intent.getBooleanExtra("android.intent.extra.finishOnCompletion",true);
+      this.p=false; this.r=false; this.l=null; this.u=null; this.o=0;
+      this.d.setProgress(0); this.d.setSecondaryProgress(0); this.i.setVisibility(View.GONE);
+      setTitle(com.alensw.PicFolder.R.string.loading); this.i(true);
+      this.j.a(new com.alensw.PicFolder.ao(this,uri));
+      this.k.setOnErrorListener(new com.alensw.PicFolder.as(this,uri));
+      Integer bookmark=(Integer)this.x.b(uri.toString());
+      this.j.a(intent,bookmark==null?0:bookmark); invalidateOptionsMenu();
+   }
+
+   @Override
    public void onDestroy() {
-      super.onDestroy();
-      if (this.v != null) {
-         this.unregisterReceiver(this.v);
-         this.v = null;
-      }
+       super.onDestroy();
+       if (this.v != null) {
+          this.unregisterReceiver(this.v);
+          this.v = null;
+       }
 
       if (this.I != null) {
          this.I.getViewTreeObserver().removeGlobalOnLayoutListener(this.y);
@@ -542,8 +560,8 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
    @Override
    public void onPause() {
       Uri var2 = this.getIntent().getData();
-      if (var2 != null) {
-         String var3 = var2.toString();
+       if (var2 != null) {
+          String var3 = var2.toString();
          int var1 = this.k.getCurrentPosition();
          if (!this.p && var1 > 5000 && var1 + 5000 < this.k.getDuration() && this.k.getDuration() > 60000) {
             this.x.a(var3, var1);
@@ -569,8 +587,8 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
 
    @Override
    protected void onSaveInstanceState(Bundle var1) {
-      if (this.p) {
-         var1.remove("cur_pos");
+       if (this.p) {
+          var1.remove("cur_pos");
       } else {
          var1.putInt("cur_pos", this.k.getCurrentPosition());
       }

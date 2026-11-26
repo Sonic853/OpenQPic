@@ -8,6 +8,7 @@ import android.os.*;
 import android.preference.PreferenceManager;
 import com.alensw.PicFolder.R;
 import org.openqpic.localsend.LocalSend;
+import org.openqpic.localsend.SystemTls;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
@@ -38,6 +39,7 @@ public final class TransferSessionService extends Service {
         }
     }
     static final String VIEW="com.alensw.transfer.VIEW_SESSION";
+    static final String TLS_MODE="localsend.tls";
     private static final String CANCEL="com.alensw.transfer.CANCEL_SESSION", CHANNEL="localsend-transfers";
     private static final int NOTICE=0x4c53;
     private final Link binder=new Link();
@@ -54,6 +56,8 @@ public final class TransferSessionService extends Service {
     private WifiManager.MulticastLock multicast;
     private PowerManager.WakeLock cpu; private WifiManager.WifiLock wifiTransfer;
     private boolean watching,foreground,destroyed;
+    private boolean preparingIdentity;
+    private SystemTls tlsIdentity;
     private final Runnable refreshNotice=this::updateNotice;
     private final Runnable tick=new Runnable() {
         public void run() {
@@ -67,8 +71,9 @@ public final class TransferSessionService extends Service {
     };
     private final class Lane implements LocalSend.Events {
         final String ip;
+        final SystemTls identity;
         LocalSend endpoint;
-        Lane(String ip) { this.ip=ip; }
+        Lane(String ip,SystemTls identity) { this.ip=ip; this.identity=identity; }
         private void post(Runnable r) { main.post(()->{ if(!destroyed) r.run(); }); }
         public void peer(LocalSend.Peer p) { post(()->{
             if(this==discovery && client!=null && nearby.seen(p)) client.peersChanged();
@@ -139,7 +144,7 @@ public final class TransferSessionService extends Service {
         if(multicast!=null && multicast.isHeld()) multicast.release();
         nearby.rows.clear();
     }
-    String address() { return discovery==null?null:discovery.ip+":"+discovery.endpoint.port(); }
+    String address() { return discovery==null?null:(discovery.endpoint.encrypted()?"https://":"http://")+discovery.ip+":"+discovery.endpoint.port(); }
     private String lanAddress() {
         ConnectivityManager cm=(ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
         for(Network net:cm.getAllNetworks()) {
@@ -155,27 +160,58 @@ public final class TransferSessionService extends Service {
         } } catch(SocketException ignored) {}
         return null;
     }
-    void refreshNetwork() {
+    void refreshNetwork() { refreshNetwork(false); }
+    private void refreshNetwork(boolean allowHttpWithoutIdentity) {
         if(client==null) return;
         String ip=lanAddress(), name=prefs.getString("transfer_name",Build.MODEL), pin=prefs.getString("localsend.pin","");
-        if(discovery!=null && discovery.ip.equals(ip) && discovery.endpoint.isOpen()) {
+        boolean encrypted=prefs.getBoolean(TLS_MODE,true);
+        if(discovery!=null && discovery.ip.equals(ip) && discovery.identity==tlsIdentity &&
+                discovery.endpoint.encrypted()==encrypted && discovery.endpoint.isOpen()) {
             discovery.endpoint.show(name,pin); return;
         }
         hideDiscovery();
+        if(ip!=null && tlsIdentity==null && (encrypted || !allowHttpWithoutIdentity)) {
+            if(!preparingIdentity) {
+                preparingIdentity=true;
+                new Thread(()->{
+                    try {
+                        SystemTls ready=SystemTls.transfers();
+                        main.post(()->{ preparingIdentity=false; tlsIdentity=ready; if(client!=null && !destroyed) refreshNetwork(); });
+                    } catch(IOException | RuntimeException e) {
+                        android.util.Log.w("LocalSend","Cannot prepare TLS identity",e);
+                        main.post(()->{
+                            preparingIdentity=false;
+                            if(client==null || destroyed) return;
+                            if(prefs.getBoolean(TLS_MODE,true)) client.problem(e.getMessage());
+                            else refreshNetwork(true);
+                        });
+                    }
+                },"QP LocalSend identity").start();
+            }
+            return;
+        }
         if(ip!=null) try {
             if(multicast!=null) multicast.acquire();
-            for(Lane l:lanes) if(l.ip.equals(ip)) synchronized(l.endpoint) {
-                if(l.endpoint.isOpen()) { l.endpoint.show(name,pin); discovery=l; break; }
+            for(Lane l:lanes) if(l.ip.equals(ip) && l.identity==tlsIdentity) synchronized(l.endpoint) {
+                if(l.endpoint.isOpen() && l.endpoint.encrypted()==encrypted) { l.endpoint.show(name,pin); discovery=l; break; }
             }
             if(discovery==null) {
-                Lane l=new Lane(ip);
-                l.endpoint=LocalSend.start(ip,name,prefs.getString("localsend.id",""),Build.MODEL,pin,l);
+                Lane l=new Lane(ip,tlsIdentity);
+                l.endpoint=LocalSend.start(ip,name,prefs.getString("localsend.id",""),Build.MODEL,pin,l,
+                        tlsIdentity,encrypted);
                 lanes.add(l); discovery=l;
             }
-        } catch(IOException | RuntimeException ex) { hideDiscovery(); client.problem(ex.getMessage()); }
+        } catch(IOException | RuntimeException ex) {
+            android.util.Log.w("LocalSend","Cannot open transfer listener",ex);
+            hideDiscovery(); client.problem(ex.getMessage());
+        }
         client.peersChanged(); settle();
     }
-    void probe(String ip,int port) { if(discovery!=null) discovery.endpoint.probe(ip,port,true); }
+    void probe(String ip,int port,String protocol) {
+        if(discovery==null) return;
+        boolean tls=protocol==null?discovery.endpoint.encrypted():"https".equals(protocol);
+        discovery.endpoint.probe(ip,port,true,tls);
+    }
     boolean sendingTo(LocalSend.Peer peer) {
         for(Lane l:lanes) if(l.endpoint.sendingTo(peer)) return true;
         return false;

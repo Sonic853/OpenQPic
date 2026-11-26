@@ -1,6 +1,6 @@
 # Retained gallery types before the all-Java migration (aa0043e).
 # Each line is the original DEX descriptor, optionally followed by its Java-compatible replacement.
-# Unused libraries are tracked in removed-unused-library-types.txt; newer Maven artifacts are checked by verify_localsend.py.
+# Later removals are tracked by verify_localsend.py, removed-unused-library-types.txt and replaced-video-adapters.txt.
 Landroid/support/a/a/a;
 Landroid/support/a/a/b;
 Landroid/support/a/a/c;

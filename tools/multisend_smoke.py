@@ -23,13 +23,19 @@ def main():
     ap.add_argument("--serial",required=True)
     ap.add_argument("--peer",type=Path,required=True)
     ap.add_argument("--report",type=Path,required=True)
+    mode=ap.add_mutually_exclusive_group()
+    mode.add_argument("--tls",action="store_true",help="use five certificate-pinned HTTPS receivers")
+    mode.add_argument("--mixed",action="store_true",help="mix HTTP and certificate-pinned HTTPS receivers in one queue")
     opt=ap.parse_args()
-    def adb(*args): return subprocess.check_output(["adb","-s",opt.serial,*args],timeout=40)
+    def adb(*args): return subprocess.check_output(["adb","-s",opt.serial,*args],timeout=60)
     def sh(cmd): return adb("shell",cmd).decode("utf8","replace").replace("\r","").strip()
     assert sh("getprop ro.kernel.qemu")=="1" and sh("getprop ro.build.version.sdk")=="23"
     tag=uuid.uuid4().hex[:10]; dump="/data/local/tmp/multisend-"+tag+".xml"
     def tree():
-        sh("uiautomator dump "+dump); return ET.fromstring(adb("exec-out","cat",dump))
+        for _ in range(4):
+            msg=sh("uiautomator dump "+dump)
+            if "dumped" in msg.lower(): return ET.fromstring(adb("exec-out","cat",dump))
+        raise AssertionError(("Could not read device UI",msg,sh("dumpsys window windows | grep mCurrentFocus")))
     def click(n):
         x,y,r,b=map(int,re.findall(r"\d+",n.get("bounds"))); sh(f"input tap {(x+r)//2} {(y+b)//2}")
     def node(attr,value):
@@ -81,20 +87,31 @@ def main():
         local=re.search(r"inet ([0-9.]+)/",sh("ip -4 addr show eth0"))[1]
         names=["A cancel","B keep","C decline","D keep","E queued"]
         children={}
+        protocols={}
+        test_env=dict(os.environ,TOKIO_WORKER_THREADS="2")
+        test_env.pop("OPENQPIC_TEST_TLS",None)
         # Adding each peer at the top exercises selection by identity instead of list position.
         for count,name in enumerate(reversed(names),1):
             gate=root/name; gate.mkdir()
+            tls=opt.tls or (opt.mixed and name in ("A cancel","D keep"))
+            protocol="https" if tls else "http"
+            protocols[name]=protocol
+            env=dict(test_env,OPENQPIC_TEST_TLS="1") if tls else test_env
             child=subprocess.Popen([str(opt.peer),"receive-gated",str(gate/"in"),str(gate),name,"2",
                                     "decline" if name=="C decline" else "accept"],
-                                   stdout=subprocess.PIPE,stderr=subprocess.STDOUT,env=dict(os.environ,TOKIO_WORKER_THREADS="2"))
+                                   stdout=subprocess.PIPE,stderr=subprocess.STDOUT,env=env)
             children[name]=child; cleanup.callback(stop,child)
+            fingerprint=name
             for line in child.stdout:
+                if line.startswith(b"FINGERPRINT="): fingerprint=line.decode().strip().split("=")[1]
                 if line.startswith(b"PORT="): break
+            if tls: assert re.fullmatch("[0-9A-F]{64}",fingerprint)
             port=int(line.split(b"=")[1]); reverse=f"tcp:{port}"
             adb("reverse","--no-rebind",reverse,reverse); cleanup.callback(adb,"reverse","--remove",reverse)
             rule=f"-d {local} -p tcp --dport {port} -j REDIRECT --to-ports {port}"
             sh("iptables -t nat -I OUTPUT 1 "+rule); cleanup.callback(sh,"iptables -t nat -D OUTPUT "+rule)
-            info={"alias":"beacon","fingerprint":name,"deviceType":"desktop","version":"2.2","protocol":"http","port":port,"announce":True}
+            info={"alias":"beacon","fingerprint":fingerprint,"deviceType":"desktop","version":"2.2",
+                  "protocol":protocol,"port":port,"announce":True}
             sh("printf '%s' "+shlex.quote(json.dumps(info))+" | timeout 1 /system/xbin/nc -u 224.0.0.167 53317 || :")
             if count==1: click(node("text",name)); click(node("text",name))  # uncheck and reselect
             click(node("text",name)); node("text",f"Send ({count})")
@@ -115,14 +132,15 @@ def main():
             assert hashes==sorted(expected),(n,hashes,expected)
         assert not (root/"E queued"/"waiting").exists()
         assert all(not list((root/n/"in").iterdir()) for n in ("A cancel","C decline","E queued"))
-        until(lambda:not re.search(r":D045\s+\S+\s+0A\b",sh("cat /proc/net/tcp")),"last hidden endpoint retires")
+        until(lambda:not re.search(r":D045\s+\S+\s+0A\b",sh("cat /proc/net/tcp /proc/net/tcp6")),"last hidden endpoint retires")
         sh("am start -W -n "+SCREEN+" -a com.alensw.transfer.VIEW_SESSION")
         for n in ("D keep","B keep"): find_row(n+" · Sent")
         base=sh("pm path "+PKG).removeprefix("package:")
-        result={"selected_devices":5,"concurrent_pending_offers":3,"independent_completed_recipients":2,
+        result={"tls":opt.tls,"selected_devices":5,"concurrent_pending_offers":3,"independent_completed_recipients":2,
                 "file_sha256_at_each_receiver":expected,"running_cancelled":True,"queued_cancelled_before_offer":True,
                 "peer_declined_and_queue_advanced_while_hidden":True,"completed_after_activity_closed":True,
-                "apk_sha256":hashlib.sha256(adb("exec-out","cat",base)).hexdigest(),"device":sh("getprop ro.build.fingerprint")}
+                 "apk_sha256":hashlib.sha256(adb("exec-out","cat",base)).hexdigest(),"device":sh("getprop ro.build.fingerprint")}
+        if opt.mixed: result["receiver_protocols"]=protocols
         opt.report.parent.mkdir(parents=True,exist_ok=True)
         opt.report.write_text(json.dumps(result,indent=2)+"\n","utf8");print(json.dumps(result))
 

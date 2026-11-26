@@ -1,11 +1,14 @@
 {
   "app/src/main/jniLibs/armeabi/libqpicjni156.so": "d68b2dbd74bde541f98e3bd80f23e6fe4b785dfe8c6a69b6747f832e2a7b404b",
-  "app/src/main/jniLibs/armeabi/libqpiclocalsend.so": "ff81822e7ece381d72eff9a46fff86140bbbee30d3daa0cf307a806b5751fe6b",
+  "app/src/main/jniLibs/armeabi/libqpiclocalsend.so": "d6a247b5c01504927426eaddb8ad80994141bba222905440865f7661b41cb5cc",
   "app/src/main/jniLibs/x86/libqpicjni156.so": "8a9fffcbaa2c05211e6d86b224fae153c08a371b80ee6330113a8c2db1470bb2",
-  "app/src/main/jniLibs/x86/libqpiclocalsend.so": "1532453bd5e5f4061912d195c27e1127410d0b1dafd4efcbb80fcf1edd3d8502",
+  "app/src/main/jniLibs/x86/libqpiclocalsend.so": "89cb8eb9de38b9d485260bf01173fef3ca0b244bdcdc25717664372d3e3aff64",
   "app/src/main/jniLibs/arm64-v8a/libqpicjni156.so": "8b46c181b0384ee1e4806413ed5ade3926f700b50d2481280df8158dd3f66304",
-  "app/src/main/jniLibs/arm64-v8a/libqpiclocalsend.so": "995271746a5ffa1a74c973474ab8b31855d70306280b37d4425b1309c2e5e3b9",
-  "app/src/main/java/org/openqpic/localsend/Wire.java": "9e1054d1418ca962cae0197c9e256a6b9245d13368826421d552290b04984839",
-  "app/src/main/java/org/openqpic/localsend/LocalSend.java": "d2e109064fd906d6987325396b1013094ba4b0611b653b984e43976882ed3b29",
+  "app/src/main/jniLibs/arm64-v8a/libqpiclocalsend.so": "2540496dfff98286435612dd46ce04fd5daf58172137954ba07b0254c9ccc32b",
+  "app/src/main/java/org/openqpic/localsend/Wire.java": "caf52c8b3acde11b4b31baaf5392febe903d499fc41d4ed1afc5291ce9f5a331",
+  "app/src/main/java/org/openqpic/localsend/LocalSend.java": "8082a7f33b74836ac13cd0c9e3a2a94cd9655cf260420a7323f2f297ff23b714",
+  "app/src/main/java/org/openqpic/localsend/LoopbackHttp.java": "95957306a920ad7277704f4bf3104ef2dcbffe160df5914fefa2b36e723becdc",
+  "app/src/main/java/org/openqpic/localsend/SystemTls.java": "fe7b7f4fddd0622cefa6a696ca9a45badd6cb5ba1fe585d22442af2a939cd8c4",
+  "app/src/main/java/org/openqpic/localsend/HttpChannel.java": "540b26068fad9c69f4b1d3f76a773611508b16e6d43f6f3c99baaa33cb48aca3",
   "licenses/picohttpparser.txt": "8d4b08f09904cce333419c67d0ec1b10ec93dc806ce5d5ffa6fa37286f002887"
 }

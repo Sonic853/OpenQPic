@@ -6,7 +6,8 @@ import android.net.Uri;
 
 class as implements OnErrorListener {
    final Uri a;
-   final PlayerActivity b;
+    final PlayerActivity b;
+    private boolean retryRequested;
 
    as(PlayerActivity var1, Uri var2) {
       this.b = var1;
@@ -14,8 +15,12 @@ class as implements OnErrorListener {
    }
 
    @Override
-   public boolean onError(MediaPlayer var1, int var2, int var3) {
-      this.b.x.c(this.a.toString());
+    public boolean onError(MediaPlayer var1, int var2, int var3) {
+       if(!retryRequested && com.alensw.video.VideoProxyService.retryInPlayer(this.b,this.a,this.b.getIntent().getType())) {
+          retryRequested=true;
+          return true;
+       }
+       this.b.x.c(this.a.toString());
       this.b.setTitle(com.alensw.PicFolder.R.string.load_failed);
       this.b.i(false);
       return false;

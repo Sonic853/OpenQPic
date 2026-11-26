@@ -1,9 +1,9 @@
 <resources>
     <string name="ls_address">通过 IP 连接</string>
-    <string name="ls_address_hint">IPv4 地址[:端口]</string>
+    <string name="ls_address_hint">IPv4[:端口]，可加 http:// 或 https://</string>
     <string name="ls_here">正在查找附近的设备\n%1$s</string>
-    <string name="ls_offline">请连接 Wi-Fi 或以太网以使用 LocalSend。</string>
-    <string name="ls_https">请先在对方设备关闭加密，再使用 HTTP 发送。</string>
+    <string name="ls_offline">请连接 Wi-Fi 或以太网以使用快传。</string>
+    <string name="ls_https">加密传输</string>
     <string name="ls_pick">请先添加要发送的文件。</string>
     <string name="ls_pin">接收 PIN 码</string>
     <string name="ls_pin_hint">可选 PIN 码（留空关闭）</string>
@@ -13,7 +13,6 @@
     <string name="ls_send_selected">发送（%1$d）</string>
     <string name="ls_wait_devices">等待设备（%1$d/%2$d）</string>
     <string name="ls_sending_to">正在向此设备发送</string>
-    <string name="ls_encrypted">HTTPS · 需在对方关闭加密</string>
     <string name="ls_mobile">手机或平板</string>
     <string name="ls_desktop">电脑</string>
     <string name="ls_device">设备</string>

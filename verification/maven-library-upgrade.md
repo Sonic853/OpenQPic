@@ -1,6 +1,6 @@
 # HttpCore 4.4.16 与 DocumentFile 1.1.0 升级验证
 
-对照[首次 Maven 迁移](maven-libraries.md)的制品。新安装包包含 Maven Central 的 HttpCore `4.4.16`（253 个类型）和 Google Maven 的 DocumentFile `1.1.0`（5 个类型）；两库均未恢复为仓库内的 Java 副本。
+对照[首次 Maven 迁移](maven-libraries.md)的制品。此阶段的安装包包含 Maven Central 的 HttpCore `4.4.16`（253 个类型）和 Google Maven 的 DocumentFile `1.1.0`（5 个类型）；两库均未恢复为仓库内的 Java 副本。后续[回环视频切换到 `libqpiclocalsend.so`](native-video.md)，不再打包 HttpCore。
 
 ## 构建与制品
 

@@ -1,0 +1,16 @@
+{
+  "tls": true,
+  "selected_devices": 5,
+  "concurrent_pending_offers": 3,
+  "independent_completed_recipients": 2,
+  "file_sha256_at_each_receiver": [
+    "35c50e10adff9004fe4ae0a97efcb203b2a523bbdb7c63a395530418e39c2b39",
+    "6bfc47d7e032361ccf8d38c90a5895797e0f2137de8cf9f9a03d8b6736c25908"
+  ],
+  "running_cancelled": true,
+  "queued_cancelled_before_offer": true,
+  "peer_declined_and_queue_advanced_while_hidden": true,
+  "completed_after_activity_closed": true,
+  "apk_sha256": "3e4223d5b8a24b4f29a93f782480db3e822a0a3ed8c11e33b638c7e1d688e198",
+  "device": "Android/sdk_phone_armv7/generic:6.0/MASTER/3079352:userdebug/test-keys"
+}

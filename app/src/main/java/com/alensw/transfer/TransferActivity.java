@@ -44,7 +44,7 @@ public final class TransferActivity extends ao implements TransferSessionService
     private ReceivePage receive; private AlertDialog pinDialog; private String pinKey;
     private SharedPreferences prefs;
     private TransferSessionService service; private boolean bound,resumed;
-    private static final int PICK=1, CONNECT=0x4c5301, PIN=0x4c5302;
+    private static final int PICK=1, CONNECT=0x4c5301, PIN=0x4c5302, TLS=0x4c5303;
     private final ServiceConnection connection=new ServiceConnection() {
         public void onServiceConnected(ComponentName n,IBinder value) {
             if(!resumed || !bound) return;
@@ -230,7 +230,8 @@ public final class TransferActivity extends ao implements TransferSessionService
             r.name.setText(p.alias);
             String kind=p.deviceModel.isEmpty()?getString(mobile?string.ls_mobile:desktop?string.ls_desktop:string.ls_device):p.deviceModel;
             boolean enabled=isEnabled(i);
-            r.detail.setText((enabled?kind:getString(getItem(i).available()?string.ls_sending_to:string.ls_encrypted))+" · "+p.ip+":"+p.port);
+            String scheme=p.encrypted()?"HTTPS":"HTTP";
+            r.detail.setText((enabled?kind:getString(string.ls_sending_to))+" · "+scheme+" · "+p.ip+":"+p.port);
             r.check.setVisibility(multi?View.VISIBLE:View.GONE); r.check.setEnabled(enabled);
             r.check.setChecked(multi && recipients.contains(p.fingerprint));
             v.setAlpha(enabled?1f:.6f); return v;
@@ -256,7 +257,7 @@ public final class TransferActivity extends ao implements TransferSessionService
         }
     }
     private boolean canSelect(NearbyDevices.Entry e) {
-        return service!=null && e.available() && !service.sendingTo(e.peer);
+        return service!=null && !service.sendingTo(e.peer);
     }
     private List<LocalSend.Peer> selectedPeers() {
         List<LocalSend.Peer> peers=new ArrayList<>();
@@ -348,12 +349,19 @@ public final class TransferActivity extends ao implements TransferSessionService
         EditText field=new EditText(this); field.setSingleLine(); field.setHint(string.ls_address_hint);
         new AlertDialog.Builder(this).setTitle(getString(string.ls_address)+" · "+service.address()).setView(field)
                 .setPositiveButton(android.R.string.ok,(d,w)->{
-                    String[] parts=field.getText().toString().trim().split(":",-1);
                     try {
+                        String address=field.getText().toString().trim(), protocol=null;
+                        int schemeEnd=address.indexOf("://");
+                        if(schemeEnd>=0) {
+                            protocol=address.substring(0,schemeEnd).toLowerCase(Locale.ROOT);
+                            if(!"http".equals(protocol) && !"https".equals(protocol)) throw new IllegalArgumentException();
+                            address=address.substring(schemeEnd+3);
+                        }
+                        String[] parts=address.split(":",-1);
                         int port=parts.length==1?LocalSend.PORT:Integer.parseInt(parts[1]);
                         if(parts.length>2 || port<1 || port>65535 || !android.util.Patterns.IP_ADDRESS.matcher(parts[0]).matches())
                             throw new IllegalArgumentException();
-                        if(service!=null) service.probe(parts[0],port);
+                        if(service!=null) service.probe(parts[0],port,protocol);
                     } catch(IllegalArgumentException e) { toast(getString(string.ls_address_hint)); }
                 }).setNegativeButton(android.R.string.cancel,null).show();
     }
@@ -361,11 +369,19 @@ public final class TransferActivity extends ao implements TransferSessionService
         super.onCreateOptionsMenu(menu);
         menu.add(0,CONNECT,0,string.ls_address); menu.add(0,id.rename,0,string.rename);
         menu.add(0,PIN,0,string.ls_pin); menu.add(0,id.share,0,string.share);
+        menu.add(0,TLS,0,string.ls_https).setCheckable(true).setChecked(prefs.getBoolean(TransferSessionService.TLS_MODE,true));
         return true;
     }
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         int key=item.getItemId();
         if(key==CONNECT) { manual(); return true; }
+        if(key==TLS) {
+            boolean enabled=!prefs.getBoolean(TransferSessionService.TLS_MODE,true);
+            prefs.edit().putBoolean(TransferSessionService.TLS_MODE,enabled).apply();
+            item.setChecked(enabled);
+            if(service!=null) service.refreshNetwork();
+            return true;
+        }
         if(key==PIN || key==id.rename) {
             boolean pin=key==PIN; EditText field=new EditText(this); field.setSingleLine();
             if(pin) { field.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_VARIATION_PASSWORD); field.setHint(string.ls_pin_hint); }

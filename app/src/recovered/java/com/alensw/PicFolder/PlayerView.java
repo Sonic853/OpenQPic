@@ -56,7 +56,7 @@ class PlayerView extends FrameLayout {
       this.q = new float[3];
       this.k = new Handler();
       this.m = new GestureDetector(var1, this.a, this.k);
-      this.l = new VideoView(var1);
+       this.l = new com.alensw.video.SecureVideoView(var1);
       this.addView(this.l, new FrameLayout.LayoutParams(-1, -1, 17));
       this.b = (int)(this.getResources().getDisplayMetrics().density * 16.0F);
    }
@@ -135,8 +135,10 @@ class PlayerView extends FrameLayout {
       return this.l;
    }
 
-   public void a(Intent intent, int i) {
-        try {
+    public void a(Intent intent, int i) {
+         this.f = false;
+         this.e = 0;
+         try {
             Uri data = intent.getData();
             android.os.Bundle bundleExtra = intent.getBundleExtra("com.android.browser.headers");
             if (bundleExtra != null) {
