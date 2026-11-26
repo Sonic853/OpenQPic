@@ -137,6 +137,11 @@ If you are setting wallpaper, please go to Gallery to set!"</string>
     <string name="slideshow_shuffle">Shuffle showing</string>
     <string name="single_tap_zoom">Single tap to zoom</string>
     <string name="single_tap_zoom_summary">Single tap to zoom and double tap to show action bar, otherwise inverse</string>
+    <string name="viewer_swipe_up">Swipe up action</string>
+    <string name="viewer_swipe_down">Swipe down action</string>
+    <string name="viewer_swipe_none">None</string>
+    <string name="viewer_swipe_details">Show details</string>
+    <string name="viewer_swipe_back">Return to photo list</string>
     <string name="sort">Sort</string>
     <string name="sort_by_date">By date</string>
     <string name="sort_by_name">By name</string>

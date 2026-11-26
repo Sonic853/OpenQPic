@@ -42,6 +42,7 @@ public class ao extends Activity {
    public static final boolean F;
    public static final boolean G;
    public static final boolean H;
+   private static final int NAVIGATION_HIDE_FLAGS = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LOW_PROFILE;
    private static int i;
    private static int j;
    protected View I;
@@ -71,6 +72,8 @@ public class ao extends Activity {
    private TitleBar f;
    private int g = -1;
    private ColorDrawable h = new ColorDrawable(this.g);
+   private boolean keepNavigationButtonsVisible;
+   private int suppressedNavigationFlags;
 
    static {
       boolean var1 = true;
@@ -580,7 +583,8 @@ public class ao extends Activity {
       if (this.P != var1) {
          int var2 = this.P;
          this.P = var1;
-         if (this.Q && (var2 & 2) != 0 && (var1 & 2) == 0 && this.J != null && !this.J.isShowing()) {
+          if (!this.keepNavigationButtonsVisible && this.Q && (var2 & 2) != 0 && (var1 & 2) == 0
+                && this.J != null && !this.J.isShowing()) {
             this.a(true);
             this.S = System.currentTimeMillis();
          }
@@ -648,9 +652,19 @@ public class ao extends Activity {
       return false;
    }
 
+   public void setKeepNavigationButtonsVisible(boolean keepVisible) {
+      if (this.keepNavigationButtonsVisible != keepVisible) {
+         int requestedFlags = this.t() | this.suppressedNavigationFlags;
+         this.keepNavigationButtonsVisible = keepVisible;
+         this.e(requestedFlags);
+      }
+   }
+
    public void e(int var1) {
       if (VERSION.SDK_INT >= 11) {
-         this.getWindow().getDecorView().setSystemUiVisibility(var1);
+         // Keep the viewer's requested state so the auto-hide timer still applies after details closes.
+         this.suppressedNavigationFlags = this.keepNavigationButtonsVisible ? var1 & NAVIGATION_HIDE_FLAGS : 0;
+         this.getWindow().getDecorView().setSystemUiVisibility(var1 & ~this.suppressedNavigationFlags);
       }
    }
 
@@ -667,7 +681,7 @@ public class ao extends Activity {
             }
          }
 
-         var3.setSystemUiVisibility(var2);
+         this.e(var2);
          var3.setOnSystemUiVisibilityChangeListener(new com.alensw.ui.activity.ay(this));
          var1 = true;
       } else {
@@ -685,7 +699,7 @@ public class ao extends Activity {
    @TargetApi(16)
    public void f(boolean var1) {
       if (VERSION.SDK_INT >= 11) {
-         int var5 = this.t();
+         int var5 = this.t() | this.suppressedNavigationFlags;
          int var4;
          if (var1) {
             var4 = var5 & -2;

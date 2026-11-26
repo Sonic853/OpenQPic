@@ -19,6 +19,7 @@ public class bu extends Animation {
    private float k;
    private float l;
    private boolean m;
+   private float exitOffsetY;
 
    public bu(boolean var1, boolean var2, RectF var3, RectF var4) {
       this.a = var1;
@@ -27,6 +28,10 @@ public class bu extends Animation {
       if (var4 != null) {
          this.a(var4, null);
       }
+   }
+
+   void setExitOffsetY(float offsetY) {
+      this.exitOffsetY = offsetY;
    }
 
    public boolean a(RectF var1, RectF var2) {
@@ -144,7 +149,8 @@ public class bu extends Animation {
          Matrix var4 = var2.getMatrix();
          var3 = this.d + this.e * var1;
          var4.setScale(var3, var3, this.f, this.g);
-         var4.postTranslate(this.h + this.j * var1, this.i + this.k * var1);
+         float dragCorrectionY = this.exitOffsetY * (1.0F - var1);
+         var4.postTranslate(this.h + this.j * var1, this.i + this.k * var1 + dragCorrectionY);
          if (this.b) {
             if (!this.a) {
                var1 = 1.0F - var1;

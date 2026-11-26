@@ -251,7 +251,8 @@ public class j extends View {
          var2.a(this.h, this.g);
       }
 
-      com.alensw.compat.LegacyPlatform.save(var1, 2);
+      var1.save();
+      this.transformPictureForDrawing(var1, this.g);
       var1.clipRect(this.g);
       if (var2.j()) {
          this.a(var1, var2, this.h, this.g, var3);
@@ -1168,6 +1169,9 @@ public class j extends View {
       super.onDetachedFromWindow();
    }
 
+   protected void transformPictureForDrawing(Canvas canvas, RectF bounds) {
+   }
+
    @TargetApi(14)
    @Override
    public void onDraw(Canvas var1) {
@@ -1228,7 +1232,8 @@ public class j extends View {
 
       if (this.c != null && var1 != this.e) {
          Bitmap var10 = this.d;
-         com.alensw.compat.LegacyPlatform.save(var1, 2);
+         var1.save();
+         this.transformPictureForDrawing(var1, this.P);
          var1.clipRect(this.c);
          if (var10 != null && !var10.isRecycled()) {
             var1.drawBitmap(var10, 0.0F, 0.0F, null);
@@ -1252,7 +1257,8 @@ public class j extends View {
 
          this.M.setDither(var7);
          this.M.setFilterBitmap(var7);
-         com.alensw.compat.LegacyPlatform.save(var1, 2);
+         var1.save();
+         this.transformPictureForDrawing(var1, this.P);
          var1.clipRect(this.P);
          this.a(var1, var5, var6);
          var1.restore();

@@ -40,6 +40,7 @@ public class dp extends com.alensw.ui.c.a {
    private com.alensw.a.as N;
    private com.alensw.a.as O;
    private final com.alensw.ui.view.q P;
+   private ViewerSwipe viewerSwipe;
    private int Q;
    private int R;
    private int S;
@@ -680,7 +681,7 @@ public class dp extends com.alensw.ui.c.a {
             }
          }
 
-         this.f.startAnimation(var6);
+         this.f.startViewerTransition(var6, var1);
       }
 
       return var3;
@@ -758,6 +759,9 @@ public class dp extends com.alensw.ui.c.a {
       super.a(var1, var2, var3, var4);
       this.C.a(this.A);
       this.c.setPadding(this.A.left, 0, this.A.right, this.A.bottom);
+      if (this.viewerSwipe != null) {
+         this.viewerSwipe.layout(var3 - var1, var4 - var2, this.A);
+      }
       if (var3 > var1 && var4 > var2 && this.y != null) {
          this.f.setTransValues(this.y);
          this.y = null;
@@ -817,6 +821,7 @@ public class dp extends com.alensw.ui.c.a {
          this.c = (ViewGroup)this.f(com.alensw.PicFolder.R.id.bottom_bar);
          this.f = (PictureView)this.f(com.alensw.PicFolder.R.id.image);
          this.f.setListener(this.P);
+         this.viewerSwipe = new ViewerSwipe(this, this.f, this::currentSwipeDetails);
          this.f.setOnFocusChangeListener(new com.alensw.ui.c.dq(this));
          this.g = (ImageView)this.f(com.alensw.PicFolder.R.id.showing);
          this.h = (ImageView)this.f(com.alensw.PicFolder.R.id.play);
@@ -957,6 +962,9 @@ public class dp extends com.alensw.ui.c.a {
 
             var15.setVisibility(var12);
             this.v = true;
+            if (this.viewerSwipe != null) {
+               this.viewerSwipe.pictureChanged(this.o);
+            }
          } else {
             this.v = var2;
          }
@@ -1208,6 +1216,9 @@ public class dp extends com.alensw.ui.c.a {
    @Override
    public void b() {
       super.b();
+      if (this.viewerSwipe != null) {
+         this.viewerSwipe.reset();
+      }
       this.K();
       this.r();
       if (this.I) {
@@ -1301,6 +1312,15 @@ public class dp extends com.alensw.ui.c.a {
         QuickApp.u.b();
         QuickApp.u.b((com.alensw.b.h.j) null);
     }
+
+   private df currentSwipeDetails() {
+      return this.n == 'I' && !this.J() ? this.p : null;
+   }
+
+   @Override
+   public boolean f() {
+      return this.viewerSwipe == null || !this.viewerSwipe.closeDetails();
+   }
 
    @Override
    public boolean handleMessage(Message var1) {

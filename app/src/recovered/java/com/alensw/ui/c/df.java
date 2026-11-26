@@ -350,12 +350,21 @@ public class df {
    }
 
    public void a(String str, com.alensw.ui.c.DateChangedCallback srcType0743) {
-        a();
         com.alensw.ui.a.u srcType0574A = com.alensw.ui.a.u.a(this.d, 0, com.alensw.PicFolder.R.layout.details);
         if (srcType0574A == null) {
             return;
         }
         srcType0574A.setTitle(str);
+        populateDetails((TableLayout) srcType0574A.findViewById(com.alensw.PicFolder.R.id.items));
+        srcType0574A.setButton(-1, this.d.getString(17039370), new com.alensw.ui.c.di(this));
+        if (srcType0743 != null && this.k.j != 0 && this.i != null && this.i.startsWith("/")) {
+            srcType0574A.setButton(-2, this.d.getString(com.alensw.PicFolder.R.string.fix_date), new com.alensw.ui.c.dj(this, srcType0743));
+        }
+        com.alensw.ui.a.f.a(srcType0574A);
+   }
+
+   void populateDetails(TableLayout tableLayout) {
+        a();
         ArrayList<Pair> arrayList = new ArrayList(16);
         String strC = this.i;
         if (strC == null) {
@@ -394,7 +403,7 @@ public class df {
             arrayList.add(new Pair(com.alensw.PicFolder.R.string.pic_address, com.alensw.b.l.b.a("(%.7f,%.7f)", this.k.k[0], this.k.k[1])));
         }
         LayoutInflater layoutInflater = (LayoutInflater) this.d.getSystemService("layout_inflater");
-        TableLayout tableLayout = (TableLayout) srcType0574A.findViewById(com.alensw.PicFolder.R.id.items);
+        tableLayout.removeAllViews();
         tableLayout.setColumnShrinkable(1, true);
         for (Pair pair : arrayList) {
             TableRow tableRow = (TableRow) layoutInflater.inflate(com.alensw.PicFolder.R.layout.detail_item, (android.view.ViewGroup) null);
@@ -408,12 +417,7 @@ public class df {
             textView.setOnClickListener(new com.alensw.ui.c.dg(this, fArr, textView));
             com.alensw.b.d.f.a(this.d).a(fArr[0], fArr[1], 0L, new com.alensw.ui.c.dh(this, textView));
         }
-        srcType0574A.setButton(-1, this.d.getString(17039370), new com.alensw.ui.c.di(this));
-        if (srcType0743 != null && this.k.j != 0 && this.i != null && this.i.startsWith("/")) {
-            srcType0574A.setButton(-2, this.d.getString(com.alensw.PicFolder.R.string.fix_date), new com.alensw.ui.c.dj(this, srcType0743));
-        }
-        com.alensw.ui.a.f.a(srcType0574A);
-    }
+   }
 
    public void b(View var1) {
       this.a();

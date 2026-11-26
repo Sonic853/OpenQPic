@@ -22,6 +22,16 @@
         <item>@string/details</item>
         <item>@string/zoom_buttons</item>
     </string-array>
+    <string-array name="viewer_swipe_actions">
+        <item>@string/viewer_swipe_none</item>
+        <item>@string/viewer_swipe_details</item>
+        <item>@string/viewer_swipe_back</item>
+    </string-array>
+    <string-array name="viewer_swipe_values" translatable="false">
+        <item>none</item>
+        <item>details</item>
+        <item>back</item>
+    </string-array>
     <string-array name="task_cache">
         <item>@string/clear_preview</item>
         <item>@string/clear_thumb</item>

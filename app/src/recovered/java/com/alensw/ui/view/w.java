@@ -8,6 +8,16 @@ import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
 public class w {
+   public interface VerticalDragListener {
+      boolean onVerticalDragStart(float distanceY);
+      void onVerticalDrag(float distanceY);
+      void onVerticalDragEnd(float distanceY);
+      void onVerticalDragCancel(boolean animate);
+   }
+
+   private static final int VERTICAL_DRAG = 5;
+   private VerticalDragListener verticalDragListener;
+   private boolean verticalDragAllowed;
    private final PointF A;
    private final PointF B;
    private final PointF C;
@@ -64,6 +74,16 @@ public class w {
       this.s = var6.getScaledMinimumFlingVelocity();
       this.t = ViewConfiguration.getDoubleTapTimeout();
       this.x = var1.getResources().getDisplayMetrics().density * 2.0F;
+   }
+
+   void setVerticalDragListener(VerticalDragListener listener) {
+      this.verticalDragListener = listener;
+   }
+
+   void clearVerticalDrag() {
+      if (this.a == VERTICAL_DRAG) {
+         this.a = 0;
+      }
    }
 
    private float a(float var1) {
@@ -172,6 +192,7 @@ public class w {
       this.q.addMovement(var1);
       switch (var6) {
          case 0:
+            this.verticalDragAllowed = this.verticalDragListener != null;
             boolean var7 = this.E;
             if (this.E) {
                this.y.removeCallbacks(this.F);
@@ -198,7 +219,10 @@ public class w {
             break;
          case 1:
             this.c = false;
-            if (this.a == 3) {
+            if (this.a == VERTICAL_DRAG) {
+               this.clearVerticalDrag();
+               this.verticalDragListener.onVerticalDragEnd(var3 - this.A.y);
+            } else if (this.a == 3) {
                this.z.f(this.C.x, this.C.y);
             } else if (this.a == 2) {
                VelocityTracker var8 = this.q;
@@ -226,6 +250,9 @@ public class w {
             }
 
             if (var6 == 3) {
+               if (this.a == VERTICAL_DRAG) {
+                  this.verticalDragListener.onVerticalDragCancel(true);
+               }
                this.a = 0;
             }
 
@@ -234,7 +261,9 @@ public class w {
             this.e = false;
             break;
          case 2:
-            if (this.a == 4) {
+            if (this.a == VERTICAL_DRAG) {
+               this.verticalDragListener.onVerticalDrag(var3 - this.A.y);
+            } else if (this.a == 4) {
                float var5 = this.f;
                var3 = this.g;
                float var2 = this.h;
@@ -287,15 +316,28 @@ public class w {
                      this.j = (float)Math.sqrt((Math.abs(this.A.y) + this.v) / (this.v * 2.0F));
                   }
                } else if (Math.max(Math.abs(var4 - var11), Math.abs(var16)) > this.u) {
-                  this.a = 2;
                   this.d = false;
-                  this.B.set(var4, var3);
+                  if (this.verticalDragAllowed && Math.abs(var16) > 1.4F * Math.abs(var4 - var11)
+                        && this.verticalDragListener.onVerticalDragStart(var16)) {
+                     this.a = VERTICAL_DRAG;
+                     this.y.removeCallbacks(this.F);
+                     this.E = false;
+                     this.verticalDragListener.onVerticalDrag(var16);
+                  } else {
+                     this.a = 2;
+                     this.B.set(var4, var3);
+                  }
                }
             }
          case 4:
          default:
             break;
          case 5:
+            this.verticalDragAllowed = false;
+            if (this.a == VERTICAL_DRAG) {
+               this.clearVerticalDrag();
+               this.verticalDragListener.onVerticalDragCancel(false);
+            }
             if (var1.getPointerCount() > 1) {
                this.b(var1);
             }

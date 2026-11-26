@@ -72,6 +72,8 @@ public class MainPreference extends com.alensw.ui.activity.ba {
          var1.findPreference("default_sort").setOnPreferenceClickListener(new com.alensw.ui.activity.ab(this, var5));
       } else if (var6.equals(this.getString(com.alensw.PicFolder.R.string.view))) {
          this.a((ListPreference)var1.findPreference("screen_orientation"));
+         this.a((ListPreference)var1.findPreference("viewer_swipe_up"));
+         this.a((ListPreference)var1.findPreference("viewer_swipe_down"));
          if (VERSION.SDK_INT < 16) {
             this.a(var1, "auto_hide_navigate_bar");
          } else if (VERSION.SDK_INT < 19) {

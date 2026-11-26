@@ -6,7 +6,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Region.Op;
 import android.os.Build.VERSION;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
@@ -19,9 +18,62 @@ public class PictureView extends com.alensw.ui.view.j {
    private boolean c;
    private int d;
    private final com.alensw.ui.view.y e = new com.alensw.ui.view.bb(this);
+   private float verticalDragOffset;
+   private float detailsReveal;
 
    public PictureView(Context var1) {
       this(var1, null);
+   }
+
+   public void setVerticalDragListener(w.VerticalDragListener listener) {
+      this.a.setVerticalDragListener(listener);
+   }
+
+   public void clearVerticalDrag() {
+      this.a.clearVerticalDrag();
+   }
+
+   public boolean isPictureAtFit() {
+      Animation animation = this.getAnimation();
+      return this.getPictureType() > 0 && !this.P.isEmpty() && !this.m()
+            && (animation == null || animation.hasEnded())
+            && Math.abs(this.getTransScale() - 1.0F) <= 0.02F
+            && this.P.width() <= this.Q.width() + 1.0F && this.P.height() <= this.Q.height() + 1.0F;
+   }
+
+   public void setVerticalDragPosition(float offsetY, float detailsReveal) {
+      this.verticalDragOffset = offsetY;
+      this.detailsReveal = detailsReveal;
+      this.invalidate();
+   }
+
+   public boolean beginDetailsPageDrag() {
+      if (this.G || this.K == null || this.getPictureType() <= 0) {
+         return false;
+      }
+      this.h();
+      return true;
+   }
+
+   public void finishDetailsPageDrag(float distanceX) {
+      if (distanceX == 0.0F) {
+         this.l();
+      } else {
+         this.a(Math.copySign(this.ah * 2.0F, distanceX));
+      }
+   }
+
+   public void startViewerTransition(Animation animation, boolean entering) {
+      boolean fromDrag = !entering && this.verticalDragOffset != 0.0F && animation instanceof bu;
+      if (fromDrag) {
+         ((bu)animation).setExitOffsetY(this.verticalDragOffset);
+      }
+      this.setVerticalDragPosition(0.0F, 0.0F);
+      this.startAnimation(animation);
+      if (fromDrag) {
+         // Android evaluates the first animation frame before invoking draw().
+         this.b();
+      }
    }
 
    public PictureView(Context var1, AttributeSet var2) {
@@ -68,35 +120,28 @@ public class PictureView extends com.alensw.ui.view.j {
    }
 
    @Override
-   public void draw(Canvas var1) {
-      boolean var3 = false;
-      boolean var2 = false;
-      if (this.c) {
-         RectF var4 = this.b();
-         if (var4 != null) {
-            var2 = true;
-         }
-
-         var3 = var2;
-         if (var2) {
-            com.alensw.compat.LegacyPlatform.save(var1, 2);
-            var1.clipRect(var4, Op.INTERSECT);
-            var3 = var2;
-         }
+   public void draw(Canvas canvas) {
+      RectF transitionClip = this.c ? this.b() : null;
+      int checkpoint = canvas.save();
+      if (transitionClip != null) {
+         canvas.clipRect(transitionClip);
       }
-
-      if (this.d != 0) {
-         var1.translate(0.0F, this.d);
-      }
-
-      super.draw(var1);
-      if (this.d != 0) {
-         var1.translate(0.0F, -this.d);
-      }
-
-      if (var3) {
-         var1.restore();
+      // Keep the picture's gesture coordinates and zoom matrix unchanged.
+      canvas.translate(0.0F, this.d + this.verticalDragOffset);
+      super.draw(canvas);
+      canvas.restoreToCount(checkpoint);
+      if (transitionClip != null) {
          this.a();
+      }
+   }
+
+   @Override
+   protected void transformPictureForDrawing(Canvas canvas, RectF bounds) {
+      if (this.detailsReveal > 0.0F && !bounds.isEmpty()) {
+         float availableHeight = Math.max(1.0F, this.D - this.detailsReveal);
+         float scale = Math.min(1.0F, availableHeight / bounds.height());
+         // Scale each page about its own center so the paging distance stays the same.
+         canvas.scale(scale, scale, bounds.centerX(), bounds.centerY());
       }
    }
 

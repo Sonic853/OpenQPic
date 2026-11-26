@@ -138,6 +138,11 @@ Android 4.4不允许任何非系统APP修改外置SD卡上的公共文件！
     <string name="slideshow_shuffle">随机播放</string>
     <string name="single_tap_zoom">单击进行缩放</string>
     <string name="single_tap_zoom_summary">单击缩放，双击显示控制栏，否则反之</string>
+    <string name="viewer_swipe_up">上滑行为</string>
+    <string name="viewer_swipe_down">下滑行为</string>
+    <string name="viewer_swipe_none">无</string>
+    <string name="viewer_swipe_details">显示详情</string>
+    <string name="viewer_swipe_back">返回图片列表</string>
     <string name="sort">排序</string>
     <string name="sort_by_date">按时间</string>
     <string name="sort_by_name">按名称</string>
