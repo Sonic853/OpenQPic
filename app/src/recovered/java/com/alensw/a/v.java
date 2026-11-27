@@ -115,7 +115,10 @@ class v extends com.alensw.b.k.e {
       }
 
       var1.n();
-      if (!var2 || this.a(var7, var1.e)) {
+      // Enhanced full scans remove albums they don't report. An unchanged
+      // cached leaf still needs to be scanned so it can be reported.
+      boolean rebuildAlbums = enhanced && (this.a == 2 || this.a == 3);
+      if (!var2 || rebuildAlbums || this.a(var7, var1.e)) {
          var1.d = com.alensw.a.u.f(this.f).a(var1);
          if (var1.h == null) {
             var1.h = new ArrayList(64);

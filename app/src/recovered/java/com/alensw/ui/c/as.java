@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
-public class as extends com.alensw.ui.c.a {
+public class as extends com.alensw.ui.c.a implements ViewerSwipe.DetailsSource {
    private int A;
    private Uri B;
    private com.alensw.a.as L;
@@ -838,7 +838,7 @@ public class as extends com.alensw.ui.c.a {
          this.c = (ViewGroup)this.f(com.alensw.PicFolder.R.id.bottom_bar);
          this.f = (PictureView)this.f(com.alensw.PicFolder.R.id.image);
          this.f.setListener(this.O);
-         this.viewerSwipe = new ViewerSwipe(this, this.f, this::currentSwipeDetails);
+         this.viewerSwipe = new ViewerSwipe(this, this.f, this);
          this.f.setOnFocusChangeListener(new com.alensw.ui.c.ax(this));
          this.g = (ImageView)this.f(com.alensw.PicFolder.R.id.showing);
          this.h = (ImageView)this.f(com.alensw.PicFolder.R.id.play);
@@ -1075,16 +1075,9 @@ public class as extends com.alensw.ui.c.a {
             var3 = var4;
             if (this.m != null) {
                var3 = var4;
-               if (this.f.getPictureType() > 0) {
-                  String var12;
-                  if (this.k != null) {
-                     var12 = Integer.toString(this.k.k + 1) + "/" + this.k.o();
-                  } else {
-                     var12 = this.g(com.alensw.PicFolder.R.string.details);
-                  }
-
+                if (this.f.getPictureType() > 0) {
                   CommonFile var15 = this.l;
-                  this.m.a(var12, new com.alensw.ui.c.az(this, var15));
+                  this.m.a(currentDetailsTitle(), new com.alensw.ui.c.az(this, var15));
                   var3 = var4;
                }
             }
@@ -1293,8 +1286,15 @@ public class as extends com.alensw.ui.c.a {
         QuickApp.u.b((com.alensw.b.h.j) null);
     }
 
-   private df currentSwipeDetails() {
+   @Override
+   public df currentPictureDetails() {
       return this.l != null && this.l.h() == 'I' && !this.z() ? this.m : null;
+   }
+
+   @Override
+   public String currentDetailsTitle() {
+      return this.k == null ? this.g(com.alensw.PicFolder.R.string.details)
+            : Integer.toString(this.k.k + 1) + "/" + this.k.o();
    }
 
    @Override

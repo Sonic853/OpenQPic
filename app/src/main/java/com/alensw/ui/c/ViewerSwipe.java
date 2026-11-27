@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
+import android.widget.TextView;
 import com.alensw.PicFolder.R;
 import com.alensw.ui.view.PictureView;
 import com.alensw.ui.view.w;
@@ -21,6 +22,7 @@ import com.alensw.ui.view.w;
 final class ViewerSwipe implements w.VerticalDragListener {
     interface DetailsSource {
         df currentPictureDetails();
+        String currentDetailsTitle();
     }
 
     private static final int WAITING_FOR_DIRECTION = 1;
@@ -35,6 +37,7 @@ final class ViewerSwipe implements w.VerticalDragListener {
     private final SharedPreferences preferences;
     private final View overlay;
     private final View sheet;
+    private final TextView title;
     private final ScrollView scrollView;
     private final TableLayout rows;
     private final float density;
@@ -64,6 +67,7 @@ final class ViewerSwipe implements w.VerticalDragListener {
         this.touchSlop = ViewConfiguration.get(picture.getContext()).getScaledTouchSlop();
         this.overlay = viewer.f(R.id.viewer_details_overlay);
         this.sheet = overlay.findViewById(R.id.viewer_details_sheet);
+        this.title = sheet.findViewById(android.R.id.title);
         this.rows = (TableLayout) sheet.findViewById(R.id.items);
         this.scrollView = (ScrollView) rows.getParent();
         overlay.setSaveFromParentEnabled(false);
@@ -76,7 +80,7 @@ final class ViewerSwipe implements w.VerticalDragListener {
         });
         overlay.setOnTouchListener(this::onDetailsTouch);
         overlay.setOnClickListener(view -> closeDetails());
-        sheet.findViewById(android.R.id.title).setOnTouchListener(this::onDetailsTouch);
+        title.setOnTouchListener(this::onDetailsTouch);
         sheet.findViewById(android.R.id.button1).setOnClickListener(view -> closeDetails());
     }
 
@@ -299,6 +303,7 @@ final class ViewerSwipe implements w.VerticalDragListener {
     }
 
     private void displayDetails(df details) {
+        title.setText(source.currentDetailsTitle());
         details.populateDetails(rows);
         scrollView.scrollTo(0, 0);
     }

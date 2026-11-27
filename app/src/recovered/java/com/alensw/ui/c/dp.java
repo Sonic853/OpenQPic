@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
-public class dp extends com.alensw.ui.c.a {
+public class dp extends com.alensw.ui.c.a implements ViewerSwipe.DetailsSource {
    private final Rect A;
    private int B;
    private Uri L;
@@ -810,7 +810,7 @@ public class dp extends com.alensw.ui.c.a {
          this.c = (ViewGroup)this.f(com.alensw.PicFolder.R.id.bottom_bar);
          this.f = (PictureView)this.f(com.alensw.PicFolder.R.id.image);
          this.f.setListener(this.P);
-         this.viewerSwipe = new ViewerSwipe(this, this.f, this::currentSwipeDetails);
+         this.viewerSwipe = new ViewerSwipe(this, this.f, this);
          this.f.setOnFocusChangeListener(new com.alensw.ui.c.dq(this));
          this.g = (ImageView)this.f(com.alensw.PicFolder.R.id.showing);
          this.h = (ImageView)this.f(com.alensw.PicFolder.R.id.play);
@@ -1054,18 +1054,11 @@ public class dp extends com.alensw.ui.c.a {
          case com.alensw.PicFolder.R.id.details:
             var4 = var5;
             if (this.p != null) {
-               String var15;
-               if (this.m != null) {
-                  var15 = Integer.toString(this.m.c + 1) + "/" + this.m.j();
-               } else {
-                  var15 = this.g(com.alensw.PicFolder.R.string.details);
-               }
-
                if (this.m != null) {
                   var8 = this.m.e(this.m.c);
                }
 
-               this.p.a(var15, new com.alensw.ui.c.dw(this, var8));
+               this.p.a(currentDetailsTitle(), new com.alensw.ui.c.dw(this, var8));
                var4 = var5;
             }
             break;
@@ -1302,8 +1295,15 @@ public class dp extends com.alensw.ui.c.a {
         QuickApp.u.b((com.alensw.b.h.j) null);
     }
 
-   private df currentSwipeDetails() {
+   @Override
+   public df currentPictureDetails() {
       return this.n == 'I' && !this.J() ? this.p : null;
+   }
+
+   @Override
+   public String currentDetailsTitle() {
+      return this.m == null ? this.g(com.alensw.PicFolder.R.string.details)
+            : Integer.toString(this.m.c + 1) + "/" + this.m.j();
    }
 
    @Override
