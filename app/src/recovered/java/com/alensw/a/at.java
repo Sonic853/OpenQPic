@@ -4,7 +4,9 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import com.alensw.PicFolder.QuickApp;
 import com.alensw.b.h.AnimatedPng;
 import com.alensw.b.h.SystemAnimation;
 import com.alensw.bean.CommonFile;
@@ -164,7 +166,8 @@ class at implements com.alensw.b.k.k {
       if (this.i.mCancel) return null;
       String mime = this.i.outMimeType;
       if ("image/gif".equals(mime)) {
-         if (Build.VERSION.SDK_INT >= 28) {
+         if (Build.VERSION.SDK_INT >= 28
+               && PreferenceManager.getDefaultSharedPreferences(QuickApp.a()).getBoolean("gif_system_decoder", true)) {
             com.alensw.b.h.j system = SystemAnimation.open(com.alensw.a.ao.c(this.c), file, uri, mime);
             if (system != null) return system;
          }

@@ -216,6 +216,7 @@ def verify(apk, aab, tools, documentfile):
                    "sonic853_bilibili","sonic853_x","v97_developer","contact","send_email","profile_card","follow",
                    "bilibili","open_source_licenses","open_source_licenses_url")}
     viewer_resources = {"id/viewer_details_overlay", "id/viewer_details_sheet",
+                        "string/gif_system_decoder", "string/gif_system_decoder_summary",
                         "array/viewer_swipe_actions", "array/viewer_swipe_values"} | {
                             "string/viewer_swipe_" + action for action in ("up", "down", "none", "details", "back")}
     scan_labels = {"string/enhanced_scan", "string/enhanced_scan_summary"}

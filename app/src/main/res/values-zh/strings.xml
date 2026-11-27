@@ -64,6 +64,8 @@
     <string name="flip_vertical">垂直翻转</string>
     <string name="force_true_color">强制输出真彩色</string>
     <string name="force_true_color_summary">输出32位真彩图像，可能会降低分辨率</string>
+    <string name="gif_system_decoder">Gif 使用系统编码</string>
+    <string name="gif_system_decoder_summary">需要 Android 9 或更高版本</string>
     <string name="interface">界面</string>
     <string name="grant_sd_permission">下一屏幕中，在左侧菜单中选择SD卡的根目录，然后在屏幕底部确认，以取得对SD卡的操作权限。</string>
     <string name="hide">隐藏</string>

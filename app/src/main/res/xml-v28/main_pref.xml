@@ -49,6 +49,7 @@
             <SwitchPreference android:icon="@drawable/ic_pattern" android:title="@string/bkgnd_pattern" android:key="bkgnd_pattern" android:summary="@string/bkgnd_pattern_summary" android:singleLineTitle="false" />
             <SwitchPreference android:icon="@drawable/ic_invisible" android:title="@string/auto_black_background" android:key="auto_black_bkgnd" android:defaultValue="false" android:singleLineTitle="false" />
             <SwitchPreference android:icon="@drawable/ic_invisible" android:title="@string/force_true_color" android:key="force_true_color" android:summary="@string/force_true_color_summary" android:singleLineTitle="false" />
+            <SwitchPreference android:icon="@drawable/ic_invisible" android:title="@string/gif_system_decoder" android:key="gif_system_decoder" android:summary="@string/gif_system_decoder_summary" android:defaultValue="true" android:singleLineTitle="false" />
         </PreferenceCategory>
     </PreferenceScreen>
     <PreferenceScreen android:icon="@drawable/ic_security" android:title="@string/security" android:summary="@string/sec_desc" android:singleLineTitle="false">
