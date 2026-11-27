@@ -11,6 +11,7 @@ import android.media.MediaMetadataRetriever;
 import android.media.ThumbnailUtils;
 import android.os.Build.VERSION;
 import android.util.Log;
+import com.alensw.PicFolder.QuickApp;
 import java.lang.reflect.Method;
 
 public class b {
@@ -131,7 +132,8 @@ public class b {
    }
 
    public static Bitmap a(Bitmap var0, float var1) {
-      Config config = com.alensw.b.h.a.a;
+       boolean alpha = var0.hasAlpha();
+       Config config = alpha ? Config.ARGB_8888 : com.alensw.b.h.a.a;
       Bitmap result = null;
       while (result == null) {
          try {
@@ -139,9 +141,10 @@ public class b {
             Canvas canvas = new Canvas(result);
             canvas.scale(var1, var1);
             canvas.drawBitmap(var0, 0.0F, 0.0F, new Paint(6));
+            result.setHasAlpha(alpha);
             return result;
          } catch (OutOfMemoryError failure) {
-            if (config != Config.ARGB_8888) return null;
+            if (alpha || config != Config.ARGB_8888) return null;
             config = Config.RGB_565;
          } catch (Throwable failure) {
             Log.e("BitmapUtils", "create scaled: " + failure);
@@ -217,39 +220,24 @@ public class b {
         return null;
     }
 
-   public static Bitmap a(com.alensw.b.c.f var0, com.alensw.b.h.a var1) {
-      Bitmap var2 = null;
-      if (!var1.e) {
-         Bitmap var3 = BitmapFactory.decodeFileDescriptor(var0.b(), null, var1);
-         var2 = var3;
-         if (var3 == null) {
-            var2 = var3;
-            if (!var1.inJustDecodeBounds) {
-               var2 = var3;
-               if (!var1.mCancel) {
-                  var1.e = true;
-                  Log.e("BitmapUtils", "decode fd error!");
-                  var2 = var3;
-               }
-            }
+   public static Bitmap a(com.alensw.b.c.f file, com.alensw.b.h.a options) {
+      if (VERSION.SDK_INT >= 28 && !options.inJustDecodeBounds && !options.mCancel
+              && "image/webp".equals(options.outMimeType) && AnimatedWebp.mayAnimate(file)) {
+         Bitmap frame = AnimatedWebp.firstFrame(QuickApp.a().getContentResolver(), file.g(), options.inSampleSize);
+         if (frame != null) {
+            options.outWidth = frame.getWidth();
+            options.outHeight = frame.getHeight();
+            return frame;
          }
       }
 
-      Bitmap var4 = var2;
-      if (var2 == null) {
-         var4 = var2;
-         if (!var1.inJustDecodeBounds) {
-            var4 = var2;
-            if (var1.e) {
-               var4 = var2;
-               if (var0.a()) {
-                  var4 = BitmapFactory.decodeFile(var0.d(), var1);
-               }
-            }
-         }
+      Bitmap bitmap = options.e ? null : BitmapFactory.decodeFileDescriptor(file.b(), null, options);
+      if (bitmap != null || options.inJustDecodeBounds || options.mCancel) return bitmap;
+      if (!options.e) {
+         options.e = true;
+         Log.e("BitmapUtils", "decode fd error!");
       }
-
-      return var4;
+      return file.a() ? BitmapFactory.decodeFile(file.d(), options) : null;
    }
 
    public static Bitmap a(com.alensw.b.c.f var0, boolean var1, int var2, com.alensw.b.h.a var3) {
@@ -365,27 +353,19 @@ public class b {
       return var5;
    }
 
-   public static boolean b(com.alensw.b.c.f var0, com.alensw.b.h.a var1) {
-      boolean var3 = true;
-
-      int var2;
+   public static boolean b(com.alensw.b.c.f file, com.alensw.b.h.a options) {
       try {
-         var1.inJustDecodeBounds = true;
-         a(var0, var1);
-         var1.inJustDecodeBounds = false;
-         if (var1.outWidth <= 0) {
-            return false;
-         }
-
-         var2 = var1.outHeight;
-      } catch (Throwable var4) {
-         Log.e("BitmapUtils", "get size: " + var4);
-         var1.inJustDecodeBounds = false;
-         var1.outHeight = -1;
-         var1.outWidth = -1;
-         return false;
+         options.inJustDecodeBounds = true;
+         a(file, options);
+      } catch (Throwable error) {
+         Log.e("BitmapUtils", "get size: " + error);
+         options.outHeight = -1;
+         options.outWidth = -1;
+      } finally {
+         options.inJustDecodeBounds = false;
       }
-
-      return var2 > 0 ? var3 : false;
+      return (options.outWidth > 0 && options.outHeight > 0)
+              || (VERSION.SDK_INT >= 28 && !options.mCancel && AnimatedWebp.mayAnimate(file)
+                  && AnimatedWebp.readBounds(QuickApp.a().getContentResolver(), file.g(), options));
    }
 }

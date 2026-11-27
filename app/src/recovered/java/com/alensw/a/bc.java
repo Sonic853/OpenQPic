@@ -17,6 +17,7 @@ import android.util.DisplayMetrics;
 import com.alensw.PicFolder.QuickApp;
 public class bc {
    public static final Config a = Config.RGB_565;
+   private static final int CACHE_VERSION = 5;
    private static final String[] h = new String[]{"thumb", "modified"};
    private static final byte[] p = new byte[1];
    public boolean b;
@@ -156,16 +157,23 @@ public class bc {
          db = SQLiteDatabase.openDatabase(file.getPath(), null, flags);
          if (!readOnly && Build.VERSION.SDK_INT >= 16) this.m = db.isWriteAheadLoggingEnabled();
          int version = db.getVersion();
-         if (version != 4) {
+         if (version != CACHE_VERSION) {
+            if (readOnly) {
+               db.close();
+               return false;
+            }
             db.beginTransaction();
             try {
                if (version == 0) {
                   this.a(db);
+               } else if (version == 4) {
+                  // The old JPEG entries cannot tell us whether the source had alpha.
+                  db.delete("thumbs", null, null);
                } else if (version < 4) {
                   com.alensw.b.l.b.c(context, context.getString(com.alensw.PicFolder.R.string.cache_need_upgrade));
-                  this.a(db, version, 4);
+                  this.a(db, version, CACHE_VERSION);
                }
-               db.setVersion(4);
+               db.setVersion(CACHE_VERSION);
                db.setTransactionSuccessful();
             } finally {
                db.endTransaction();
@@ -309,11 +317,12 @@ public class bc {
 
       com.alensw.b.h.h var14 = new com.alensw.b.h.h(var17, var7.b, var7.c);
       var14.b.e = com.alensw.b.h.j.a(var16);
-      if (var9 && !var8 && (var14.b.d != 0 || var17.getWidth() != var3 || var17.getHeight() != var4 || var17.getConfig() != a)) {
-         com.alensw.b.h.h var13 = var14.a(var3, var4, this.b, a);
+      Config config = var17.hasAlpha() ? Config.ARGB_8888 : a;
+      if (var9 && !var8 && (var14.b.d != 0 || var17.getWidth() != var3 || var17.getHeight() != var4 || var17.getConfig() != config)) {
+         com.alensw.b.h.h var13 = var14.a(var3, var4, this.b, config);
          if (var13 == null) {
-            Object var18 = null;
-            return (com.alensw.b.h.h)var18;
+            var14.m();
+            return null;
          }
 
          var14.m();
@@ -375,7 +384,7 @@ public class bc {
    }
 
    public void a(String var1, long var2, com.alensw.b.h.h var4) {
-      byte[] var5 = var4.a(CompressFormat.JPEG, 75);
+      byte[] var5 = var4.a(var4.i() ? CompressFormat.PNG : CompressFormat.JPEG, 75);
       if (var5 != null) {
          this.q.a(var1, 1, var2, var5);
       }

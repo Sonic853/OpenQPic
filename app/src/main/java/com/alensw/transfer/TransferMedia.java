@@ -1,10 +1,16 @@
 package com.alensw.transfer;
 
+import static com.alensw.b.f.c.webmMimeType;
+
+import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
+import android.net.Uri;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import com.alensw.b.h.AnimatedWebp;
 import org.openqpic.localsend.LocalSend;
 import java.io.IOException;
 import java.util.HashMap;
@@ -46,7 +52,8 @@ final class TransferMedia {
     }
     static String offered(LocalSend.Item item) {
         if(item.size<=0) return null;
-        String name=TransferFiles.basename(item.name), mime=normal(item.type);
+        String name=TransferFiles.basename(item.name);
+        String mime=webmMimeType(name,normal(item.type));
         int dot=name.lastIndexOf('.');
         String ext=dot<0?null:extensions.get(name.substring(dot+1).toLowerCase(Locale.ROOT));
         if(dot>=0 && ext==null) return null;
@@ -58,18 +65,21 @@ final class TransferMedia {
         return ("video/mp4".equals(ext) && "audio/mp4".equals(mime)) ||
                 ("video/webm".equals(ext) && "audio/webm".equals(mime)) ? mime:null;
     }
-    static boolean readable(ParcelFileDescriptor file,LocalSend.Item item) throws IOException {
+    static boolean readable(ParcelFileDescriptor file,LocalSend.Item item,ContentResolver resolver,Uri uri) throws IOException {
         if(item.type.startsWith("image/")) {
             BitmapFactory.Options opts=new BitmapFactory.Options();
             opts.inJustDecodeBounds=true;
             BitmapFactory.decodeFileDescriptor(file.getFileDescriptor(),null,opts);
-            if(opts.outWidth<1 || opts.outHeight<1 || opts.outMimeType==null ||
-                    !item.type.equals(normal(opts.outMimeType))) return false;
-            opts.inJustDecodeBounds=false; opts.inSampleSize=1;
-            while(Math.max(opts.outWidth,opts.outHeight)/(long)opts.inSampleSize>128) opts.inSampleSize*=2;
-            Bitmap sample=BitmapFactory.decodeFileDescriptor(file.getFileDescriptor(),null,opts);
-            if(sample==null) return false;
-            sample.recycle(); return true;
+            if(opts.outWidth>0 && opts.outHeight>0 && opts.outMimeType!=null && item.type.equals(normal(opts.outMimeType))) {
+                opts.inJustDecodeBounds=false; opts.inSampleSize=1;
+                while(Math.max(opts.outWidth,opts.outHeight)/(long)opts.inSampleSize>128) opts.inSampleSize*=2;
+                Bitmap sample=BitmapFactory.decodeFileDescriptor(file.getFileDescriptor(),null,opts);
+                if(sample!=null) {
+                    sample.recycle();
+                    return true;
+                }
+            }
+            return Build.VERSION.SDK_INT>=28 && "image/webp".equals(item.type) && AnimatedWebp.readable(resolver,uri);
         }
         MediaExtractor probe=new MediaExtractor();
         try {

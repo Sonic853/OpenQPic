@@ -508,6 +508,7 @@ public class j extends View {
          } else if (var1.d == 3) {
             if (this.a != null && this.a.j()) {
                if (this.b != null) {
+                  if (this.b != var1) this.b.a(true);
                   this.b.m();
                }
 
@@ -515,6 +516,7 @@ public class j extends View {
             }
          } else {
             if (this.b != null) {
+               if (this.b != var1) this.b.a(true);
                this.b.m();
             }
 
@@ -875,6 +877,11 @@ public class j extends View {
          this.b.a(this, this.N);
          this.invalidate();
       }
+   }
+
+   public boolean hasAnimationPreview() {
+      return "image/gif".equals(this.getMimeType())
+              || (this.b == null && this.a != null && this.a.animatedPreview);
    }
 
    public void g() {
@@ -1341,6 +1348,10 @@ public class j extends View {
    @Override
    protected void onWindowVisibilityChanged(int var1) {
       super.onWindowVisibilityChanged(var1);
+      if (VERSION.SDK_INT >= 28 && this.b instanceof com.alensw.b.h.AnimatedWebp) {
+         if (var1 == VISIBLE && this.c == null && !this.G) this.b.a(this, this.N);
+         else this.b.a(true);
+      }
       this.invalidate();
    }
 

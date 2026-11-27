@@ -1,5 +1,7 @@
 package com.alensw.video;
 
+import static com.alensw.b.f.c.webmMimeType;
+
 import android.app.Service;
 import android.content.*;
 import android.content.res.AssetFileDescriptor;
@@ -34,14 +36,24 @@ public final class VideoProxyService extends Service {
     private final java.util.concurrent.ExecutorService opens=java.util.concurrent.Executors.newSingleThreadExecutor();
     private static volatile VideoProxyService current;
     private static final String INTERNAL_PLAYER="com.alensw.video.INTERNAL_PLAYER";
-    private final Map<String,Uri> grants=new ConcurrentHashMap<>();
-    private final Map<String,Uri> internalGrants=new ConcurrentHashMap<>();
+    private final Map<String,Playback> grants=new ConcurrentHashMap<>();
+    private final Map<String,Playback> internalGrants=new ConcurrentHashMap<>();
+
+    private static final class Playback {
+        final Uri uri;
+        final String webmType;
+        Playback(Uri uri,String mime) {
+            this.uri=uri;
+            this.webmType="video/webm".equals(mime) || "audio/webm".equals(mime) ? mime : null;
+        }
+    }
 
     /** A content provider may be readable but not directly seekable by the platform player. */
     public static boolean retryInPlayer(Context context,Uri uri,String mime) {
         if(uri==null || !"content".equals(uri.getScheme())) return false;
         try {
             if(mime==null) mime=context.getContentResolver().getType(uri);
+            mime=webmMimeType(context.getContentResolver(),uri,mime);
             if(mime==null || !mime.startsWith("video/")) return false;
             context.startService(new Intent(context,VideoProxyService.class).setAction(Intent.ACTION_VIEW)
                     .setDataAndType(uri,mime).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION).putExtra(INTERNAL_PLAYER,true));
@@ -50,6 +62,11 @@ public final class VideoProxyService extends Service {
     }
 
     public static void view(Context context, Uri uri, String mime) {
+        ContentResolver resolver=context.getContentResolver();
+        if(mime==null && "content".equals(uri.getScheme())) {
+            try { mime=resolver.getType(uri); } catch(RuntimeException unavailable) {}
+        }
+        mime=webmMimeType(resolver,uri,mime);
         if("file".equals(uri.getScheme()) && uri.getPath()!=null) {
             try {
                 String path=new File(uri.getPath()).getCanonicalPath();
@@ -89,27 +106,30 @@ public final class VideoProxyService extends Service {
             try(Cursor c=getContentResolver().query(uri,new String[]{OpenableColumns.DISPLAY_NAME},null,null,null)) {
                 if(c!=null && c.moveToFirst() && !c.isNull(0)) name=c.getString(0);
             }
+            String type=i.getType()==null ? getContentResolver().getType(uri) : i.getType();
+            String mime=webmMimeType(name,type);
+            Playback source=new Playback(uri,mime);
             String key=UUID.randomUUID().toString();
             // Choose using the old HTTP filter, before disclosing a capability. If the
             // system chooser selects our player later, PlayerView upgrades that grant.
-            Intent probe=new Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse("http://127.0.0.1/video"),i.getType());
+            Intent probe=new Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse("http://127.0.0.1/video"),mime);
             ResolveInfo target=getPackageManager().resolveActivity(probe,android.content.pm.PackageManager.MATCH_DEFAULT_ONLY);
             boolean internal=i.getBooleanExtra(INTERNAL_PLAYER,false) ||
                     (target!=null && target.activityInfo!=null && getPackageName().equals(target.activityInfo.packageName));
             synchronized(this) { if(destroyed) return; current=this; }
             Uri url;
             if(internal) {
-                url=secureUrl(uri,name);
+                url=secureUrl(source,name);
                 probe.setClass(this,PlayerActivity.class);
             } else {
                 synchronized(this) {
                     if(destroyed) return;
                     if(externalServer==null || !externalServer.isOpen()) externalServer=new LoopbackHttp((p,r,h,o)->serve(grants,p,r,h,o));
-                    grants.put(key,uri);
+                    grants.put(key,source);
                     url=url("http",externalServer.port(),key,name);
                 }
             }
-            synchronized(this) { if(!destroyed) startActivity(probe.setDataAndType(url,i.getType()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
+            synchronized(this) { if(!destroyed) startActivity(probe.setDataAndType(url,mime).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
         } catch(Exception e) { Log.w("VideoProxy","Cannot open video",e); }
         finally { release(); }
     }
@@ -127,7 +147,7 @@ public final class VideoProxyService extends Service {
     private static Uri url(String scheme,int port,String key,String name) {
         return new Uri.Builder().scheme(scheme).encodedAuthority("127.0.0.1:"+port).appendPath("video").appendPath(key).appendPath(name).build();
     }
-    private synchronized Uri secureUrl(Uri source,String name) throws IOException {
+    private synchronized Uri secureUrl(Playback source,String name) throws IOException {
         if(destroyed) throw new IOException("Video service stopped");
         if(videoServer==null || !videoServer.isOpen())
             videoServer=new LoopbackHttp((p,r,h,o)->serve(internalGrants,p,r,h,o),SystemTls.video());
@@ -150,7 +170,7 @@ public final class VideoProxyService extends Service {
             if("https".equals(uri.getScheme()) && s.videoServer!=null && uri.getPort()==s.videoServer.port()
                     && s.internalGrants.containsKey(parts.get(1))) return uri;
             if("http".equals(uri.getScheme()) && s.externalServer!=null && uri.getPort()==s.externalServer.port()) {
-                Uri src=s.grants.get(parts.get(1));
+                Playback src=s.grants.get(parts.get(1));
                 if(src!=null) return upgrade?s.secureUrl(src,parts.get(2)):uri;
             }
             return null;
@@ -162,13 +182,14 @@ public final class VideoProxyService extends Service {
         return s::release;
     }
 
-    private void serve(Map<String,Uri> allowed,String path, String range, boolean head, LoopbackHttp.Reply reply) throws IOException {
+    private void serve(Map<String,Playback> allowed,String path, String range, boolean head, LoopbackHttp.Reply reply) throws IOException {
         int query=path.indexOf('?');
         String[] parts=Uri.decode(query<0 ? path : path.substring(0,query)).split("/",-1);
         if(parts.length!=4 || !parts[0].isEmpty() || !"video".equals(parts[1]) || parts[3].isEmpty() ||
                 ".".equals(parts[3]) || "..".equals(parts[3]) || parts[3].contains("\\") || parts[3].indexOf('\0')>=0) return;
-        Uri uri=allowed.get(parts[2]);
-        if(uri==null || !acquire()) return;
+        Playback source=allowed.get(parts[2]);
+        if(source==null || !acquire()) return;
+        Uri uri=source.uri;
         try {
             String name; long size;
             try(Cursor c=getContentResolver().query(uri,new String[]{OpenableColumns.DISPLAY_NAME,OpenableColumns.SIZE},null,null,null)) {
@@ -211,7 +232,9 @@ public final class VideoProxyService extends Service {
                 boolean seekable=isSeekable(asset);
                 if(!seekable && (offset!=0 || begin!=0)) return;
                 long length=end-begin+1;
-                reply.headers(range==null?200:206,length,getContentResolver().getType(uri),
+                String mime=parts[3].equals(name) ? source.webmType : null;
+                if(mime==null) mime=webmMimeType(parts[3],getContentResolver().getType(uri));
+                reply.headers(range==null?200:206,length,mime,
                         range==null?null:"bytes "+begin+"-"+end+"/"+size,seekable);
                 if(head || length==0) return;
                 if(seekable) {

@@ -44,8 +44,10 @@ class ar implements com.alensw.b.k.k {
                   var2 = this.a.toString();
                }
 
-               com.alensw.a.ao.a(this.e).a(var2, this.d, var4);
-            }
+               this.e.savePreview(var2, this.d, var4);
+            } else {
+               var4.delete();
+             }
 
             this.b.a = false;
          }

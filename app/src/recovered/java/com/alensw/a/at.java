@@ -2,8 +2,10 @@ package com.alensw.a;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
+import com.alensw.b.h.AnimatedWebp;
 import com.alensw.bean.CommonFile;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -64,6 +66,7 @@ class at implements com.alensw.b.k.k {
         String str = this.f;
         com.alensw.b.h.a srcType0193 = this.i;
         String str2 = srcType0193.outMimeType;
+        boolean animatedWebp = mayAnimateWebp(var1, str2);
         int i2 = srcType0193.c;
         int i3 = srcType0193.outWidth;
         int i4 = srcType0193.outHeight;
@@ -98,7 +101,7 @@ class at implements com.alensw.b.k.k {
             a((com.alensw.b.h.j) this.k.get());
             if (cH == 'I') {
                 bitmapA2 = com.alensw.b.h.b.a(var1, false, com.alensw.a.ao.d(this.c), srcType0193);
-                z2 = srcType0193.inSampleSize > 1 || "image/gif".equals(srcType0193.outMimeType);
+                z2 = srcType0193.inSampleSize > 1 || "image/gif".equals(srcType0193.outMimeType) || animatedWebp;
             } else {
                 bitmapA2 = (cH == 'D' || cH == 0) ? com.alensw.b.h.b.a(var1, false, com.alensw.a.ao.d(this.c), srcType0193) : bitmapA;
                 if (bitmapA2 == null) {
@@ -118,6 +121,7 @@ class at implements com.alensw.b.k.k {
             i = (!z || z5) ? 1 : 2;
         }
         com.alensw.b.h.j srcType0203 = new com.alensw.b.h.j(bitmapA4, i, var2, srcType0193);
+        srcType0203.animatedPreview = animatedWebp;
         this.c.a(srcType0203);
         a(srcType0203);
         if (this.c.a && z && z5 && !z4) {
@@ -150,14 +154,22 @@ class at implements com.alensw.b.k.k {
       }
    }
 
+   private static boolean mayAnimateWebp(com.alensw.b.c.f file, String mime) {
+      return Build.VERSION.SDK_INT >= 28 && "image/webp".equals(mime) && AnimatedWebp.mayAnimate(file);
+   }
+
+   private com.alensw.b.h.j animation(com.alensw.b.c.f file, Uri uri) {
+      if (this.i.mCancel) return null;
+      if ("image/gif".equals(this.i.outMimeType)) return com.alensw.b.h.d.a(file, uri, this.d);
+      if (this.b != 4 && mayAnimateWebp(file, this.i.outMimeType)) {
+         return AnimatedWebp.open(com.alensw.a.ao.c(this.c), file, uri);
+      }
+      return null;
+   }
+
    private com.alensw.b.h.j b(com.alensw.b.c.f var1, Uri var2) {
       com.alensw.b.h.a var4 = this.i;
-      com.alensw.b.h.j var3;
-      if ("image/gif".equals(var4.outMimeType) && !var4.mCancel) {
-         var3 = com.alensw.b.h.d.a(var1, var2, this.d);
-      } else {
-         var3 = null;
-      }
+      com.alensw.b.h.j var3 = animation(var1, var2);
 
       Object var5;
       if (var3 != null) {
@@ -189,7 +201,7 @@ class at implements com.alensw.b.k.k {
         Bitmap bitmap;
         com.alensw.b.h.a srcType0193 = this.i;
         if (!this.g || srcType0193.mCancel) {
-            srcType0202A = (!"image/gif".equals(srcType0193.outMimeType) || srcType0193.mCancel) ? null : com.alensw.b.h.d.a(var1, var2, this.d);
+            srcType0202A = animation(var1, var2);
         } else {
             srcType0202A = com.alensw.b.h.n.a(var1, var2, srcType0193.outMimeType, this.d);
         }
@@ -309,8 +321,8 @@ class at implements com.alensw.b.k.k {
                   var5.outHeight = -1;
                   var5.outWidth = -1;
                   this.a(true);
-                  Object var7 = null;
-                  return (com.alensw.b.c.f)var7;
+                  var4.h();
+                  return null;
                }
 
                var3.a = var5.outWidth;

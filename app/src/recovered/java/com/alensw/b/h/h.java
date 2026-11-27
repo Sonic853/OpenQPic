@@ -97,20 +97,20 @@ public class h extends com.alensw.b.h.l {
          }
 
          Bitmap var11 = this.a;
+         boolean alpha = var11.hasAlpha();
          if (var4 == null) {
             var4 = var11.getConfig();
          }
 
-         Config var9 = var4;
-         if (var4 == null) {
-            var9 = Config.RGB_565;
-         }
+         Config var9 = alpha && (var4 == null || var4 == Config.RGB_565) ? Config.ARGB_8888 : var4;
+         if (var9 == null) var9 = Config.RGB_565;
 
          Bitmap var13 = com.alensw.b.h.b.a(var1, var2, var9);
          if (var13 == null) {
             var12 = null;
          } else {
             new Canvas(var13).drawBitmap(var11, var10, new Paint(6));
+            var13.setHasAlpha(alpha);
             var12 = new com.alensw.b.h.h(var13);
          }
       }
@@ -294,14 +294,7 @@ public class h extends com.alensw.b.h.l {
    }
 
    public final boolean i() {
-      boolean var1;
-      if (this.a != null && this.a.hasAlpha() && this.a.getConfig() == Config.ARGB_8888) {
-         var1 = true;
-      } else {
-         var1 = false;
-      }
-
-      return var1;
+      return this.a != null && this.a.hasAlpha();
    }
 
    public final boolean j() {

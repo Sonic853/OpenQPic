@@ -186,8 +186,10 @@ public final class GalleryShareMenu implements MenuItem.OnMenuItemClickListener 
         int dot = name == null ? -1 : name.lastIndexOf('.');
         String byName = dot < 0 ? null : MimeTypeMap.getSingleton()
                 .getMimeTypeFromExtension(name.substring(dot + 1).toLowerCase(Locale.ROOT));
-        // Our legacy provider derives MIME from the path too, but aliases MOV to MP4 and WebM to MKV.
-        if (byName != null && "com.alensw.PicFolder.FileProvider".equals(uri.getAuthority())) return byName;
+        // Our file provider derives MIME from the path too, but aliases MOV to MP4.
+        if (byName != null && "com.alensw.PicFolder.FileProvider".equals(uri.getAuthority())) {
+            return com.alensw.b.f.c.webmMimeType(name, byName);
+        }
         String type = null;
         if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
             try {
@@ -196,6 +198,7 @@ public final class GalleryShareMenu implements MenuItem.OnMenuItemClickListener 
                 // A provider may not implement getType even when its stream is readable.
             }
         }
+        type = com.alensw.b.f.c.webmMimeType(context.getContentResolver(), uri, type);
         if (type != null && type.indexOf('/') > 0 && !type.endsWith("/*")
                 && !"application/octet-stream".equals(type)) return type;
         if (byName != null) return byName;

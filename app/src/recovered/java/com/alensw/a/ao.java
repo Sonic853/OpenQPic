@@ -118,7 +118,7 @@ public class ao {
          var7 = var1.toString();
       }
 
-      File var8 = this.j.a(var7, var3);
+      File var8 = this.j.a(var7, previewStamp(var3));
       Bitmap var9;
       if (var8 != null && !var5.mCancel) {
          var9 = a(var8.getPath(), var5, var6);
@@ -218,18 +218,21 @@ public class ao {
    }
 
    private static boolean b(String path, com.alensw.b.h.j image) {
-      boolean compressed = false;
-      try {
-         FileOutputStream file = new FileOutputStream(path);
-         BufferedOutputStream buffer = new BufferedOutputStream(file);
-         boolean png = image.i() && "image/png".equals(image.h);
-         compressed = image.d().compress(png ? CompressFormat.PNG : CompressFormat.JPEG, 80, buffer);
-         buffer.close();
-         file.close();
+      try (BufferedOutputStream buffer = new BufferedOutputStream(new FileOutputStream(path))) {
+         return image.d().compress(image.i() ? CompressFormat.PNG : CompressFormat.JPEG, 80, buffer);
       } catch (Throwable error) {
          Log.e("PictureLoader", "save thumbnail: " + path + ", " + error);
+         return false;
       }
-      return compressed;
+   }
+
+   private static long previewStamp(long modified) {
+      // Old previews may be JPEGs with lost alpha. The cache removes a stale file on lookup.
+      return ~modified;
+   }
+
+   void savePreview(String key, long modified, File file) {
+      this.j.a(key, previewStamp(modified), file);
    }
 
    static ContentResolver c(com.alensw.a.ao var0) {

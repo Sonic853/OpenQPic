@@ -507,20 +507,7 @@ public class as extends com.alensw.ui.c.a {
    }
 
    private boolean s() {
-      boolean var3 = true;
-      int var1 = this.f.getPictureType();
-      if (!this.s && var1 == 1) {
-         return var3;
-      } else {
-         boolean var2;
-         if ("image/gif".equals(this.f.getMimeType())) {
-            var2 = var3;
-         } else {
-            var2 = false;
-         }
-
-         return var2;
-      }
+      return (!this.s && this.f.getPictureType() == 1) || this.f.hasAnimationPreview();
    }
 
    private void t() {

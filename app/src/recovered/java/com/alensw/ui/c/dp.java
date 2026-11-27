@@ -551,18 +551,7 @@ public class dp extends com.alensw.ui.c.a {
    }
 
    private boolean v() {
-      boolean var2 = true;
-      if (this.f.getPictureType() == 1) {
-         if (!this.u) {
-            return var2;
-         }
-
-         if ("image/gif".equals(this.f.getMimeType())) {
-            return var2;
-         }
-      }
-
-      return false;
+      return this.f.getPictureType() == 1 && (!this.u || this.f.hasAnimationPreview());
    }
 
    private void w() {

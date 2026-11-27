@@ -1,5 +1,7 @@
 package com.alensw.transfer;
 
+import static com.alensw.b.f.c.webmMimeType;
+
 import android.Manifest;
 import android.content.*;
 import android.content.pm.PackageManager;
@@ -67,7 +69,7 @@ final class TransferFiles {
         finally { cancellation.onCancel(null); }
     }
     private LocalSend.Source openSource(Uri uri,LocalSend.Cancellation cancellation,CancellationSignal signal) throws IOException {
-        String name=name(uri,signal), type=resolver.getType(uri);
+        String name=name(uri,signal), type=webmMimeType(name,resolver.getType(uri));
         if(type==null) type=MimeTypeMap.getSingleton().getMimeTypeFromExtension(
                 name.substring(name.lastIndexOf('.')+1).toLowerCase(Locale.ROOT));
         AssetFileDescriptor asset=resolver.openAssetFileDescriptor(uri,"r",signal);
@@ -124,6 +126,22 @@ final class TransferFiles {
         }
         catch(RuntimeException e) { Log.w("LocalSend","Cannot notify media collection",e); }
     }
+
+    private void finishIndex(Uri uri, String type, String path) {
+        if(uri==null) return;
+        if("audio/webm".equals(type)) {
+            // MediaStore may classify audio-only .webm as video using its extension.
+            try {
+                Uri file=MediaStore.Files.getContentUri(uri.getPathSegments().get(0),ContentUris.parseId(uri));
+                ContentValues audio=new ContentValues();
+                audio.put(MediaStore.MediaColumns.MIME_TYPE,type);
+                audio.put(MediaStore.Files.FileColumns.MEDIA_TYPE,MediaStore.Files.FileColumns.MEDIA_TYPE_AUDIO);
+                resolver.update(file,audio,path==null?null:MediaStore.MediaColumns.DATA+"=?",
+                        path==null?null:new String[]{path});
+            } catch(RuntimeException e) { Log.w("LocalSend","Cannot index WebM audio",e); }
+        }
+        indexed(type);
+    }
     private final class Destination implements LocalSend.Sink {
         final LocalSend.Item item; final String name;
         final LocalSend.Cancellation cancellation;
@@ -154,7 +172,7 @@ final class TransferFiles {
         public boolean isMedia() throws IOException {
             try(ParcelFileDescriptor p=row==null?ParcelFileDescriptor.open(temp,ParcelFileDescriptor.MODE_READ_ONLY):
                     resolver.openFileDescriptor(row,"r")) {
-                return p!=null && TransferMedia.readable(p,item);
+                return p!=null && TransferMedia.readable(p,item,resolver,row==null?Uri.fromFile(temp):row);
             }
         }
         public boolean matches(String expected) throws IOException {
@@ -186,11 +204,11 @@ final class TransferFiles {
             }
             committed=true;
             if(item.type.startsWith("image/") || item.type.startsWith("video/")) ReceivedMediaUpdates.published(directory);
-            if(saved==null) indexed(item.type); // IS_PENDING has already been cleared
+            if(saved==null) finishIndex(row,item.type,null); // IS_PENDING has already been cleared
             else try {
                 String type=item.type;
                 MediaScannerConnection.scanFile(context,new String[]{saved.toString()},new String[]{type},
-                        (path,uri)->{ if(uri!=null) indexed(type); });
+                        (path,uri)->finishIndex(uri,type,path));
             } catch(RuntimeException e) { Log.w("LocalSend","Cannot request media scan",e); }
         }
         public void close() throws IOException {

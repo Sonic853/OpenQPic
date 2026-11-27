@@ -14,6 +14,7 @@ public class j extends com.alensw.b.h.h {
    public int d;
    public String h = "image/bmp";
    public Uri i = Uri.EMPTY;
+   public boolean animatedPreview;
 
    public j(int var1, int var2, int var3, Uri var4, String var5) {
       super(var1, var2, 0, 0);
