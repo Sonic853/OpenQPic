@@ -10,7 +10,7 @@ import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
-import com.alensw.b.h.AnimatedWebp;
+import com.alensw.b.h.SystemAnimation;
 import org.openqpic.localsend.LocalSend;
 import java.io.IOException;
 import java.util.HashMap;
@@ -79,7 +79,7 @@ final class TransferMedia {
                     return true;
                 }
             }
-            return Build.VERSION.SDK_INT>=28 && "image/webp".equals(item.type) && AnimatedWebp.readable(resolver,uri);
+            return Build.VERSION.SDK_INT>=28 && "image/webp".equals(item.type) && SystemAnimation.readable(resolver,uri);
         }
         MediaExtractor probe=new MediaExtractor();
         try {

@@ -98,7 +98,7 @@ def verify(apk, aab, tools, documentfile):
     image_prefix="Java_com_alensw_jni_JniUtils_"
     image=declared(java/"com/alensw/jni/JniUtils.java",image_prefix) | {image_prefix+"fuCopyFile",image_prefix+"fuSocketPair"}
     wire=declared(java/"org/openqpic/localsend/Wire.java","Java_org_openqpic_localsend_Wire_")
-    assert len(image)==34 and len(wire)>=1
+    assert len(image)==39 and len(wire)>=1
     # Fixed names from the last mixed build, including the JNI bridge. Keep this
     # independent of current sources so deleting a Java file cannot shrink the gate.
     inventory=[s.split() for s in (APP/"recovered-types.txt").read_text().splitlines() if s.startswith("L")]

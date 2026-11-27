@@ -20,24 +20,24 @@ import com.alensw.b.c.f;
 import java.io.File;
 import java.io.IOException;
 
-/** System WebP decoder and viewer rendering adapter. Callers gate it on API 28. */
+/** System GIF and WebP decoder and viewer rendering adapter. Callers gate it on API 28. */
 @TargetApi(28)
-public final class AnimatedWebp extends j implements Drawable.Callback {
-    private static final String MIME = "image/webp";
+public final class SystemAnimation extends j implements Drawable.Callback {
+    private static final String WEBP = "image/webp";
     private static final Handler FRAMES = new Handler(Looper.getMainLooper());
 
     private final AnimatedImageDrawable animation;
     private View owner;
     private Paint background;
 
-    private AnimatedWebp(AnimatedImageDrawable animation, Uri uri) {
-        super(animation.getIntrinsicWidth(), animation.getIntrinsicHeight(), 4, uri, MIME);
+    private SystemAnimation(AnimatedImageDrawable animation, Uri uri, String mime) {
+        super(animation.getIntrinsicWidth(), animation.getIntrinsicHeight(), 4, uri, mime);
         this.animation = animation;
         animation.setBounds(0, 0, e(), f());
     }
 
     /** Extended WebP has a VP8X chunk first; bit 1 of its feature flags denotes animation. */
-    public static boolean mayAnimate(f file) {
+    public static boolean mayAnimateWebp(f file) {
         byte[] header = new byte[21];
         try {
             int read = Os.pread(file.b(), header, 0, header.length, 0);
@@ -52,14 +52,14 @@ public final class AnimatedWebp extends j implements Drawable.Callback {
         }
     }
 
-    public static AnimatedWebp open(ContentResolver resolver, f file, Uri uri) {
+    public static SystemAnimation open(ContentResolver resolver, f file, Uri uri, String mime) {
         try {
             Drawable drawable = ImageDecoder.decodeDrawable(source(resolver, file.g()), (decoder, info, src) -> {
-                if (!MIME.equals(info.getMimeType()) || !info.isAnimated()) throw new HeaderRead();
+                if (!mime.equals(info.getMimeType()) || !info.isAnimated()) throw new HeaderRead();
                 decoder.setTargetSampleSize(sampleSize(info.getSize(), 1, com.alensw.b.h.b.d));
             });
             return drawable instanceof AnimatedImageDrawable
-                    ? new AnimatedWebp((AnimatedImageDrawable) drawable, uri) : null;
+                    ? new SystemAnimation((AnimatedImageDrawable) drawable, uri, mime) : null;
         } catch (IOException | RuntimeException | OutOfMemoryError unavailable) {
             return null;  // The existing bitmap path can still offer a preview.
         }
@@ -68,15 +68,15 @@ public final class AnimatedWebp extends j implements Drawable.Callback {
     static boolean readBounds(ContentResolver resolver, Uri uri, a options) {
         try {
             ImageDecoder.decodeBitmap(source(resolver, uri), (decoder, info, src) -> {
-                if (MIME.equals(info.getMimeType())) {
+                if (WEBP.equals(info.getMimeType())) {
                     options.outWidth = info.getSize().getWidth();
                     options.outHeight = info.getSize().getHeight();
-                    options.outMimeType = MIME;
+                    options.outMimeType = WEBP;
                 }
                 throw new HeaderRead();
             });
         } catch (HeaderRead done) {
-            return MIME.equals(options.outMimeType) && options.outWidth > 0 && options.outHeight > 0;
+            return WEBP.equals(options.outMimeType) && options.outWidth > 0 && options.outHeight > 0;
         } catch (IOException | RuntimeException unavailable) {
             // Keep the existing unsupported-image result.
         }
@@ -97,7 +97,7 @@ public final class AnimatedWebp extends j implements Drawable.Callback {
     private static Bitmap firstFrame(ImageDecoder.Source source, int sample, int maxPixels) {
         try {
             return ImageDecoder.decodeBitmap(source, (decoder, info, src) -> {
-                if (!MIME.equals(info.getMimeType())) throw new HeaderRead();
+                if (!WEBP.equals(info.getMimeType())) throw new HeaderRead();
                 decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
                 decoder.setTargetSampleSize(sampleSize(info.getSize(), sample, maxPixels));
             });

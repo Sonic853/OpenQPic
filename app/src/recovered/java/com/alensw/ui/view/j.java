@@ -1348,7 +1348,7 @@ public class j extends View {
    @Override
    protected void onWindowVisibilityChanged(int var1) {
       super.onWindowVisibilityChanged(var1);
-      if (VERSION.SDK_INT >= 28 && this.b instanceof com.alensw.b.h.AnimatedWebp) {
+       if (this.b != null && this.b.d == 4) {
          if (var1 == VISIBLE && this.c == null && !this.G) this.b.a(this, this.N);
          else this.b.a(true);
       }

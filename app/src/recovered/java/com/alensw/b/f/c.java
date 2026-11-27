@@ -11,7 +11,7 @@ import java.util.HashMap;
 
 public class c {
    public static final String[][] a = new String[][]{
-      {"jpg", "jpeg", "avif", "png", "gif", "webp", "heic", "heif"},
+      {"jpg", "jpeg", "avif", "png", "apng", "gif", "webp", "heic", "heif"},
       {"bmp"},
       {"3gp", "3gpp", "webm", "avi", "mp4", "mkv", "mov", "m4v", "mpeg"},
       {"asf", "divx", "flv", "k3g", "mpg", "m2ts", "mts", "rm", "rmvb", "skm", "ts", "wmv", "3g2"}
@@ -66,6 +66,7 @@ public class c {
 
    public static String a(String var0, char var1) {
       String var4 = com.alensw.b.l.b.a(var0, true);
+      if ("apng".equals(var4)) return "image/apng";
       if ("webm".equals(var4)) return "video/webm";
       if ("weba".equals(var4)) return "audio/webm";
       char var2 = var1;

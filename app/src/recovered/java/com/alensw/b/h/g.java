@@ -1,90 +1,76 @@
 package com.alensw.b.h;
 
+import android.os.Handler;
+import android.os.SystemClock;
+
 class g implements com.alensw.b.k.k {
-   final com.alensw.b.h.d a;
-   private volatile boolean b;
-   private final com.alensw.b.k.f c;
-   private final Object d;
+    private final d owner;
+    private final Handler handler;
+    private final com.alensw.b.k.f available = new com.alensw.b.k.f();
+    private volatile boolean stopped;
 
-   g(com.alensw.b.h.d owner, com.alensw.b.h.e unused) {
-      this(owner);
-   }
+    g(d owner, Handler handler) {
+        this.owner = owner;
+        this.handler = handler;
+    }
 
-   private g(com.alensw.b.h.d var1) {
-      this.a = var1;
-      this.c = new com.alensw.b.k.f();
-      this.d = new Object();
-   }
+    @Override public synchronized void a() {
+        stopped = true;
+        handler.removeCallbacksAndMessages(this);
+        available.a();
+        notifyAll();
+    }
 
-   private com.alensw.b.h.f e() {
-        com.alensw.b.h.f srcType0198;
-        synchronized (this.c) {
-            srcType0198 = (com.alensw.b.h.f) this.c.b();
-            if (srcType0198 == null && !this.b) {
-                try {
-                    this.c.wait(100L);
-                } catch (Throwable th) {
+    @Override public void b() {}
+
+    synchronized void recycle(f frame) {
+        if (!stopped) {
+            available.a(frame);
+            notifyAll();
+        }
+    }
+
+    void present(f frame) {
+        if (stopped) return;
+        if (owner.present(this, frame.number, frame.buffer, frame.handle)) recycle(frame);
+        else a();
+    }
+
+    private synchronized f nextBuffer() throws InterruptedException {
+        while (!stopped) {
+            f frame = (f) available.b();
+            if (frame != null) return frame;
+            wait();
+        }
+        return null;
+    }
+
+    private synchronized boolean publish(f frame, boolean last, long deadline) throws InterruptedException {
+        if (stopped || !handler.postAtTime(frame, this, SystemClock.uptimeMillis()) || last) return false;
+        long remaining;
+        while (!stopped && (remaining = deadline - SystemClock.uptimeMillis()) > 0) wait(remaining);
+        return !stopped;
+    }
+
+    @Override public Void call() {
+        int frameNumber = 0;
+        int repeats = owner.repeatCount;
+        try {
+            for (f frame; (frame = nextBuffer()) != null;) {
+                long start = SystemClock.uptimeMillis();
+                frame.number = frameNumber;
+                int delay = owner.decode(frameNumber, frame.buffer, frame.handle);
+                if (delay <= 0) break;
+                boolean endOfPass = ++frameNumber == owner.frameCount;
+                if (!publish(frame, endOfPass && repeats == 0, Math.max(start + delay, SystemClock.uptimeMillis() + 10))) break;
+                if (endOfPass) {
+                    frameNumber = 0;
+                    if (repeats > 0) repeats--;
                 }
             }
-        }
-        return srcType0198;
-    }
-
-   @Override
-   public void a() {
-        this.b = true;
-        synchronized (this.d) {
-            this.d.notifyAll();
-        }
-        c();
-    }
-
-   public void a(com.alensw.b.h.f param1) {
-        synchronized (this.c) {
-            this.c.a(param1);
-            this.c.notifyAll();
-        }
-    }
-
-   @Override
-   public void b() {
-   }
-
-   public void c() {
-        synchronized (this.c) {
-            this.c.a();
-            this.c.notifyAll();
-        }
-    }
-
-   @Override
-   public Object call() {
-      return this.d();
-   }
-
-   public Void d() {
-        while (!this.b) {
-            com.alensw.b.h.f srcType0198E = e();
-            if (srcType0198E != null) {
-                long jUptimeMillis = android.os.SystemClock.uptimeMillis();
-                srcType0198E.c = com.alensw.b.h.d.c(this.a);
-                int iB = com.alensw.b.h.d.b(this.a, srcType0198E.c, srcType0198E.a, srcType0198E.b);
-                if (com.alensw.b.h.d.d(this.a) >= com.alensw.b.h.d.e(this.a)) {
-                    com.alensw.b.h.d.b(this.a, 0);
-                }
-                if (iB > 0 && !this.b) {
-                    com.alensw.b.h.d.f(this.a).post(srcType0198E);
-                }
-                int iMax = Math.max(iB - ((int) (android.os.SystemClock.uptimeMillis() - jUptimeMillis)), 10);
-                if (!this.b) {
-                    synchronized (this.d) {
-                        try {
-                            this.d.wait(iMax);
-                        } catch (Throwable th) {
-                        }
-                    }
-                }
-            }
+        } catch (InterruptedException interrupted) {
+            a();
+            Thread.currentThread().interrupt();
         }
         return null;
     }

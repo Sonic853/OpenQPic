@@ -4,281 +4,182 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Bitmap.Config;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
-import android.os.Build.VERSION;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import com.alensw.jni.JniUtils;
 
-public class d extends com.alensw.b.h.j {
-   public static final boolean a;
-   private int j;
-   private int k;
-   private int l;
-   private int m;
-   private int n = -1;
-   private int o;
-   private int[] p;
-   private int[] q;
-   private Handler r;
-   private com.alensw.b.h.g s;
-   private View t;
+public class d extends j {
+    public static final boolean a = Build.VERSION.SDK_INT >= 8
+            && (Build.VERSION.SDK_INT < 11 || Build.VERSION.SDK_INT > 13);
+    private static final String MIME = "image/gif";
+    private final int duration;
+    final int frameCount;
+    final int repeatCount;
+    private final Handler handler;
+    private final int[] buffers = new int[2];
+    private int handle;
+    private int sample;
+    private int[] pixels;
+    private boolean hasFrame;
+    private g playback;
+    private View owner;
 
-   static {
-      boolean var0;
-      if (VERSION.SDK_INT < 8 || VERSION.SDK_INT >= 11 && VERSION.SDK_INT <= 13) {
-         var0 = false;
-      } else {
-         var0 = true;
-      }
-
-      a = var0;
-   }
-
-   public d(int var1, Uri var2, Handler var3, int var4, int var5, int[] var6) {
-      super(var4, var5, 4, var2, "image/gif");
-      this.o = JniUtils.gifGetImageWidth(var1) / var4;
-      this.p = var6;
-      this.a(var1, var3);
-   }
-
-   public d(int var1, Uri var2, Handler var3, Bitmap var4) {
-      super(var4, 4);
-      super.h = "image/gif";
-      super.i = var2;
-      this.a(var1, var3);
-   }
-
-   private int a(int param1, int param2, int param3) {
-        int iGifDecodeFrame = 0;
-        synchronized (this) {
-            if (this.j != 0 && param2 != 0 && param3 == this.j) {
-                iGifDecodeFrame = JniUtils.gifDecodeFrame(this.j, param1, param2);
-            }
-        }
-        return iGifDecodeFrame;
+    public d(int handle, Uri uri, Handler handler, Bitmap bitmap) {
+        super(bitmap, 4);
+        h = MIME;
+        i = uri;
+        this.duration = JniUtils.gifGetDuration(handle);
+        this.frameCount = JniUtils.gifGetFrameCount(handle);
+        this.repeatCount = JniUtils.gifGetRepeatCount(handle);
+        this.handler = handler == null ? new Handler(Looper.getMainLooper()) : handler;
+        allocateBuffers(handle);
+        this.handle = handle;
     }
 
-   static int a(com.alensw.b.h.d var0, int var1) {
-      var0.n = var1;
-      return var1;
-   }
+    public d(int handle, Uri uri, Handler handler, int width, int height, int[] pixels) {
+        super(width, height, 4, uri, MIME);
+        this.duration = JniUtils.gifGetDuration(handle);
+        this.frameCount = JniUtils.gifGetFrameCount(handle);
+        this.repeatCount = JniUtils.gifGetRepeatCount(handle);
+        this.handler = handler == null ? new Handler(Looper.getMainLooper()) : handler;
+        this.sample = JniUtils.gifGetImageWidth(handle) / width;
+        this.pixels = pixels;
+        allocateBuffers(handle);
+        this.handle = handle;
+    }
 
-   static View a(com.alensw.b.h.d var0) {
-      return var0.t;
-   }
-
-   public static com.alensw.b.h.d a(com.alensw.b.c.f var0, Uri var1, Handler var2) {
-        int iGifOpenFD = 0;
+    public static d a(com.alensw.b.c.f file, Uri uri, Handler handler) {
+        int handle = JniUtils.gifOpenFD(file.c(), a);
+        if (handle == 0) return null;
+        Bitmap bitmap = null;
+        boolean attached = false;
         try {
-            iGifOpenFD = JniUtils.gifOpenFD(var0.c(), a);
-            if (iGifOpenFD == 0) {
-                throw new RuntimeException("load error");
-            }
-            if (JniUtils.gifGetFrameCount(iGifOpenFD) <= 1) {
-                throw new RuntimeException("not animated");
-            }
-            int iGifGetImageWidth = JniUtils.gifGetImageWidth(iGifOpenFD);
-            int iGifGetImageHeight = JniUtils.gifGetImageHeight(iGifOpenFD);
-            int i = iGifGetImageWidth * iGifGetImageHeight;
-            while (iGifGetImageWidth > 0 && iGifGetImageHeight > 0) {
-                if (i <= com.alensw.b.h.b.d) {
-                    if (a) {
-                        Bitmap bitmapA = com.alensw.b.h.b.a(iGifGetImageWidth, iGifGetImageHeight, Config.ARGB_8888);
-                        if (bitmapA != null) {
-                            return new com.alensw.b.h.d(iGifOpenFD, var1, var2, bitmapA);
-                        }
-                    } else {
-                        int[] iArrA = a(i);
-                        if (iArrA != null) {
-                            return new com.alensw.b.h.d(iGifOpenFD, var1, var2, iGifGetImageWidth, iGifGetImageHeight, iArrA);
-                        }
+            if (JniUtils.gifGetFrameCount(handle) <= 1) return null;
+            int width = JniUtils.gifGetImageWidth(handle);
+            int height = JniUtils.gifGetImageHeight(handle);
+            for (; width > 0 && height > 0; width >>= 1, height >>= 1) {
+                int count = width * height;
+                if (count > com.alensw.b.h.b.d) continue;
+                d animation;
+                if (a) {
+                    bitmap = com.alensw.b.h.b.a(width, height, Bitmap.Config.ARGB_8888);
+                    if (bitmap == null) continue;
+                    animation = new d(handle, uri, handler, bitmap);
+                } else {
+                    int[] pixels;
+                    try {
+                        pixels = new int[count];
+                    } catch (OutOfMemoryError unavailable) {
+                        continue;
                     }
+                    animation = new d(handle, uri, handler, width, height, pixels);
                 }
-                iGifGetImageWidth >>= 1;
-                iGifGetImageHeight >>= 1;
-                i >>= 2;
-            }
-            throw new RuntimeException("out of memory");
-        } catch (Throwable th) {
-            Log.e("GifMovie", "load GIF: ", th);
-            if (iGifOpenFD != 0) {
-                JniUtils.gifClose(iGifOpenFD);
+                attached = true;
+                return animation;
             }
             return null;
-        }
-    }
-
-   private void a(int var1, Handler var2) {
-      this.l = JniUtils.gifGetDuration(var1);
-      this.m = JniUtils.gifGetFrameCount(var1);
-      int var4 = JniUtils.gifGetImageWidth(var1);
-      int var5 = JniUtils.gifGetImageHeight(var1);
-      this.q = new int[2];
-
-      for (int var3 = 0; var3 < 2; var3++) {
-         int var6 = JniUtils.gifAllocBuffer(var5 * var4);
-         if (var6 == 0) {
-            throw new RuntimeException("alloc buffer failed");
-         }
-
-         this.q[var3] = var6;
-      }
-
-      this.j = var1;
-      this.r = var2;
-   }
-
-   static boolean a(com.alensw.b.h.d var0, int var1, int var2, int var3) {
-      return var0.b(var1, var2, var3);
-   }
-
-   private static int[] a(int var0) {
-      int[] var1;
-      try {
-         var1 = new int[var0];
-      } catch (Throwable var2) {
-         var1 = null;
-      }
-
-      return var1;
-   }
-
-   static int b(com.alensw.b.h.d var0, int var1) {
-      var0.k = var1;
-      return var1;
-   }
-
-   static int b(com.alensw.b.h.d var0, int var1, int var2, int var3) {
-      return var0.a(var1, var2, var3);
-   }
-
-   static com.alensw.b.h.g b(com.alensw.b.h.d var0) {
-      return var0.s;
-   }
-
-   private boolean b(int param1, int param2, int param3) {
-        boolean zGifDrawFrame2 = false;
-        synchronized (this) {
-            try {
-                if (a) {
-                    if (this.j != 0 && param2 != 0 && param3 == this.j && j()) {
-                        zGifDrawFrame2 = JniUtils.gifDrawFrame(this.j, param1, param2, d());
-                    }
-                } else if (this.j != 0 && param2 != 0 && param3 == this.j && this.p != null) {
-                    zGifDrawFrame2 = JniUtils.gifDrawFrame2(this.j, param1, param2, this.p, this.o);
-                }
-            } catch (Throwable th) {
-                Log.e("GifMovie", "draw frame: ", th);
+        } catch (RuntimeException | OutOfMemoryError error) {
+            Log.e("GifMovie", "load GIF: " + uri, error);
+            return null;
+        } finally {
+            if (!attached) {
+                if (bitmap != null) bitmap.recycle();
+                JniUtils.gifClose(handle);
             }
         }
-        return zGifDrawFrame2;
     }
 
-   static int c(com.alensw.b.h.d var0) {
-      return var0.k;
-   }
+    private void allocateBuffers(int handle) {
+        int area = JniUtils.gifGetImageWidth(handle) * JniUtils.gifGetImageHeight(handle);
+        boolean allocated = false;
+        try {
+            for (int i = 0; i < buffers.length; i++) {
+                buffers[i] = JniUtils.gifAllocBuffer(area);
+                if (buffers[i] == 0) throw new IllegalStateException("GIF buffer allocation failed");
+            }
+            allocated = true;
+        } finally {
+            if (!allocated) freeBuffers();
+        }
+    }
 
-   static int d(com.alensw.b.h.d var0) {
-      int var1 = var0.k + 1;
-      var0.k = var1;
-      return var1;
-   }
+    private void freeBuffers() {
+        for (int i = 0; i < buffers.length; i++) {
+            if (buffers[i] != 0) {
+                JniUtils.gifFreeBuffer(buffers[i]);
+                buffers[i] = 0;
+            }
+        }
+    }
 
-   static int e(com.alensw.b.h.d var0) {
-      return var0.m;
-   }
+    synchronized int decode(int number, int buffer, int source) {
+        return handle == source && handle != 0 ? JniUtils.gifDecodeFrame(handle, number, buffer) : 0;
+    }
 
-   static Handler f(com.alensw.b.h.d var0) {
-      return var0.r;
-   }
+    synchronized boolean present(g job, int number, int buffer, int source) {
+        if (playback != job || handle != source || handle == 0) return false;
+        if (a ? !JniUtils.gifDrawFrame(handle, number, buffer, d())
+              : !JniUtils.gifDrawFrame2(handle, number, buffer, pixels, sample)) return false;
+        hasFrame = true;
+        owner.invalidate();
+        return true;
+    }
 
-   @Override
-   protected void a() {
+    @Override protected void a() {
+        a(true);
+        synchronized (this) {
+            freeBuffers();
+            if (handle != 0) {
+                JniUtils.gifClose(handle);
+                handle = 0;
+            }
+            pixels = null;
+        }
         super.a();
-        a(false);
-        synchronized (this) {
-            for (int i = 0; i < 2; i++) {
-                if (this.q[i] != 0) {
-                    JniUtils.gifFreeBuffer(this.q[i]);
-                    this.q[i] = 0;
-                }
-            }
-            if (this.j != 0) {
-                JniUtils.gifClose(this.j);
-                this.j = 0;
-            }
-        }
-        this.m = 0;
-        this.n = -1;
-        this.p = null;
     }
 
-   @Override
-   public void a(Canvas var1, Matrix var2, com.alensw.b.h.j var3, Matrix var4, Paint var5, boolean var6) {
-      if (this.n != -1) {
-         if (a && this.j()) {
-            var1.drawBitmap(this.d(), var2, var5);
-            return;
-         }
-
-         if (this.p != null) {
+    @Override public void a(Canvas canvas, Matrix matrix, j preview, Matrix previewMatrix, Paint paint, boolean moving) {
+        if (hasFrame && a && j()) {
+            canvas.drawBitmap(d(), matrix, paint);
+        } else if (hasFrame && pixels != null) {
+            int saved = canvas.save();
             try {
-               com.alensw.compat.LegacyPlatform.save(var1, 1);
-               var1.concat(var2);
-               var1.drawBitmap(this.p, 0, this.b.a, 0, 0, this.b.a, this.b.b, false, var5);
-               var1.restore();
-               return;
-            } catch (Throwable var7) {
-               Log.e("GifMovie", "draw: " + var7);
+                canvas.concat(matrix);
+                canvas.drawBitmap(pixels, 0, e(), 0, 0, e(), f(), false, paint);
+            } finally {
+                canvas.restoreToCount(saved);
             }
-         }
-      }
+        } else if (preview != null && preview.j()) {
+            canvas.drawBitmap(preview.d(), previewMatrix, paint);
+        }
+    }
 
-      if (var3 != null && var3.j()) {
-         var1.drawBitmap(var3.d(), var4, var5);
-      }
-   }
+    @Override public synchronized void a(boolean stop) {
+        if (playback != null) {
+            playback.a();
+            playback = null;
+        }
+        owner = null;
+    }
 
-   @Override
-   public void a(boolean var1) {
-      this.t = null;
-      if (this.s != null) {
-         this.s.a();
-         this.s = null;
-      }
-   }
+    @Override public synchronized boolean a(View view, Paint background) {
+        if (handle == 0 || view.getWindowVisibility() != View.VISIBLE) return false;
+        JniUtils.gifSetBkColor(handle, background.getColor());
+        if (owner != view) {
+            a(true);
+            owner = view;
+            playback = new g(this, handler);
+            for (int buffer : buffers) playback.recycle(new f(playback, buffer, handle));
+            c.a(playback);
+        }
+        return true;
+    }
 
-   @Override
-   public boolean a(View var1, Paint var2) {
-      boolean var6 = false;
-      int var3 = 0;
-      if (this.j != 0) {
-         this.t = var1;
-         JniUtils.gifSetBkColor(this.j, var2.getColor());
-         if (this.s != null) {
-            this.s.a();
-         }
-
-         this.s = new com.alensw.b.h.g(this, null);
-         c.a(this.s);
-         int[] var7 = this.q;
-
-         for (int var4 = var7.length; var3 < var4; var3++) {
-            int var5 = var7[var3];
-            this.s.a(new com.alensw.b.h.f(this, var5, this.j));
-         }
-
-         var6 = true;
-      }
-
-      return var6;
-   }
-
-   @Override
-   public long b() {
-      return this.l;
-   }
+    @Override public long b() {
+        return duration & 0xffffffffL;
+    }
 }

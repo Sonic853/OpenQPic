@@ -222,8 +222,8 @@ public class b {
 
    public static Bitmap a(com.alensw.b.c.f file, com.alensw.b.h.a options) {
       if (VERSION.SDK_INT >= 28 && !options.inJustDecodeBounds && !options.mCancel
-              && "image/webp".equals(options.outMimeType) && AnimatedWebp.mayAnimate(file)) {
-         Bitmap frame = AnimatedWebp.firstFrame(QuickApp.a().getContentResolver(), file.g(), options.inSampleSize);
+               && "image/webp".equals(options.outMimeType) && SystemAnimation.mayAnimateWebp(file)) {
+          Bitmap frame = SystemAnimation.firstFrame(QuickApp.a().getContentResolver(), file.g(), options.inSampleSize);
          if (frame != null) {
             options.outWidth = frame.getWidth();
             options.outHeight = frame.getHeight();
@@ -365,7 +365,7 @@ public class b {
          options.inJustDecodeBounds = false;
       }
       return (options.outWidth > 0 && options.outHeight > 0)
-              || (VERSION.SDK_INT >= 28 && !options.mCancel && AnimatedWebp.mayAnimate(file)
-                  && AnimatedWebp.readBounds(QuickApp.a().getContentResolver(), file.g(), options));
+               || (VERSION.SDK_INT >= 28 && !options.mCancel && SystemAnimation.mayAnimateWebp(file)
+                   && SystemAnimation.readBounds(QuickApp.a().getContentResolver(), file.g(), options));
    }
 }

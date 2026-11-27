@@ -2,6 +2,10 @@
 Lcom/alensw/PicFolder/GalleryStorage;
 Lcom/alensw/compat/LegacyPlatform;
 Lcom/alensw/compat/LegacyPlatform$CanvasFlags;
+Lcom/alensw/b/h/AnimatedPng;
+Lcom/alensw/b/h/AnimatedPng$Frame;
+Lcom/alensw/b/h/AnimatedPng$Playback;
+Lcom/alensw/b/h/SystemAnimation;
 Lcom/alensw/ui/activity/GalleryShareMenu;
 Lcom/alensw/ui/c/ViewerSwipe;
 Lcom/alensw/ui/c/ViewerSwipe$1;

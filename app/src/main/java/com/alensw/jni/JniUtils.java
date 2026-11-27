@@ -11,6 +11,16 @@ public class JniUtils {
         init(Environment.getExternalStorageDirectory().getPath());
     }
 
+    public static native boolean apngHasAnimation(int fd);
+
+    // info: canvas width, height, frame count, unsigned play count (0 means infinite).
+    public static native int apngOpenFD(int fd, int[] info);
+
+    // info: x, y, width, height, delay in ms, disposal, blend. Returns an ordinary PNG.
+    public static native byte[] apngReadFrame(int handle, int frame, int[] info);
+
+    public static native void apngClose(int handle);
+
     public static native void exifClose(int i);
 
     public static native double[] exifGet3RealValue(int i, int i2, boolean z);
@@ -64,6 +74,8 @@ public class JniUtils {
     public static native int gifGetDuration(int i);
 
     public static native int gifGetFrameCount(int i);
+
+    public static native int gifGetRepeatCount(int handle);
 
     public static native int gifGetImageHeight(int i);
 

@@ -1,9 +1,9 @@
 {
-  "app/src/main/jniLibs/armeabi/libqpicjni156.so": "d68b2dbd74bde541f98e3bd80f23e6fe4b785dfe8c6a69b6747f832e2a7b404b",
+  "app/src/main/jniLibs/armeabi/libqpicjni156.so": "67676c2264816c7160a1fbb8ff0b3975440d90af1714664b90a60fb3eaa0ae59",
   "app/src/main/jniLibs/armeabi/libqpiclocalsend.so": "d6a247b5c01504927426eaddb8ad80994141bba222905440865f7661b41cb5cc",
-  "app/src/main/jniLibs/x86/libqpicjni156.so": "8a9fffcbaa2c05211e6d86b224fae153c08a371b80ee6330113a8c2db1470bb2",
+  "app/src/main/jniLibs/x86/libqpicjni156.so": "09536f5fd9a78d58ba15758406f1d96016d2eccd1186d09114d0ae4980e6ec6c",
   "app/src/main/jniLibs/x86/libqpiclocalsend.so": "89cb8eb9de38b9d485260bf01173fef3ca0b244bdcdc25717664372d3e3aff64",
-  "app/src/main/jniLibs/arm64-v8a/libqpicjni156.so": "8b46c181b0384ee1e4806413ed5ade3926f700b50d2481280df8158dd3f66304",
+  "app/src/main/jniLibs/arm64-v8a/libqpicjni156.so": "831764088f1da431f2a8800e6dfb021353b5b13d949c0d7cebfa37032bd6fef8",
   "app/src/main/jniLibs/arm64-v8a/libqpiclocalsend.so": "2540496dfff98286435612dd46ce04fd5daf58172137954ba07b0254c9ccc32b",
   "app/src/main/java/org/openqpic/localsend/Wire.java": "caf52c8b3acde11b4b31baaf5392febe903d499fc41d4ed1afc5291ce9f5a331",
   "app/src/main/java/org/openqpic/localsend/LocalSend.java": "8082a7f33b74836ac13cd0c9e3a2a94cd9655cf260420a7323f2f297ff23b714",
