@@ -11,7 +11,8 @@ import android.preference.PreferenceManager;
 import android.text.InputType;
 import android.view.*;
 import android.widget.*;
-import android.support.v4.a.p;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 import com.alensw.PicFolder.GalleryActivity;
 import com.alensw.PicFolder.QuickApp;
 import com.alensw.bean.CommonFile;
@@ -39,7 +40,7 @@ public final class TransferActivity extends ao implements TransferSessionService
     private final Set<String> deferred=new HashSet<>();
     private final View[] pages=new View[2];
     private final TextView[] tabs=new TextView[2];
-    private View send; private p pager; private TextView tip, count; private ImageGridView grid;
+    private View send; private ViewPager pager; private TextView tip, count; private ImageGridView grid;
     private ImageView clearFilesButton;
     private Devices deviceAdapter; private History historyAdapter;
     private FrameLayout root; private View tabBar; private TextView nearby;
@@ -57,7 +58,7 @@ public final class TransferActivity extends ao implements TransferSessionService
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         prefs=PreferenceManager.getDefaultSharedPreferences(this);
-        root=new FrameLayout(this); pager=new p(this); root.addView(pager); setContentView(root); g(true);
+        root=new FrameLayout(this); pager=new ViewPager(this); root.addView(pager); setContentView(root); g(true);
         pages[0]=send=getLayoutInflater().inflate(layout.transfer_send,pager,false);
         pages[1]=getLayoutInflater().inflate(layout.list_view,pager,false);
         tip=send.findViewById(id.empty_tip); count=send.findViewById(id.files_to_send);
@@ -96,15 +97,14 @@ public final class TransferActivity extends ao implements TransferSessionService
         send.findViewById(id.add).setOnClickListener(v->pick());
         clearFilesButton.setContentDescription(getString(string.delete));
         clearFilesButton.setOnClickListener(v->removeFiles());
-        pager.setOnPageChangeListener(new android.support.v4.a.x() {
-            public void a(int n) { if(J!=null) J.setSelectedNavigationItem(n); else select(n); }
-            public void a(int n,float f,int px) {} public void b(int n) {}
+        pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override public void onPageSelected(int n) { if(J!=null) J.setSelectedNavigationItem(n); else select(n); }
         });
-        pager.setAdapter(new android.support.v4.a.j() {
-            public int a() { return pages.length; }
-            public Object a(ViewGroup parent,int n) { parent.addView(pages[n]); return pages[n]; }
-            public void a(ViewGroup parent,int n,Object page) { parent.removeView((View)page); }
-            public boolean a(View view,Object page) { return view==page; }
+        pager.setAdapter(new PagerAdapter() {
+            @Override public int getCount() { return pages.length; }
+            @Override public Object instantiateItem(ViewGroup parent,int n) { parent.addView(pages[n]); return pages[n]; }
+            @Override public void destroyItem(ViewGroup parent,int n,Object page) { parent.removeView((View)page); }
+            @Override public boolean isViewFromObject(View view,Object page) { return view==page; }
         });
         if(J!=null) {
             J.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -135,7 +135,8 @@ public final class TransferActivity extends ao implements TransferSessionService
             }
         } else collect(getIntent());
         pendingFilesChanged(); peersChanged(); a((CharSequence)alias());
-        if(TransferSessionService.VIEW.equals(getIntent().getAction()) || state!=null && state.getInt("page")==1) pager.setCurrentItem(1);
+        int initialPage = TransferSessionService.VIEW.equals(getIntent().getAction()) ? 1 : 0;
+        pager.setCurrentItem(state == null ? initialPage : state.getInt("page", initialPage), false);
     }
     private String alias() { return prefs.getString("transfer_name",Build.MODEL); }
     private void select(int index) { for(int i=0;i<2;i++) if(tabs[i]!=null) tabs[i].setSelected(index==i); }

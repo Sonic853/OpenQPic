@@ -157,6 +157,7 @@ def main():
            for table in tables]
     pinned = dict(line.removeprefix("com.alensw.PicFolder:").split(" = ") for line in
                   (ROOT / "app/resource-ids.txt").read_text("utf-8").splitlines())
+    pinned = {k: v for k, v in pinned.items() if k in ids[0]}  # The original APK predates OpenQPic's product IDs.
     check("resource_ids", ids[0] == ids[1] == pinned and len(pinned) == 918, names_and_ids=len(ids[1]),
           differences=diff(ids[0], ids[1]))
     check("complete_resource_table_dump", tables[0] == [normalized_mipmap_path(l) for l in tables[1]],

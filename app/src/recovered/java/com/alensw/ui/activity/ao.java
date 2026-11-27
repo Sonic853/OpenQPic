@@ -127,65 +127,16 @@ public class ao extends Activity {
    }
 
    public static void a(Activity var0, int var1) {
-      ImageView var3;
-      if (F && VERSION.SDK_INT < 21) {
-         View var7 = var0.findViewById(16908332);
-         if (var7 != null) {
-            LayoutParams var12 = var7.getLayoutParams();
-            var12.width = 0;
-            if (var12 instanceof MarginLayoutParams) {
-               MarginLayoutParams var10 = (MarginLayoutParams)var12;
-               var10.rightMargin = 0;
-               var10.leftMargin = 0;
-            }
-
-            var7.setLayoutParams(var12);
-            var7.setVisibility(8);
-         }
-
-         var3 = android.support.a.a.k.a(var0, var7);
-         android.support.a.a.a.a(var0, var1);
-      } else if (VERSION.SDK_INT >= 21) {
-         var1 = var0.getResources().getIdentifier("up", "id", "android");
-         View var4;
-         if (var1 != 0) {
-            var4 = var0.findViewById(var1);
-         } else {
-            var4 = null;
-         }
-
-         ImageView var2;
-         if (var4 instanceof ImageView) {
-            var2 = (ImageView)var4;
-         } else {
-            var2 = null;
-         }
-
-         var3 = var2;
-         if (QuickApp.e) {
-            var3 = var2;
-            if (var4 != null) {
-               ViewParent var11 = var4.getParent();
-
-               while (true) {
-                  var3 = var2;
-                  if (var11 == null) {
-                     break;
-                  }
-
-                  View var9 = (View)var11;
-                  if (var9 instanceof LinearLayout && var9.getId() == -1) {
-                     var9.setOnClickListener(new com.alensw.ui.activity.ar(var0));
-                     var3 = var2;
-                     break;
-                  }
-
-                  var11 = var11.getParent();
-               }
+      int up = var0.getResources().getIdentifier("up", "id", "android");
+      View button = up != 0 ? var0.findViewById(up) : null;
+      ImageView var3 = button instanceof ImageView ? (ImageView)button : null;
+      if (QuickApp.e && button != null) {
+         for (ViewParent parent = button.getParent(); parent instanceof View; parent = parent.getParent()) {
+            if (parent instanceof LinearLayout && ((View)parent).getId() == View.NO_ID) {
+               ((View)parent).setOnClickListener(new com.alensw.ui.activity.ar(var0));
+               break;
             }
          }
-      } else {
-         var3 = null;
       }
 
       if (var3 != null) {

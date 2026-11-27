@@ -1486,8 +1486,8 @@ public class ImageGridView extends com.alensw.ui.view.bp {
    }
 
    public void setHorizontal(boolean var1) {
-      if (!this.p.f()) {
-         this.p.a(true);
+      if (!this.p.isFinished()) {
+         this.p.forceFinished(true);
       }
 
       if (this.c != var1) {

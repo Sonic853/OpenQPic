@@ -1,5 +1,7 @@
 package com.alensw.PicFolder;
 
+import android.view.Gravity;
+
 class ae implements Runnable {
    final GalleryActivity a;
 
@@ -9,11 +11,9 @@ class ae implements Runnable {
 
    @Override
    public void run() {
-      if (GalleryActivity.a(this.a).isEmpty()) {
-         GalleryActivity.a(this.a).a();
-         GalleryActivity.b(this.a).postDelayed(this, 700L);
-      } else {
-         GalleryActivity.b(this.a).c(3);
+      if (!this.a.isDestroyed() && !this.a.isFinishing()
+            && GalleryActivity.b(this.a).getDrawerLockMode(Gravity.LEFT) == androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED) {
+         GalleryActivity.b(this.a).openDrawer(Gravity.LEFT);
       }
    }
 }

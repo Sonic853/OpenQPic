@@ -402,8 +402,8 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
       MenuItem var5 = var1.findItem(com.alensw.PicFolder.R.id.tracks);
       this.a(var5, var3);
       if (var3) {
-         android.support.a.a.m var4 = new android.support.a.a.m(this);
-         var4.a(this.X);
+         com.alensw.ui.view.GalleryArrow var4 = new com.alensw.ui.view.GalleryArrow(this);
+         var4.setColor(this.X);
          var5.setIcon(var4);
       }
 

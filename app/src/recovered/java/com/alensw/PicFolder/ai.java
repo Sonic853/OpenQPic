@@ -2,6 +2,7 @@ package com.alensw.PicFolder;
 
 import android.preference.PreferenceManager;
 import android.view.View;
+import android.view.Gravity;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import com.alensw.bean.CommonRoot;
@@ -15,7 +16,7 @@ class ai implements OnItemClickListener {
 
    @Override
    public void onItemClick(AdapterView var1, View var2, int var3, long var4) {
-      GalleryActivity.b(this.a).d(3);
+      GalleryActivity.b(this.a).closeDrawer(Gravity.LEFT);
       CommonRoot var6 = GalleryActivity.a(this.a).c(var3);
       if (var6 != null) {
          if (var6.n != null) {

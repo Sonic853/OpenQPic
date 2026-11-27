@@ -43,7 +43,7 @@
     <!-- StreamingActivity accepts user-selected http:// video hosts as well as the loopback proxy. -->
     <application android:allowBackup="false" android:grantUriPermissions="true" android:hardwareAccelerated="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:localeConfig="@xml/locales_config" android:logo="@mipmap/ic_launcher" android:name=".QuickApp" android:requestLegacyExternalStorage="true" android:resizeableActivity="true" android:roundIcon="@mipmap/ic_launcher_round" android:supportsRtl="true" android:usesCleartextTraffic="true">
         <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/update" android:name="com.alensw.updater.UpdateView" android:theme="@style/LaunchScreen"/>
-        <provider android:authorities="com.alensw.PicFolder.provider" android:exported="false" android:grantUriPermissions="true" android:name="android.support.v4.content.FileProvider">
+        <provider android:authorities="com.alensw.PicFolder.provider" android:exported="false" android:grantUriPermissions="true" android:name="androidx.core.content.FileProvider">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths"/>
         </provider>
         <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/app_name" android:name=".GalleryActivity" android:theme="@style/LaunchScreen">

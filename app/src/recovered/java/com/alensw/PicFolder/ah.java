@@ -1,6 +1,7 @@
 package com.alensw.PicFolder;
 
 import android.view.View;
+import android.view.Gravity;
 import android.view.View.OnClickListener;
 
 class ah implements OnClickListener {
@@ -12,8 +13,8 @@ class ah implements OnClickListener {
 
    @Override
    public void onClick(View var1) {
-      if (GalleryActivity.b(this.a).e(3)) {
-         GalleryActivity.b(this.a).d(3);
+      if (GalleryActivity.b(this.a).isDrawerOpen(Gravity.LEFT)) {
+         GalleryActivity.b(this.a).closeDrawer(Gravity.LEFT);
       }
    }
 }

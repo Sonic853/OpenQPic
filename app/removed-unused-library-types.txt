@@ -1,5 +1,6 @@
 # Previously bundled library types with no call path from the retained gallery.
-# Exact descriptors from the restored inventory; do not remove HttpCore or DocumentFile.
+# Historical descriptors from the source cleanup. On the AndroidX branch a matching
+# Core type is allowed only when provided by the pinned official Core artifact.
 
 # org.apache.httpcomponents:httpclient:4.5
 Lorg/apache/http/auth/AUTH;

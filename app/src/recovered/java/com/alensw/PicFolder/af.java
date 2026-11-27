@@ -14,7 +14,7 @@ class af extends com.alensw.ui.view.bt {
 
    @Override
    public void a() {
-      android.support.a.a.a var2 = GalleryActivity.c(this.b);
+      GalleryDrawerToggle var2 = GalleryActivity.c(this.b);
       float var1;
       if (this.a) {
          var1 = 1.0F;
@@ -22,7 +22,7 @@ class af extends com.alensw.ui.view.bt {
          var1 = 0.0F;
       }
 
-      var2.a(var1);
+      var2.setProgress(var1);
    }
 
    @Override
@@ -32,6 +32,6 @@ class af extends com.alensw.ui.view.bt {
          var2 = 1.0F - var1;
       }
 
-      GalleryActivity.c(this.b).a(var2);
+      GalleryActivity.c(this.b).setProgress(var2);
    }
 }

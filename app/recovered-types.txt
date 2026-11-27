@@ -1,5 +1,5 @@
 # Retained gallery types before the all-Java migration (aa0043e).
-# Each line is the original DEX descriptor, optionally followed by its Java-compatible replacement.
+# Each line is the original DEX descriptor, optionally followed by its current application name.
 # Later removals are tracked by verify_localsend.py, removed-unused-library-types.txt and replaced-video-adapters.txt.
 Landroid/support/a/a/a;
 Landroid/support/a/a/b;
@@ -93,7 +93,7 @@ Lcom/alensw/PicFolder/ac;
 Lcom/alensw/PicFolder/ad;
 Lcom/alensw/PicFolder/ae;
 Lcom/alensw/PicFolder/af;
-Lcom/alensw/PicFolder/ag;
+Lcom/alensw/PicFolder/ag; Lcom/alensw/PicFolder/GalleryDrawerToggle;
 Lcom/alensw/PicFolder/ah;
 Lcom/alensw/PicFolder/ai;
 Lcom/alensw/PicFolder/aj;

@@ -42,8 +42,8 @@ Android 相册，保留原图库、播放、分享和「WiFi 快传」界面。*
 
 | 模块 | 来源 / 编辑位置 |
 |---|---|
-| 图库、播放器、定制 Support 控件 | `app/src/recovered/java/`，与 `app/src/main/java/` 一起由 javac 编译。见 [Java 恢复记录](docs/recovery/gallery-java.md)。 |
-| Android 文档访问 | Gradle 从 Google Maven 引入 [AndroidX DocumentFile 1.1.0](docs/recovery/android-support.md)；不引入 `androidx.core`。 |
+| 图库、播放器、快图箭头 | `app/src/recovered/java/` 与 `app/src/main/java/` 一起由 javac 编译。见 [Java 恢复记录](docs/recovery/gallery-java.md)。 |
+| 抽屉、分页、文件授权 | Google Maven 的 [AndroidX Core 1.17.0、DrawerLayout 1.2.0、ViewPager 1.1.0、DocumentFile 1.1.0](docs/recovery/android-support.md)。 |
 | 资源、系统分享 | `app/src/main/res/`、`app/resource-ids.txt`、`app/src/main/java/com/alensw/ui/activity/GalleryShareMenu.java`。 |
 | Android 快传界面、授权与文件提交 | `app/src/main/java/com/alensw/transfer/`；复用 `transfer_send`、`list_view`、`transfer_list_item`、`ImageGridView` 和原双页导航。 |
 | 图像 JNI | **OpenQPicJni** 的 `libqpicjni156.so`，含该仓库从 32 位源码移植的 arm64 版本。 |
@@ -53,6 +53,6 @@ Android 相册，保留原图库、播放、分享和「WiFi 快传」界面。*
 
 ## 验证
 
-`verifyLocalSendDebug` 检查实际 APK/AAB 的最低和目标 SDK、两套 JNI、DEX、原有 918 个资源 ID、签名与对齐。`tools/localsend_smoke.py --tls` 和 `tools/multisend_smoke.py --tls` 用官方 LocalSend 核心验证加密收发、指纹校验、取消和后台队列。见[系统 TLS 实测与体积](verification/system-tls.md)、[快传实现](docs/localsend-http/IMPLEMENTATION.md)及 [targetSdk 32 兼容记录](verification/target-sdk-32.md)。
+`verifyLocalSendDebug` 检查实际 APK/AAB 的 SDK、两套 JNI、DEX、[运行库及其摘要](app/runtime-libraries.sha256)、签名与对齐。原版 918 个资源 ID 和 OpenQPic 后加的 77 个 ID 均锁定；APK、AAB 与 Java 使用的 ID 逐项核对。`tools/localsend_smoke.py --tls` 和 `tools/multisend_smoke.py --tls` 用官方 LocalSend 核心验证加密收发、指纹校验、取消和后台队列。见[系统 TLS 实测与体积](verification/system-tls.md)、[快传实现](docs/localsend-http/IMPLEMENTATION.md)及 [targetSdk 32 兼容记录](verification/target-sdk-32.md)。
 
 [`tools/gallery_share_smoke.py`](tools/gallery_share_smoke.py) 用无存储权限的独立应用从系统面板和直达菜单读取单张、多张、视频及混合媒体并核对 SHA-256。[回环视频迁移验证](verification/native-video.md)记录脱离 HttpCore 后的制品与测试；[原版保真验证](STABLE-BASELINE.md)及[早期协议与定容分析](docs/localsend-http/README.md)是历史记录。

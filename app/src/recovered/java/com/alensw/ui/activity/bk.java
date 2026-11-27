@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import com.alensw.ui.view.GalleryArrow;
 class bk extends BaseAdapter {
    final SelectThemeActivity a;
 
@@ -36,14 +37,14 @@ class bk extends BaseAdapter {
       View var10 = var2;
       if (var2 == null) {
          var10 = View.inflate(this.a, com.alensw.PicFolder.R.layout.theme_item, null);
-         ((ImageView)var10.findViewById(com.alensw.PicFolder.R.id.home)).setImageDrawable(new android.support.a.a.m(this.a));
+         ((ImageView)var10.findViewById(com.alensw.PicFolder.R.id.home)).setImageDrawable(new GalleryArrow(this.a));
          ((ImageView)var10.findViewById(com.alensw.PicFolder.R.id.menu))
             .setImageDrawable(com.b.a.b.a(this.a.getResources(), com.alensw.PicFolder.R.raw.ic_menu_overflow, this.a.X, SelectThemeActivity.d(this.a)));
       }
 
       com.alensw.ui.activity.bl var6 = (com.alensw.ui.activity.bl)SelectThemeActivity.c(this.a).get(var1);
       var10.findViewById(com.alensw.PicFolder.R.id.title_bar).setBackgroundColor(var6.c);
-      ((android.support.a.a.m)((ImageView)var10.findViewById(com.alensw.PicFolder.R.id.home)).getDrawable()).a(var6.e);
+      ((GalleryArrow)((ImageView)var10.findViewById(com.alensw.PicFolder.R.id.home)).getDrawable()).setColor(var6.e);
       Drawable var7 = ((ImageView)var10.findViewById(com.alensw.PicFolder.R.id.menu)).getDrawable();
       ColorFilter var5 = (ColorFilter)SelectThemeActivity.e(this.a).get(var6.e);
       Object var8 = var5;

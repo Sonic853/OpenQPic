@@ -12,14 +12,15 @@ import android.os.Handler;
 import android.os.StrictMode;
 import android.os.StrictMode.VmPolicy.Builder;
 import android.preference.PreferenceManager;
-import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import androidx.drawerlayout.widget.DrawerLayout;
 import com.alensw.bean.CommonFile;
 import com.alensw.bean.CommonFolder;
 import com.alensw.bean.CommonRoot;
@@ -36,7 +37,8 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
    private DrawerLayout e;
    private ViewGroup f;
    private ListView g;
-   private android.support.a.a.a h;
+   private GalleryDrawerToggle h;
+   private static final String DRAWER_STATE_VERSION = "androidx_drawer_state";
    private com.alensw.ui.view.bc i;
    private int j;
    private boolean waitingForStorage;
@@ -58,7 +60,7 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
       return var0.e;
    }
 
-   static android.support.a.a.a c(GalleryActivity var0) {
+   static GalleryDrawerToggle c(GalleryActivity var0) {
       return var0.h;
    }
 
@@ -66,14 +68,16 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
       this.e = (DrawerLayout)var1.findViewById(com.alensw.PicFolder.R.id.drawer_layout);
       this.f = (ViewGroup)this.e.findViewById(com.alensw.PicFolder.R.id.drawer_panel);
       this.g = (ListView)this.f.findViewById(com.alensw.PicFolder.R.id.drawer_list);
-      this.h = new com.alensw.PicFolder.ag(this, this, this.e, this.X, com.alensw.PicFolder.R.string.app_name, com.alensw.PicFolder.R.string.app_name);
-      this.e.setDrawerListener(this.h);
+      this.h = new GalleryDrawerToggle(this, this.e, this.X);
+      this.e.addDrawerListener(this.h);
       if (this.T == 0) {
          this.e.setScrimColor(this.g());
       }
 
       this.f.setOnClickListener(new com.alensw.PicFolder.ah(this));
       this.i = new com.alensw.ui.view.bc(this, this.g);
+      // A restored open drawer need not dispatch a new drag or opening callback.
+      this.i.a();
       this.g.setAdapter((ListAdapter)this.i);
       ListView var3 = this.g;
       boolean var2;
@@ -281,7 +285,7 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
       this.g(true);
       this.h(true);
       if (this.j == 0 && this.h != null) {
-         boolean var3 = this.h.b();
+         boolean var3 = this.h.isEnabled();
          boolean var2;
          if (this.d() <= 1 && !(var1 instanceof com.alensw.ui.c.dp)) {
             var2 = true;
@@ -289,7 +293,7 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
             var2 = false;
          }
 
-         this.h.a(var2);
+         this.h.setEnabled(var2);
          if (var2 != var3 && this.a == 3) {
             View var5 = this.I;
             if (!var2) {
@@ -312,15 +316,7 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
    @Override
    public void a(boolean var1) {
       if (this.j == 0) {
-         DrawerLayout var3 = this.e;
-         byte var2;
-         if (var1) {
-            var2 = 0;
-         } else {
-            var2 = 1;
-         }
-
-         var3.a(var2, 3);
+         this.e.setDrawerLockMode(var1 ? DrawerLayout.LOCK_MODE_UNLOCKED : DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.LEFT);
       }
 
       super.a(var1);
@@ -344,8 +340,8 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
 
    @Override
    public void onBackPressed() {
-      if (this.e.e(3)) {
-         this.e.d(3);
+      if (this.e.isDrawerOpen(Gravity.LEFT)) {
+         this.e.closeDrawer(Gravity.LEFT);
       } else {
          super.onBackPressed();
       }
@@ -355,12 +351,17 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
    public void onConfigurationChanged(Configuration var1) {
       super.onConfigurationChanged(var1);
       if (this.h != null) {
-         this.h.a(var1);
+         this.h.syncIndicator();
       }
    }
 
    @Override
    public void onCreate(Bundle var1) {
+      if (var1 != null && !var1.containsKey(DRAWER_STATE_VERSION)) {
+         // The former window hierarchy contains the retired Support SavedState
+         // class. Keep the gallery's own page stack and root from the same bundle.
+         var1.remove("android:viewHierarchyState");
+      }
       this.onCreate__$appendSource6(var1);
       this.onCreate__$appendPatch6(var1);
    }
@@ -368,9 +369,9 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
    @Override
    public boolean onOptionsItemSelected(MenuItem var1) {
       boolean var4 = true;
-      if (!this.h.a(var1)) {
-         if (this.e.e(3)) {
-            this.e.d(3);
+      if (!this.h.onOptionsItemSelected(var1)) {
+         if (this.e.isDrawerOpen(Gravity.LEFT)) {
+            this.e.closeDrawer(Gravity.LEFT);
          }
 
          switch (var1.getItemId()) {
@@ -409,21 +410,26 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
       boolean var2 = true;
       super.onPostCreate(var1);
       if (this.j == 0) {
-         this.h.a();
+         this.h.syncIndicator();
          if (this.d() > 1 || this.c() instanceof com.alensw.ui.c.dp) {
             var2 = false;
          }
 
-         this.h.a(var2);
-         this.e.a(0, 3);
+         this.h.setEnabled(var2);
+         if (var1 == null || !var1.containsKey(DRAWER_STATE_VERSION)) {
+            this.e.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, Gravity.LEFT);
+         }
+         if (this.e.isDrawerOpen(Gravity.LEFT)) {
+            this.h.onDrawerOpened(this.f);
+         }
          SharedPreferences var3 = PreferenceManager.getDefaultSharedPreferences(this);
          if (var3.getInt("drawer_shown", 0) != QuickApp.k) {
             com.alensw.b.l.b.a(var3.edit().putInt("drawer_shown", QuickApp.k));
             this.e.postDelayed(new com.alensw.PicFolder.ae(this), 300L);
          }
       } else {
-         this.h.a(false);
-         this.e.a(1, 3);
+         this.h.setEnabled(false);
+         this.e.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.LEFT);
       }
    }
 
@@ -440,6 +446,7 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
    @Override
    public void onSaveInstanceState(Bundle var1) {
       super.onSaveInstanceState(var1);
+      var1.putBoolean(DRAWER_STATE_VERSION, true);
       if (this.i != null) {
          var1.putInt("current_root", this.i.c);
       }

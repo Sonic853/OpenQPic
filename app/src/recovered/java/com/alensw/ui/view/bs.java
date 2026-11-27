@@ -12,8 +12,8 @@ class bs implements OnGestureListener {
 
    @Override
    public boolean onDown(MotionEvent var1) {
-      if (!this.a.p.f()) {
-         this.a.p.a(true);
+      if (!this.a.p.isFinished()) {
+         this.a.p.forceFinished(true);
       } else {
          this.a.a(var1);
       }
@@ -44,7 +44,7 @@ class bs implements OnGestureListener {
       }
 
       if (var5 != 0 || var6 != 0) {
-         this.a.p.a(var12, var9, var8, var11, 0, var7, 0, var10, var5, var6);
+         this.a.p.fling(var12, var9, var8, var11, 0, var7, 0, var10, var5, var6);
          this.a.g();
          this.a.b(var1, var2, var3, var4);
       }

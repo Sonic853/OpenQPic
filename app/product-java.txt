@@ -7,6 +7,8 @@ Lcom/alensw/b/h/AnimatedPng$Frame;
 Lcom/alensw/b/h/AnimatedPng$Playback;
 Lcom/alensw/b/h/SystemAnimation;
 Lcom/alensw/ui/activity/GalleryShareMenu;
+Lcom/alensw/ui/view/GalleryArrow;
+Lcom/alensw/ui/view/GalleryDrawerLayout;
 Lcom/alensw/ui/c/ViewerSwipe;
 Lcom/alensw/ui/c/ViewerSwipe$1;
 Lcom/alensw/ui/c/ViewerSwipe$DetailsSource;

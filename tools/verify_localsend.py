@@ -10,13 +10,13 @@ import re
 import struct
 import subprocess
 import tempfile
+import xml.etree.ElementTree as ET
 from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT/"app"
 PREFIX = "Lcom/alensw/transfer/"
 LICENSES_URL = "https://github.com/Sonic853/OpenQPic/tree/main/licenses"
-DOCUMENT_FILE_SHA = "684e0ffcb21a660c939d1bb814521f42c4bd74816f4a117291fe6a101cf3a822"
 EXCLUDED_LIBRARY_RESOURCES = {
     "META-INF/DEPENDENCIES", "META-INF/LICENSE", "META-INF/NOTICE",
     "META-INF/androidx/documentfile/documentfile/LICENSE.txt",
@@ -67,17 +67,31 @@ def dex(data):
     return set(types), {types[u(u(100)+i*32)] for i in range(u(96))}, strings
 
 
-def library_classes(archive, digest):
-    data = archive.read_bytes()
-    assert sha(data) == digest, ("unexpected Maven artifact", archive, sha(data))
-    if archive.suffix == ".aar":
-        with ZipFile(BytesIO(data)) as aar:
-            data = aar.read("classes.jar")
-    with ZipFile(BytesIO(data)) as jar:
-        return {"L"+name[:-6]+";" for name in jar.namelist() if name.endswith(".class")}
+def library_inventory(archives):
+    pinned = {coord: digest for digest, coord in
+              (line.split() for line in (APP/"runtime-libraries.sha256").read_text().splitlines())}
+    assert archives.keys() == pinned.keys(), ("runtime dependency change", archives.keys() ^ pinned.keys())
+    classes, r_classes, resources = {}, set(), set()
+    for coord, file in archives.items():
+        archive = Path(file)
+        data = archive.read_bytes()
+        assert sha(data) == pinned[coord], ("unexpected Maven artifact", coord)
+        if archive.suffix == ".aar":
+            with ZipFile(BytesIO(data)) as aar:
+                namespace = ET.fromstring(aar.read("AndroidManifest.xml")).get("package")
+                r_classes.add("L" + namespace.replace(".", "/") + "/R")
+                for line in aar.read("R.txt").decode().splitlines():
+                    kind, resource_type, name, *_ = line.split()
+                    if kind == "int" and resource_type != "styleable":
+                        resources.add(resource_type + "/" + name)
+                data = aar.read("classes.jar")
+        with ZipFile(BytesIO(data)) as jar:
+            classes[coord] = {"L"+n[:-6]+";" for n in jar.namelist()
+                              if n.endswith(".class") and not n.startswith("META-INF/")}
+    return classes, r_classes, resources
 
 
-def verify(apk, aab, tools, documentfile):
+def verify(apk, aab, tools, archives):
     pinned = json.loads((APP/"native-inputs.json").read_text())
     assert {"app/src/main/java/org/openqpic/localsend/"+n for n in
             ("Wire.java", "LocalSend.java", "LoopbackHttp.java", "HttpChannel.java", "SystemTls.java")} <= pinned.keys()
@@ -91,6 +105,7 @@ def verify(apk, aab, tools, documentfile):
     assert len(libs) == 6
     licenses = ROOT/"licenses"
     assert (licenses/"README.md").is_file()
+    assert all((licenses/name).is_file() for name in ("android-support-apache-2.0.txt", "android-support.txt", "jvm-libraries.txt"))
     license_files = {p.name for p in licenses.rglob("*.txt")}
     def declared(path,prefix):
         return {prefix+n for n in re.findall(r"\bnative\s+\S+\s+(\w+)\(",path.read_text("utf-8"))}
@@ -107,17 +122,25 @@ def verify(apk, aab, tools, documentfile):
     assert all(len(r) in (1,2) for r in inventory)
     unused={s for s in (APP/"removed-unused-library-types.txt").read_text().splitlines() if s.startswith("L")}
     assert len(unused)==587 and unused <= old
+    libraries, library_r, library_resources = library_inventory(archives)
+    external = set.union(*libraries.values())
+    core = libraries["androidx.core:core:1.17.0"]
+    support = {t for t in old if t.startswith("Landroid/support/")}
+    assert len(support) == 60 and not support & external
+    restored_by_core = unused & core
+    assert all(t.startswith("Landroidx/core/") for t in restored_by_core)
     httpcore = {t for t in old-unused if t.startswith("Lorg/apache/http/")}
     adapters = {s for s in (APP/"replaced-video-adapters.txt").read_text().splitlines() if s.startswith("L")}
     assert len(httpcore)==254 and len(adapters)==5 and adapters <= old-unused-httpcore
     replaced_video = httpcore | adapters
-    removed = unused | replaced_video
+    removed = (unused - restored_by_core) | replaced_video | support
     # Reflected class names (and JNI-style names) need not appear in type_ids.
     removed_names = {name for t in removed for name in (t, t[1:-1], t[1:-1].replace("/", "."))}
-    expected={r[-1] for r in inventory if r[0] not in removed}
-    assert len(expected)==626 and not removed & expected
-    external = library_classes(documentfile, DOCUMENT_FILE_SHA)
-    assert len(external)==5 and external == {t for t in expected if t.startswith("Landroidx/documentfile/")}
+    replaced = unused | replaced_video | support
+    gallery = {r[-1] for r in inventory if r[0] not in replaced}
+    assert len(gallery)==566 and not removed & gallery
+    assert gallery & external == libraries["androidx.documentfile:documentfile:1.1.0"]
+    expected = gallery | external
     assert not next((APP/"src").rglob("*.smali"),None), "Smali in product sources"
     for suffix in ("*.class","*.dex","*.jar"):
         assert not next((APP/"src").rglob(suffix),None), "Precompiled Java input: "+suffix
@@ -137,7 +160,7 @@ def verify(apk, aab, tools, documentfile):
             assert sha(elf) == sha(bundle.read("base/"+name)) == digest, name
             check_elf(elf,name.split("/")[1],image if name.endswith("/libqpicjni156.so") else wire)
         for package in (z, bundle):
-            packaged = [n for n in package.namelist() if re.search(r"(^|/)assets/licenses(/|$)", n)
+            packaged = [n for n in package.namelist() if re.search(r"(^|/)(licenses?|notice|copying)([./_-]|$)", n, re.I)
                         or n.rsplit("/", 1)[-1] in license_files]
             assert not packaged, ("Repository-only license files packaged", packaged)
             assert not any(n.lower().endswith((".pem",".jks",".p12",".keystore",".key")) for n in package.namelist()), "Packaged key material"
@@ -165,15 +188,17 @@ def verify(apk, aab, tools, documentfile):
         assert {"Ljavax/net/ssl/SSLSocket;","Ljavax/net/ssl/SSLServerSocket;",
                 "Landroid/security/keystore/KeyGenParameterSpec$Builder;","Landroid/media/MediaDataSource;"} <= refs
         program = javac | external
-        # AGP generates an empty R class for the resource-free DocumentFile AAR.
-        unexpected={d for d in defs-program if d != "Landroidx/documentfile/R;"
-                    and not re.fullmatch(r"Lcom/alensw/PicFolder/R(?:\$\w+)?;", d)
-                    and not ("$$ExternalSynthetic" in d and d.split("$$ExternalSynthetic")[0]+";" in program)}
+        generated_r = library_r | {"Lcom/alensw/PicFolder/R"}
+        unexpected={d for d in defs-program if d.rstrip(";").split("$")[0] not in generated_r
+                    and not ("$$ExternalSynthetic" in d and d.split("$$ExternalSynthetic")[0]+";" in program)
+                    and not (d.endswith("$-CC;") and d.removesuffix("$-CC;")+";" in program)}
         assert not unexpected, ("DEX classes not traceable to source, Maven libraries, D8 or R", sorted(unexpected))
         assert not {t for t in refs if t.startswith(PREFIX)} - {d for d in defs if d.startswith(PREFIX)}
         forbidden=retired | removed | {r[0] for r in inventory if len(r)==2}
         assert not forbidden & (defs|refs), forbidden & (defs|refs)
-        assert not any(t.startswith(("Lorg/apache/http/", "Landroidx/core/", "Lcom/alensw/cloud/",
+        # AndroidX Core publishes a few legacy Binder/Parcelizer binary names.
+        assert {t for t in refs if t.startswith("Landroid/support/")} == {t for t in core if t.startswith("Landroid/support/")}
+        assert not any(t.startswith(("Lorg/apache/http/", "Lcom/alensw/cloud/",
                                       "Lb/a/", "Lcom/c/a/")) for t in refs)
         api=b"https://api.github.com/repos/Sonic853/OpenQPic/releases/latest"
         assert any(api in z.read(n) for n in z.namelist() if re.fullmatch(r"classes\d*\.dex",n))
@@ -187,6 +212,9 @@ def verify(apk, aab, tools, documentfile):
             assert re.search(r"android:"+key+r"\(0x[0-9a-f]+\)="+str(value)+r"\b",sdk),(package,key,sdk)
         return manifest
     manifest = check_sdk(apk)
+    for name in ("androidx.core.content.FileProvider", "android.support.FILE_PROVIDER_PATHS",
+                 "com.alensw.PicFolder.provider", "com.alensw.PicFolder.FileProvider"):
+        assert f'"{name}"' in manifest, name
     def version(package):
         badging=run(aapt,"dump","badging",package).splitlines()[0]
         code, tag = re.search(r"\bversionCode='(\d+)' versionName='([^']+)'",badging).groups()
@@ -208,8 +236,13 @@ def verify(apk, aab, tools, documentfile):
         assert re.search(r"android:"+attribute+r"\(0x[0-9a-f]+\)="+value+r"\b",transfer),attribute
     resources=run(aapt,"dump","resources",apk)
     assert re.search(r'resource \S+ string/version\b[^\n]*\n[^\n]*"'+re.escape(tag)+r'"',resources)
-    table = dict((name,n) for n,name in re.findall(r"^\s*resource (0x[0-9a-f]+) (\S+)",resources,re.M))
+    def resource_ids(dump):
+        return {name: n for n, name in re.findall(r"^\s*resource (0x[0-9a-f]+) (\S+)", dump, re.M)}
+    table = resource_ids(resources)
     stable = dict(x.split(":")[1].split(" = ") for x in (APP/"resource-ids.txt").read_text().splitlines())
+    declared = {e.get("type")+"/"+e.get("name"): e.get("id")
+                for e in ET.parse(APP/"src/main/res/values/public.xml").getroot().findall("public")}
+    assert declared.items() <= stable.items() and len(stable) >= 995
     assert stable.items() <= table.items()
     update_labels={"string/update_"+s for s in ("no_release","check_failed","view_release","open_failed")}
     about_labels={"string/about_"+s for s in ("sonic853","sonic853_email","sonic853_card","sonic853_github",
@@ -221,11 +254,17 @@ def verify(apk, aab, tools, documentfile):
                             "string/viewer_swipe_" + action for action in ("up", "down", "none", "details", "back")}
     scan_labels = {"string/enhanced_scan", "string/enhanced_scan_summary"}
     product_resources=update_labels | about_labels | viewer_resources | scan_labels | {"drawable/ic_bilibili","string/share_other","plurals/ls_cancel_sending_files"}
+    original = declared.keys() - product_resources
+    assert len(original) == 918
     assert product_resources <= table.keys()
-    assert all(re.fullmatch(r"(string|id|layout|drawable)/ls_\w+",k) or k in product_resources for k in table.keys()-stable.keys())
+    extras = {k.replace(".", "_") for k in table.keys()-stable.keys()} - library_resources - product_resources
+    assert all(re.fullmatch(r"(string|id|layout|drawable)/ls_\w+", k) for k in extras), extras
     symbols = (APP/"build/intermediates/runtime_symbol_list/debug/processDebugResources/R.txt").read_text()
-    for k in table.keys()-stable.keys():
-        assert "int "+k.replace("/"," ")+" "+table[k] in symbols, k
+    java_ids = {kind+"/"+name: value for kind, name, value in re.findall(r"^int (\w+) (\S+) (0x[0-9a-f]+)$", symbols, re.M)}
+    aliases = {"string/"+word: "string/stable_keyword_"+word for word in ("default", "interface")}
+    projected = {aliases.get(k, k.replace(".", "_")): value for k, value in table.items()}
+    assert projected == java_ids, ("Java and APK resource IDs differ", projected.items() ^ java_ids.items())
+    assert library_resources <= java_ids.keys(), ("missing AAR resources", library_resources - java_ids.keys())
     def check_license_link(package, resource_dump):
         label = "string/about_open_source_licenses"
         url = label + "_url"
@@ -254,25 +293,29 @@ def verify(apk, aab, tools, documentfile):
         run(aapt,"convert","--output-format","binary","-o",binary,Path(temp)/"bundle.zip")
         assert version(binary)==(tag,code)
         check_sdk(binary)
-        check_license_link(binary, run(aapt,"dump","resources",binary))
+        bundle_resources = run(aapt,"dump","resources",binary)
+        assert resource_ids(bundle_resources) == table, "AAB and APK resource IDs differ"
+        check_license_link(binary, bundle_resources)
     run(java,"-Xmx128m","-XX:+UseSerialGC","-jar",tools/"lib/apksigner.jar","verify",apk)
     return {"apk_sha256":sha(apk.read_bytes()), "bytes":apk.stat().st_size, "dex_classes":len(defs),
-            "java_compiled_classes":len(javac),"retained_gallery_types":len(old-removed),
+            "java_compiled_classes":len(javac),"retained_gallery_types":len(gallery),
             "external_library_types":len(external),
+            "maven_artifacts":len(libraries), "core_types":len(core), "replaced_support_types":len(support),
             "versionName":tag,"versionCode":code,"minSdk":23,"targetSdk":32,"retired_legacy_types":len(retired),
-            "removed_unused_library_types":len(unused),
+            "removed_unused_library_types":len(unused-restored_by_core),
             "replaced_video_server_types":len(replaced_video),
-            "original_resource_ids":len(stable),"native_sha256":libs,"licenses_url":LICENSES_URL,
+            "original_resource_ids":len(original), "pre_androidx_resource_ids":len(stable),
+            "native_sha256":libs,"licenses_url":LICENSES_URL,
             "packaged_license_files":0}
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--build-tools", type=Path, required=True)
-    ap.add_argument("--documentfile", type=Path, required=True)
+    ap.add_argument("--library", nargs=2, action="append", required=True, metavar=("COORDINATE", "ARCHIVE"))
     args = ap.parse_args()
     data = verify(APP/"build/outputs/apk/debug/app-debug.apk",APP/"build/outputs/bundle/debug/app-debug.aab",
-                  args.build_tools,args.documentfile)
+                  args.build_tools,dict(args.library))
     report = APP/"build/reports/localsend-debug.json"
     report.parent.mkdir(parents=True,exist_ok=True)
     report.write_text(json.dumps(data,indent=2)+"\n","utf-8")

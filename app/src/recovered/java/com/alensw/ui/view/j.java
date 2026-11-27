@@ -14,7 +14,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Paint.Align;
 import android.net.Uri;
 import android.os.Build.VERSION;
-import android.support.v4.widget.k;
+import android.widget.OverScroller;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -70,7 +70,7 @@ public class j extends View {
    private int j;
    private float k;
    private float l;
-   private k m;
+   private OverScroller m;
    protected int y;
    protected int z;
 
@@ -263,7 +263,7 @@ public class j extends View {
       var1.restore();
    }
 
-   static k b(com.alensw.ui.view.j var0) {
+   static OverScroller b(com.alensw.ui.view.j var0) {
       return var0.m;
    }
 
@@ -833,10 +833,10 @@ public class j extends View {
          }
 
          if (this.m == null) {
-            this.m = new k(this.getContext());
+            this.m = new OverScroller(this.getContext());
          }
 
-         this.J = new com.alensw.ui.view.m(this, this, null, var12, var10, var7, var8, var9, var4, var3);
+         this.J = new com.alensw.ui.view.m(this, this, null, var12, var10, var7, var8, var9);
          this.J.a(0L, false);
          var11 = true;
       }
@@ -1145,7 +1145,7 @@ public class j extends View {
 
    public boolean m() {
       boolean var1;
-      if ((this.m == null || this.m.f()) && !this.G) {
+      if ((this.m == null || this.m.isFinished()) && !this.G) {
          var1 = false;
       } else {
          var1 = true;

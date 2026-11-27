@@ -2,14 +2,14 @@ package com.alensw.ui.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.support.v4.widget.j;
+import android.widget.EdgeEffect;
 
 public class au {
    private final com.alensw.ui.view.bp a;
-   private final j b;
-   private final j c;
-   private final j d;
-   private final j e;
+   private final EdgeEffect top;
+   private final EdgeEffect bottom;
+   private final EdgeEffect left;
+   private final EdgeEffect right;
    private float f;
    private float g;
    private int h;
@@ -18,10 +18,10 @@ public class au {
    public au(com.alensw.ui.view.bp var1) {
       Context var2 = var1.getContext();
       this.a = var1;
-      this.b = new j(var2);
-      this.c = new j(var2);
-      this.d = new j(var2);
-      this.e = new j(var2);
+      this.top = new EdgeEffect(var2);
+      this.bottom = new EdgeEffect(var2);
+      this.left = new EdgeEffect(var2);
+      this.right = new EdgeEffect(var2);
    }
 
    public void a(float var1, float var2) {
@@ -39,14 +39,14 @@ public class au {
          if (var5 > 0) {
             var1 = this.h + var3;
             if (var1 < 0) {
-               this.d.a((float)this.h / this.a.getWidth(), this.g / this.a.getHeight());
-               if (!this.e.a()) {
-                  this.e.b();
+               this.left.onPull((float)this.h / this.a.getWidth(), this.g / this.a.getHeight());
+               if (!this.right.isFinished()) {
+                  this.right.onRelease();
                }
             } else if (var1 > var5) {
-               this.e.a((float)this.h / this.a.getWidth(), 1.0F - this.g / this.a.getHeight());
-               if (!this.d.a()) {
-                  this.d.b();
+               this.right.onPull((float)this.h / this.a.getWidth(), 1.0F - this.g / this.a.getHeight());
+               if (!this.left.isFinished()) {
+                  this.left.onRelease();
                }
             }
 
@@ -56,14 +56,14 @@ public class au {
          if (var6 > 0) {
             var1 = this.i + var4;
             if (var1 < 0) {
-               this.b.a((float)this.i / this.a.getHeight(), this.f / this.a.getWidth());
-               if (!this.c.a()) {
-                  this.c.b();
+               this.top.onPull((float)this.i / this.a.getHeight(), this.f / this.a.getWidth());
+               if (!this.bottom.isFinished()) {
+                  this.bottom.onRelease();
                }
             } else if (var1 > var6) {
-               this.c.a((float)this.i / this.a.getHeight(), 1.0F - this.f / this.a.getWidth());
-               if (!this.b.a()) {
-                  this.b.b();
+               this.bottom.onPull((float)this.i / this.a.getHeight(), 1.0F - this.f / this.a.getWidth());
+               if (!this.top.isFinished()) {
+                  this.top.onRelease();
                }
             }
 
@@ -73,14 +73,7 @@ public class au {
    }
 
    public boolean a() {
-      boolean var1;
-      if (this.b.a() && this.c.a() && this.d.a() && this.e.a()) {
-         var1 = false;
-      } else {
-         var1 = true;
-      }
-
-      return var1;
+      return !top.isFinished() || !bottom.isFinished() || !left.isFinished() || !right.isFinished();
    }
 
    public boolean a(Canvas var1) {
@@ -89,45 +82,45 @@ public class au {
       int var4 = this.a.getWidth();
       int var6 = this.a.getHeight();
       boolean var10;
-      if (!this.b.a()) {
+      if (!this.top.isFinished()) {
          int var7 = var1.save();
          var1.translate(var5, this.a.getPaddingTop() + Math.min(0, var3));
-         this.b.a(var4, var6);
-         var10 = this.b.a(var1) | false;
+         this.top.setSize(var4, var6);
+         var10 = this.top.draw(var1);
          var1.restoreToCount(var7);
       } else {
          var10 = false;
       }
 
       boolean var9 = var10;
-      if (!this.c.a()) {
+      if (!this.bottom.isFinished()) {
          int var11 = var1.save();
          var1.translate(-var4 + var5, Math.max(this.a.getScrollRangeY(), var3) + var6 - this.a.getPaddingBottom());
          var1.rotate(180.0F, var4, 0.0F);
-         this.c.a(var4, var6);
-         var9 = var10 | this.c.a(var1);
+         this.bottom.setSize(var4, var6);
+         var9 = var10 | this.bottom.draw(var1);
          var1.restoreToCount(var11);
       }
 
       var10 = var9;
-      if (!this.d.a()) {
+      if (!this.left.isFinished()) {
          int var12 = var1.save();
          var1.rotate(270.0F);
          float var2 = -var6 - var3;
          int var8 = this.a.getPaddingLeft();
          var1.translate(var2, Math.min(0, var5) + var8);
-         this.d.a(var6, var4);
-         var10 = var9 | this.d.a(var1);
+         this.left.setSize(var6, var4);
+         var10 = var9 | this.left.draw(var1);
          var1.restoreToCount(var12);
       }
 
       var9 = var10;
-      if (!this.e.a()) {
+      if (!this.right.isFinished()) {
          int var13 = var1.save();
          var1.rotate(90.0F);
          var1.translate(var3, -(Math.max(this.a.getScrollRangeX(), var5) + var4 - this.a.getPaddingRight()));
-         this.e.a(var6, var4);
-         var9 = var10 | this.e.a(var1);
+         this.right.setSize(var6, var4);
+         var9 = var10 | this.right.draw(var1);
          var1.restoreToCount(var13);
       }
 
@@ -135,37 +128,37 @@ public class au {
    }
 
    public void b() {
-      this.b.b();
-      this.c.b();
-      this.d.b();
-      this.e.b();
+      this.top.onRelease();
+      this.bottom.onRelease();
+      this.left.onRelease();
+      this.right.onRelease();
    }
 
    public void b(int var1, int var2, int var3, int var4, int var5, int var6) {
       if (var6 > 0) {
          if (var2 < 0 && var4 >= 0) {
-            this.b.a((int)this.a.p.e());
-            if (!this.c.a()) {
-               this.c.b();
+            this.top.onAbsorb((int)this.a.p.getCurrVelocity());
+            if (!this.bottom.isFinished()) {
+               this.bottom.onRelease();
             }
          } else if (var2 > var6 && var4 <= var6) {
-            this.c.a((int)this.a.p.e());
-            if (!this.b.a()) {
-               this.b.b();
+            this.bottom.onAbsorb((int)this.a.p.getCurrVelocity());
+            if (!this.top.isFinished()) {
+               this.top.onRelease();
             }
          }
       }
 
       if (var5 > 0) {
          if (var1 < 0 && var3 >= 0) {
-            this.d.a((int)this.a.p.e());
-            if (!this.e.a()) {
-               this.e.b();
+            this.left.onAbsorb((int)this.a.p.getCurrVelocity());
+            if (!this.right.isFinished()) {
+               this.right.onRelease();
             }
          } else if (var1 > var5 && var3 <= var5) {
-            this.e.a((int)this.a.p.e());
-            if (!this.d.a()) {
-               this.d.b();
+            this.right.onAbsorb((int)this.a.p.getCurrVelocity());
+            if (!this.left.isFinished()) {
+               this.left.onRelease();
             }
          }
       }

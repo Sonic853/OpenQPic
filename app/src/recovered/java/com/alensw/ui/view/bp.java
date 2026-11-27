@@ -8,7 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.Drawable.Callback;
 import android.os.Build.VERSION;
-import android.support.v4.widget.k;
+import android.widget.OverScroller;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -31,7 +31,7 @@ public class bp extends View {
    protected final Drawable m;
    protected final RippleDrawable n;
    protected final com.alensw.ui.view.bn o;
-   protected final k p;
+   protected final OverScroller p;
    protected final GestureDetector q;
 
    public bp(Context var1) {
@@ -53,18 +53,11 @@ public class bp extends View {
       this.n = var5;
       this.q = new GestureDetector(var1, this.e);
       this.o = new com.alensw.ui.view.bn(var1, this);
-      this.p = new k(var1);
-      if (this.p.a()) {
-         try {
-            com.alensw.ui.view.au var6 = new com.alensw.ui.view.au(this);
-            this.k = var6;
-         } catch (Throwable var3) {
-         }
-
-         ViewConfiguration var4 = ViewConfiguration.get(var1);
-         this.i = var4.getScaledOverscrollDistance();
-         this.j = var4.getScaledOverflingDistance();
-      }
+      this.p = new OverScroller(var1);
+      this.k = new com.alensw.ui.view.au(this);
+      ViewConfiguration config = ViewConfiguration.get(var1);
+      this.i = config.getScaledOverscrollDistance();
+      this.j = config.getScaledOverflingDistance();
    }
 
    public void a(Canvas var1, RectF var2) {
@@ -104,53 +97,10 @@ public class bp extends View {
    public boolean a(int var1, int var2, int var3, int var4, int var5, int var6, boolean var7) {
       int var9 = this.getScrollRangeX();
       int var8 = this.getScrollRangeY();
-      if (this.p.a()) {
-         if (this.k != null) {
-            this.k.a(var1, var2);
-         }
-
-         boolean var10 = super.overScrollBy(var1, var2, var3, var4, var9, var8, var5, var6, var7);
-         var7 = var10;
-         if (this.k != null) {
-            var7 = var10;
-            if (this.k.a()) {
-               this.g();
-               var7 = var10;
-            }
-         }
-      } else {
-         var1 = var3 + var1;
-         var2 = var4 + var2;
-         if (var1 < 0) {
-            var1 = 0;
-            var7 = true;
-         } else if (var1 > var9) {
-            var7 = true;
-            var1 = var9;
-         } else {
-            var7 = false;
-         }
-
-         boolean var15;
-         if (var2 < 0) {
-            var2 = 0;
-            var15 = true;
-         } else if (var2 > var8) {
-            var15 = true;
-            var2 = var8;
-         } else {
-            var15 = false;
-         }
-
-         this.onOverScrolled(var1, var2, var7, var15);
-         if (!var7 && !var15) {
-            var7 = false;
-         } else {
-            var7 = true;
-         }
-      }
-
-      return var7;
+      if (this.k != null) this.k.a(var1, var2);
+      boolean clamped = super.overScrollBy(var1, var2, var3, var4, var9, var8, var5, var6, var7);
+      if (this.k != null && this.k.a()) this.g();
+      return clamped;
    }
 
    public void b(MotionEvent var1) {
@@ -168,11 +118,11 @@ public class bp extends View {
    @Override
    public void computeScroll() {
       int var3 = 0;
-      if (this.p.b()) {
+      if (this.p.computeScrollOffset()) {
          int var4 = this.getScrollX();
          int var1 = this.getScrollY();
-         var3 = this.p.c();
-         int var2 = this.p.d();
+         var3 = this.p.getCurrX();
+         int var2 = this.p.getCurrY();
          if (var4 != var3 || var1 != var2) {
             this.a(var3 - var4, var2 - var1, var4, var1, this.j, this.j, false);
          }
@@ -236,7 +186,7 @@ public class bp extends View {
 
    public final boolean f() {
       boolean var1;
-      if (this.p.f() && !this.o.c()) {
+      if (this.p.isFinished() && !this.o.c()) {
          var1 = false;
       } else {
          var1 = true;
@@ -360,8 +310,8 @@ public class bp extends View {
          this.k.a(var1, var2, var6, var8, var5, var7);
       }
 
-      if (!this.p.f() && (var3 || var4)) {
-         this.p.a(var1, var2, 0, var5, 0, var7);
+      if (!this.p.isFinished() && (var3 || var4)) {
+         this.p.springBack(var1, var2, 0, var5, 0, var7);
       }
    }
 
@@ -385,8 +335,8 @@ public class bp extends View {
       boolean var2;
       if (this.o.a(var1)) {
          var2 = var3;
-         if (!this.p.f()) {
-            this.p.a(true);
+         if (!this.p.isFinished()) {
+            this.p.forceFinished(true);
             var2 = var3;
          }
       } else {
@@ -410,7 +360,7 @@ public class bp extends View {
                   this.k.b();
                }
 
-               if (this.p.a(this.getScrollX(), this.getScrollY(), 0, this.getScrollRangeX(), 0, this.getScrollRangeY())) {
+               if (this.p.springBack(this.getScrollX(), this.getScrollY(), 0, this.getScrollRangeX(), 0, this.getScrollRangeY())) {
                   this.g();
                }
                break;

@@ -96,11 +96,12 @@ def compare(baseline, rebuilt, *, local_only=False):
     def renamed(signature):
         return re.sub(r"L[^;(:]+;", lambda m: aliases.get(m[0], m[0]), signature)
 
-    missing = [f"removed type reappeared: {t}" for t in unused & new.keys()]
+    missing = [f"removed type reappeared: {t}" for t in unused & new.keys()
+               if not (local_only and t.startswith("Landroidx/core/"))]
     count = dict(types=0, fields=0, methods=0, concrete=0)
     for before, after in aliases.items():
         if before in unused or (local_only and
-                                (before in replaced or before.startswith(("Lorg/apache/http/", "Landroidx/documentfile/")))):
+                                (before in replaced or before.startswith(("Lorg/apache/http/", "Landroid/support/", "Landroidx/")))):
             continue
         if before not in old or after not in new:
             missing.append(f"type: {before} → {after}")

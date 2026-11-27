@@ -1,9 +1,4 @@
 import com.android.build.api.artifact.SingleArtifact
-import com.android.build.api.instrumentation.AsmClassVisitorFactory
-import com.android.build.api.instrumentation.ClassContext
-import com.android.build.api.instrumentation.ClassData
-import com.android.build.api.instrumentation.InstrumentationParameters
-import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask
 import com.android.build.gradle.internal.res.LinkAndroidResForBundleTask
@@ -14,27 +9,16 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 import org.openqpic.version.GalleryVersion
-import org.objectweb.asm.ClassVisitor
-import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Opcodes
 
 plugins {
     id 'com.android.application'
 }
 
-def documentFile = 'androidx.documentfile:documentfile:1.1.0'
-
 dependencies {
-    implementation(documentFile) {
-        exclude group: 'androidx.core', module: 'core'
-        exclude group: 'androidx.annotation', module: 'annotation'
-        exclude group: 'org.jspecify', module: 'jspecify'
-    }
-    // Keep DocumentFile's API annotations visible to javac/lint but out of the package.
-    compileOnly('androidx.annotation:annotation:1.8.1') {
-        exclude group: 'org.jetbrains.kotlin'
-    }
-    compileOnly 'org.jspecify:jspecify:1.0.0'
+    implementation 'androidx.core:core:1.17.0'
+    implementation 'androidx.documentfile:documentfile:1.1.0'
+    implementation 'androidx.drawerlayout:drawerlayout:1.2.0'
+    implementation 'androidx.viewpager:viewpager:1.1.0'
 }
 
 def galleryVersion = providers.gradleProperty('openqpicVersion')
@@ -73,9 +57,8 @@ android {
         jniLibs.keepDebugSymbols += ['**/libqpicjni156.so', '**/libqpiclocalsend.so']
         jniLibs.useLegacyPackaging = true
         // Keep licenses and library metadata out of the package.
-        resources.excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/NOTICE',
-                               'META-INF/androidx/documentfile/documentfile/LICENSE.txt',
-                               'META-INF/androidx.documentfile_documentfile.version']
+        resources.excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE*', 'META-INF/NOTICE*',
+                               'META-INF/**/LICENSE*', 'META-INF/**/NOTICE*', 'META-INF/*.version']
     }
     dependenciesInfo {
         includeInApk = false
@@ -83,51 +66,6 @@ android {
     }
     sourceSets.main.java.srcDir('src/recovered/java')
     sourceSets.main.java.srcDir(rootProject.file('buildSrc/src/main/java'))
-}
-
-// DocumentFile 1.1.0 uses four DocumentsContractCompat wrappers. On API 21+
-// they delegate to the same platform methods; link those calls without androidx.core.
-abstract class LinkPlatformDocumentsContract implements AsmClassVisitorFactory<InstrumentationParameters.None> {
-    static final String COMPAT = 'androidx/core/provider/DocumentsContractCompat'
-    static final Set<String> PLATFORM_METHODS = [
-            'isDocumentUri(Landroid/content/Context;Landroid/net/Uri;)Z',
-            'getDocumentId(Landroid/net/Uri;)Ljava/lang/String;',
-            'getTreeDocumentId(Landroid/net/Uri;)Ljava/lang/String;',
-            'buildDocumentUriUsingTree(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;'
-    ].toSet()
-
-    @Override boolean isInstrumentable(ClassData data) {
-        data.className in ['androidx.documentfile.provider.DocumentFile',
-                           'androidx.documentfile.provider.DocumentsContractApi19']
-    }
-
-    @Override ClassVisitor createClassVisitor(ClassContext context, ClassVisitor next) {
-        new ClassVisitor(Opcodes.ASM9, next) {
-            @Override MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
-                                                String[] exceptions) {
-                new MethodVisitor(Opcodes.ASM9, super.visitMethod(access, name, descriptor, signature, exceptions)) {
-                    @Override void visitMethodInsn(int opcode, String owner, String method, String desc,
-                                                   boolean isInterface) {
-                        if (owner == LinkPlatformDocumentsContract.COMPAT) {
-                            if (opcode != Opcodes.INVOKESTATIC || isInterface ||
-                                    !LinkPlatformDocumentsContract.PLATFORM_METHODS.contains(method + desc)) {
-                                throw new GradleException("Unexpected DocumentFile call: ${owner}.${method}${desc}")
-                            }
-                            owner = 'android/provider/DocumentsContract'
-                        }
-                        super.visitMethodInsn(opcode, owner, method, desc, isInterface)
-                    }
-                }
-            }
-
-            @Override void visitInnerClass(String name, String owner, String innerName, int access) {
-                // FLAG_VIRTUAL_DOCUMENT is inlined; this entry alone names its enclosing library.
-                if (name != LinkPlatformDocumentsContract.COMPAT + '$DocumentCompat') {
-                    super.visitInnerClass(name, owner, innerName, access)
-                }
-            }
-        }
-    }
 }
 
 // The Java-side Android resource merger rejects string/default and
@@ -140,12 +78,17 @@ abstract class CompileStableResources extends DefaultTask {
     @InputDirectory @PathSensitive(PathSensitivity.RELATIVE)
     abstract DirectoryProperty getResourcesDir()
     @InputFile @PathSensitive(PathSensitivity.NONE) abstract RegularFileProperty getAaptBinary()
+    static class Library {
+        @InputDirectory @PathSensitive(PathSensitivity.RELATIVE) final File resources
+        Library(File resources) { this.resources = resources }
+    }
+    // A list of separate inputs preserves both overlay order and same-named values.xml files.
+    @Nested abstract ListProperty<Library> getResourceOverlays()
     @OutputDirectory abstract DirectoryProperty getFlats()
     @OutputDirectory abstract DirectoryProperty getBlame()
     @OutputFile abstract RegularFileProperty getRuntimeArchive()
     @Inject abstract ExecOperations getExecOperations()
     @Inject abstract FileSystemOperations getFileOps()
-    @Inject abstract ArchiveOperations getArchives()
 
     @TaskAction void compileResources() {
         // Materialize the two pinned version string IDs before compiling either projection.
@@ -175,13 +118,21 @@ abstract class CompileStableResources extends DefaultTask {
                 }
             }
         }
-        def archive = new File(temporaryDir, 'java-res.zip')
+        // AGP links the files in MERGED_RES as -R overlays in filename order.
+        // Supply complete compiled AAR archives first, then the application's.
+        def compiled = flats.get().asFile
+        fileOps.delete { delete compiled }
+        compiled.mkdirs()
+        resourceOverlays.get().eachWithIndex { lib, index ->
+            execOperations.exec {
+                commandLine aaptBinary.get().asFile, 'compile', '--dir', lib.resources,
+                        '-o', new File(compiled, String.format('lib-%04d.zip', index))
+            }
+        }
         execOperations.exec {
             commandLine aaptBinary.get().asFile, 'compile', '--legacy', '--no-crunch',
-                    '--dir', safe, '-o', archive
+                    '--dir', safe, '-o', new File(compiled, 'project.zip')
         }
-        fileOps.sync { from archives.zipTree(archive); into flats }
-        // DocumentFile ships no Android resources, so there are no library overlays.
         blame.get().asFile.mkdirs()
     }
 }
@@ -191,17 +142,20 @@ abstract class LinkStableResources extends DefaultTask {
     @InputFile @PathSensitive(PathSensitivity.NONE) abstract RegularFileProperty getAaptBinary()
     @InputFile @PathSensitive(PathSensitivity.NONE) abstract RegularFileProperty getFramework()
     @InputFile @PathSensitive(PathSensitivity.NONE) abstract RegularFileProperty getCompiledRes()
+    @InputDirectory @PathSensitive(PathSensitivity.RELATIVE) abstract DirectoryProperty getLibraries()
     @InputFile @PathSensitive(PathSensitivity.NONE) abstract RegularFileProperty getManifest()
     @InputFile @PathSensitive(PathSensitivity.NONE) abstract RegularFileProperty getDeclaredManifest()
     @InputFile @PathSensitive(PathSensitivity.NONE) abstract RegularFileProperty getIdMap()
     @Input abstract Property<Boolean> getProto()
     @OutputFile abstract RegularFileProperty getArchive()
+    @Optional @OutputFile abstract RegularFileProperty getJavaIds()
     @Inject abstract ExecOperations getExecOperations()
 
     @TaskAction void link() {
         def out = archive.get().asFile
         out.parentFile.mkdirs()
         def manifestForAapt = new File(temporaryDir, 'AndroidManifest.xml')
+        def emittedIds = new File(temporaryDir, 'runtime-ids.txt')
         preserveManifestSpelling(manifestForAapt)
         execOperations.exec {
             executable aaptBinary.get().asFile
@@ -209,7 +163,15 @@ abstract class LinkStableResources extends DefaultTask {
                     '--stable-ids', idMap.get().asFile, '--no-resource-deduping',
                     '--no-resource-removal', '--no-auto-version', '-0', 'svg'
             if (proto.get()) args '--proto-format'
-            args '-o', out, compiledRes.get().asFile
+            if (javaIds.present) args '--emit-ids', emittedIds
+            args '--auto-add-overlay', '-o', out
+            libraries.get().asFile.listFiles().findAll { it.name.startsWith('lib-') }.sort().each { args '-R', it }
+            args '-R', compiledRes.get().asFile
+        }
+        if (javaIds.present) {
+            // Use the actual runtime IDs for R, including private product IDs and AAR resources.
+            javaIds.get().asFile.setText(emittedIds.getText('UTF-8')
+                    .replaceAll(/:string\/(default|interface) = /, ':string/stable_keyword_$1 = '), 'UTF-8')
         }
     }
 
@@ -256,16 +218,18 @@ abstract class LinkStableResources extends DefaultTask {
 
 androidComponents {
     onVariants(selector().all()) { variant ->
-        if (variant.minSdk.apiLevel < 21) {
-            throw new GradleException('DocumentFile platform linking requires minSdk 21 or higher.')
-        }
-        variant.instrumentation.transformClassesWith(LinkPlatformDocumentsContract, InstrumentationScope.ALL) {}
         def cap = variant.name.capitalize()
         def aapt = sdkComponents.aapt2.flatMap { it.executable }
+        def libraryDirs = variant.runtimeConfiguration.incoming.artifactView {
+            attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, 'android-res')
+        }.files
         def flats = tasks.register("compile${cap}StableResources", CompileStableResources) {
             galleryVersionName.set(galleryVersion)
             resourcesDir.set(layout.projectDirectory.dir('src/main/res'))
             aaptBinary.set(aapt)
+            resourceOverlays.set(libraryDirs.elements.map { dirs ->
+                dirs.collect { new CompileStableResources.Library(it.asFile) }.reverse()
+            })
             runtimeArchive.set(layout.buildDirectory.file("intermediates/stable-inputs/${variant.name}/runtime-flats.zip"))
         }
         variant.artifacts.use(flats).wiredWith({ it.flats }).toCreate(InternalArtifactType.MERGED_RES.INSTANCE)
@@ -277,14 +241,19 @@ androidComponents {
                 aaptBinary.set(aapt)
                 framework.set(platform)
                 compiledRes.set(flats.flatMap { it.runtimeArchive })
+                libraries.set(flats.flatMap { it.flats })
                 manifest.set(realManifest)
                 declaredManifest.set(layout.projectDirectory.file('src/main/AndroidManifest.xml'))
                 idMap.set(layout.projectDirectory.file('resource-ids.txt'))
                 proto.set(protoOutput)
                 archive.set(layout.buildDirectory.file("intermediates/stable-linked/${variant.name}/${protoOutput ? 'proto' : 'binary'}.ap_"))
+                if (!protoOutput) javaIds.set(layout.buildDirectory.file("intermediates/stable-linked/${variant.name}/java-ids.txt"))
             }
         }
-        def binary = linker(false).flatMap { it.archive }
+        def binaryLink = linker(false)
+        def binary = binaryLink.flatMap { it.archive }
+        def javaIds = binaryLink.flatMap { it.javaIds }
+        variant.androidResources.aaptAdditionalParameters.addAll(javaIds.map { ['--stable-ids', it.asFile.absolutePath] })
         def bundle = linker(true).flatMap { it.archive }
         // Keep AGP's own R.jar, R.txt, BuiltArtifacts metadata, signing and
         // deployment. Only replace the *unsigned resource archive* at link time.
@@ -318,12 +287,9 @@ tasks.register('verifyLocalSendDebug', Exec) {
         def archives = configurations.debugRuntimeClasspath.incoming.artifacts.artifacts.collectEntries { artifact ->
             [(artifact.id.componentIdentifier.displayName): artifact.file]
         }
-        if (archives.keySet() != [documentFile].toSet()) {
-            throw new GradleException("Unexpected runtime libraries: ${archives.keySet()}")
-        }
         environment 'JAVA_HOME', System.getProperty('java.home')
         commandLine providers.gradleProperty('python').getOrElse(System.getProperty('os.name').startsWith('Windows') ? 'python' : 'python3'),
-                rootProject.file('tools/verify_localsend.py'), '--build-tools', sdk.get().dir('build-tools/36.0.0').asFile,
-                '--documentfile', archives[documentFile]
+                rootProject.file('tools/verify_localsend.py'), '--build-tools', sdk.get().dir('build-tools/36.0.0').asFile
+        archives.each { coordinate, file -> args '--library', coordinate, file }
     }
 }
