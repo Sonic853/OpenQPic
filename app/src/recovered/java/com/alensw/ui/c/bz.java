@@ -1,5 +1,8 @@
 package com.alensw.ui.c;
 
+import static com.alensw.a.s.DIRECTORIES_REFRESHED;
+import static com.alensw.a.s.REFRESH_DIRECTORIES;
+
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.view.Menu;
@@ -15,14 +19,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import com.alensw.PicFolder.GalleryActivity;
+import com.alensw.PicFolder.GalleryStorage;
 import com.alensw.PicFolder.QuickApp;
+import com.alensw.a.e;
 import com.alensw.bean.UriFile;
 import com.alensw.ui.view.ImageGridView;
 import com.alensw.ui.view.PathBar;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class bz extends com.alensw.ui.c.a {
    protected static final String[] B = new String[]{"Pictures", "Photos", "Picture", "Photo"};
@@ -35,6 +46,11 @@ public class bz extends com.alensw.ui.c.a {
    private final Rect L;
    private com.alensw.a.e M;
    private final com.alensw.ui.view.aj O;
+   private Handler scanHandler;
+   private boolean batchScanUpdates;
+   private boolean albumGridPending;
+   private Set<e> albumsToVerify;
+   private final Runnable drawAlbums = this::drawAlbumGrid;
    protected ImageGridView j;
    protected PathBar k;
    protected com.alensw.a.x l;
@@ -99,7 +115,7 @@ public class bz extends com.alensw.ui.c.a {
         String string;
         boolean z = false;
         super.a();
-        ReceivedMediaUpdates.observe(this);
+         ReceivedMediaUpdates.observe(this);
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.C);
         this.j.setHorizontal(defaultSharedPreferences.getBoolean("horizontal_scroll", this.j.c));
         int iA = com.alensw.a.x.a(this.o, this.s, this.t);
@@ -950,8 +966,10 @@ public class bz extends com.alensw.ui.c.a {
                 }
                 return true;
             case 11:
-                if (!(message.arg1 == 1)) {
-                    boolean z2 = this.l.f() == 0;
+                 if (message.arg1 != 1) {
+                     if (message.arg2 == 1) removeUnverifiedAlbums();
+                     albumsToVerify = null;
+                     boolean z2 = this.l.f() == 0;
                     QuickApp.x = message.arg2 == 1;
                     this.p = false;
                     if (QuickApp.x && z2) {
@@ -961,16 +979,17 @@ public class bz extends com.alensw.ui.c.a {
                         this.j.requestLayout();
                     }
                     c(false);
-                } else if (!QuickApp.x || this.l.f() == 0) {
-                    w();
+                 } else if (!QuickApp.x || this.l.f() == 0 && (!batchScanUpdates || this.o)) {
+                     w();
+                 } else if (this.l.f() == 0) {
+                     this.j.setEmptyText(g(com.alensw.PicFolder.R.string.no_picture_in_album));
                 }
                 return true;
             case 12:
-                this.l.d((com.alensw.a.e) message.obj);
-                if (this.H == 2) {
-                    this.j.requestLayout();
-                    this.j.a();
-                }
+                 e album = (e) message.obj;
+                 this.l.d(album);
+                 if (albumsToVerify != null) albumsToVerify.remove(album);
+                 requestAlbumGrid();
                 if (this.l.f() >= this.j.getVisibleCount() + 1) {
                     this.p = false;
                 }
@@ -979,17 +998,21 @@ public class bz extends com.alensw.ui.c.a {
                 com.alensw.a.e srcType0111 = (com.alensw.a.e) message.obj;
                 if (this.C.q() && this.A.remove(srcType0111)) {
                     this.C.a((CharSequence) (Integer.toString(this.A.size()) + "/" + this.l.f()), false);
-                }
-                this.l.f(srcType0111);
-                this.j.requestLayout();
-                return true;
+                 }
+                 this.l.f(srcType0111);
+                 if (batchScanUpdates) requestAlbumGrid();
+                 else this.j.requestLayout();
+                 return true;
             case 14:
                 this.p = false;
                 c(false);
                 if (this.H == 2) {
                     this.j.requestLayout();
-                }
-                return true;
+                 }
+                 return true;
+            case DIRECTORIES_REFRESHED:
+                 if (message.arg2 == 1) applyChangedAlbums((List<e>) message.obj);
+                 return true;
             default:
                 return true;
         }
@@ -998,6 +1021,76 @@ public class bz extends com.alensw.ui.c.a {
    @Override
    public void i() {
       super.i();
+   }
+
+   private void requestAlbumGrid() {
+      if (this.H != 2) return;
+      if (!batchScanUpdates) {
+         drawAlbumGrid();
+      } else if (!albumGridPending) {
+         albumGridPending = true;
+         this.j.postOnAnimation(drawAlbums);
+      }
+   }
+
+   private void drawAlbumGrid() {
+      albumGridPending = false;
+      this.j.requestLayout();
+      this.j.a();
+   }
+
+   private void updateAlbumSelection() {
+      if (this.C.q()) {
+         this.C.a(Integer.toString(this.A.size()) + "/" + this.l.f(), false);
+      }
+   }
+
+   private void removeUnverifiedAlbums() {
+      if (albumsToVerify == null || albumsToVerify.isEmpty()) return;
+      for (e album : albumsToVerify) {
+         int index = this.l.a(album);
+         if (this.l.b(index) == album) {
+            this.l.c(index);
+            this.A.remove(album);
+         }
+      }
+      updateAlbumSelection();
+      requestAlbumGrid();
+   }
+
+   private void applyChangedAlbums(List<e> updatedAlbums) {
+      if (updatedAlbums.isEmpty()) return;
+      e focused = this.l.b(this.v);
+      Map<e, e> replacements = new HashMap<>();
+      boolean changed = false;
+      for (e album : updatedAlbums) {
+         int index = this.l.a(album);
+         e old = this.l.b(index);
+         if (old == null && album.j() == 0) continue;
+         changed = true;
+         if (old != null) this.l.c(index);  // invalidate its cached cover even if the mtime matches
+         if (album.j() > 0) {
+            this.l.d(album);
+            if (old != null) replacements.put(old, album);
+         } else if (old != null) {
+            replacements.put(old, null);
+         }
+      }
+      if (!changed) return;
+      if (!replacements.isEmpty() && !this.A.isEmpty()) {
+         LinkedHashSet<e> selection = new LinkedHashSet<>();
+         for (Object value : this.A) {
+            e selected = (e) value;
+            e updated = replacements.containsKey(selected) ? replacements.get(selected) : selected;
+            if (updated != null) selection.add(updated);
+         }
+         this.A.clear();
+         this.A.addAll(selection);
+      }
+      if (focused != null) this.v = Math.max(-1, this.l.a(focused));
+      this.j.setEmptyText(this.l.f() == 0 ? g(com.alensw.PicFolder.R.string.no_picture_in_album) : null);
+      updateAlbumSelection();
+      requestAlbumGrid();
    }
 
    @Override
@@ -1145,7 +1238,7 @@ public class bz extends com.alensw.ui.c.a {
       this.j.requestLayout();
       this.j.post(new com.alensw.ui.c.ce(this));
       ArrayList var1 = this.l.h();
-      QuickApp.q.a(1, var1, this.b);
+       requestScan(1, var1, null);
       this.n();
       if (this.C.q()) {
          this.C.a(Integer.toString(this.A.size()) + "/" + this.l.f(), false);
@@ -1153,14 +1246,22 @@ public class bz extends com.alensw.ui.c.a {
    }
 
    public void v() {
-      h = this.j.getScrollPos();
-      this.j.c();
-      QuickApp.q.c();
+       h = this.j.getScrollPos();
+       this.j.c();
+       scanHandler = null;
+       albumsToVerify = null;
+       albumGridPending = false;
+       this.j.removeCallbacks(drawAlbums);
+       QuickApp.q.c();
       QuickApp.t.a(true);
       this.x();
    }
 
    public void w() {
+       scanAlbums(null);
+   }
+
+   void scanAlbums(Runnable completed) {
       if (this.l.d()) {
          this.l.i();
       }
@@ -1169,10 +1270,39 @@ public class bz extends com.alensw.ui.c.a {
          this.z.n();
          f = this.z.getPath();
          g = this.z.e;
-         QuickApp.q.a(2, this.z.getPath(), this.b);
-      } else {
-         QuickApp.q.a(3, null, this.b);
-      }
+          requestScan(2, this.z.getPath(), completed);
+       } else {
+          requestScan(3, null, completed);
+       }
+   }
+
+   boolean scanningAlbums() {
+      return scanHandler != null;
+   }
+
+   void scanChangedAlbums(List<File> directories, Runnable completed) {
+      requestScan(REFRESH_DIRECTORIES, directories, completed);
+   }
+
+   private void requestScan(int operation, Object argument, Runnable completed) {
+      batchScanUpdates = GalleryStorage.enhancedScan(this.C);
+      albumsToVerify = batchScanUpdates && (operation == 2 || operation == 3)
+              ? new HashSet<e>(this.l.h()) : null;
+      // Each request owns its callbacks, including messages already posted as a page is left.
+      scanHandler = new Handler(this.b.getLooper()) {
+         @Override
+         public void handleMessage(Message message) {
+            if (scanHandler != this) return;
+            boolean finished = message.what == 11 || message.what == DIRECTORIES_REFRESHED;
+            if (finished) scanHandler = null;
+            bz.this.handleMessage(message);
+            if (finished) {
+               if (message.arg2 == 1 && completed != null) completed.run();
+               ReceivedMediaUpdates.observe(bz.this);
+            }
+         }
+      };
+      QuickApp.q.a(operation, argument, scanHandler);
    }
 
    protected void x() {

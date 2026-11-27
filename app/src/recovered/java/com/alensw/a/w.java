@@ -50,6 +50,7 @@ class w implements Callable {
          }
 
          if (!this.e) {
+            if (this.d == null && !this.f.keepPrescan(this.b, var3)) return null;
             this.b.h = null;
          }
 

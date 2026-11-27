@@ -138,6 +138,8 @@ If you are setting wallpaper, please go to Gallery to set!"</string>
     <string name="single_tap_zoom">Single tap to zoom</string>
     <string name="single_tap_zoom_summary">Single tap to zoom and double tap to show action bar, otherwise inverse</string>
     <string name="viewer_swipe_up">Swipe up action</string>
+    <string name="enhanced_scan">Enhanced scanning</string>
+    <string name="enhanced_scan_summary">Refresh changed folders and avoid repeat scans when loading albums</string>
     <string name="viewer_swipe_down">Swipe down action</string>
     <string name="viewer_swipe_none">None</string>
     <string name="viewer_swipe_details">Show details</string>

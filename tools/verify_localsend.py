@@ -218,7 +218,8 @@ def verify(apk, aab, tools, documentfile):
     viewer_resources = {"id/viewer_details_overlay", "id/viewer_details_sheet",
                         "array/viewer_swipe_actions", "array/viewer_swipe_values"} | {
                             "string/viewer_swipe_" + action for action in ("up", "down", "none", "details", "back")}
-    product_resources=update_labels | about_labels | viewer_resources | {"drawable/ic_bilibili","string/share_other","plurals/ls_cancel_sending_files"}
+    scan_labels = {"string/enhanced_scan", "string/enhanced_scan_summary"}
+    product_resources=update_labels | about_labels | viewer_resources | scan_labels | {"drawable/ic_bilibili","string/share_other","plurals/ls_cancel_sending_files"}
     assert product_resources <= table.keys()
     assert all(re.fullmatch(r"(string|id|layout|drawable)/ls_\w+",k) or k in product_resources for k in table.keys()-stable.keys())
     symbols = (APP/"build/intermediates/runtime_symbol_list/debug/processDebugResources/R.txt").read_text()

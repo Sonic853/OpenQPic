@@ -55,7 +55,7 @@ public class bf extends com.alensw.ui.c.a {
    @Override
    public void a() {
       super.a();
-      ReceivedMediaUpdates.observe(this);
+       ReceivedMediaUpdates.observe(this);
       if (this.n != 0) {
          this.D.setPadding(this.D.getPaddingLeft(), this.D.getPaddingTop() - this.n, this.D.getPaddingRight(), this.D.getPaddingBottom());
          this.n = 0;
@@ -581,7 +581,7 @@ public class bf extends com.alensw.ui.c.a {
    public void c(boolean var1) {
       super.c(var1);
       if (!var1) {
-         ReceivedMediaUpdates.observe(this);
+          ReceivedMediaUpdates.observe(this);
       }
    }
 

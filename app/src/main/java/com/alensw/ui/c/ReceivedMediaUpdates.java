@@ -3,100 +3,187 @@ package com.alensw.ui.c;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.util.Log;
+import com.alensw.PicFolder.GalleryStorage;
 import com.alensw.PicFolder.QuickApp;
+import com.alensw.PicFolder.R;
+import com.alensw.a.bh;
 import com.alensw.a.e;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
-/** The local Albums (bz) and folder (bf) grids are filesystem-backed, not MediaStore observers.
- * Track publication, not temporary writes. All gallery models and views are touched on main. */
+/** Coalesces directory changes until a local Albums or folder page can apply them. */
 public final class ReceivedMediaUpdates {
-    private static final Handler main=new Handler(Looper.getMainLooper());
-    private static final Map<File,Long> changed=new HashMap<>(); // only app-selected receive directories
-    private static final WeakHashMap<cu,Long> pages=new WeakHashMap<>();
-    private static long version,firstPending;
-    private static final Runnable flush=ReceivedMediaUpdates::refresh;
+    private static final int MAX_CHANGED_DIRECTORIES = 512;
+    private static final Handler main = new Handler(Looper.getMainLooper());
+    private static final Map<File, Long> changed = new HashMap<>();
+    private static final WeakHashMap<cu, Long> pages = new WeakHashMap<>();
+    private static final Runnable flush = ReceivedMediaUpdates::refresh;
+    private static long version, reconcileAt, firstPending;
+    private static MediaStoreDirectories mediaStore;
 
     private ReceivedMediaUpdates() {}
 
     public static void published(File directory) {
-        File path=canonical(directory);
-        main.post(()->{
-            changed.put(path,++version);
-            QuickApp.x=false; // the cached Albums scan is no longer complete
+        File path = canonical(directory);
+        main.post(() -> {
+            if (!GalleryStorage.enhancedScan(QuickApp.a())) QuickApp.x = false;
+            record(path);
             schedule();
         });
     }
-    /** On page resume or completion of an earlier folder load. Paused pages retain their watermark. */
+
     static void observe(cu page) {
-        if(!pages.containsKey(page)) pages.put(page,0L);
-        if(pages.get(page)<version) schedule();
+        updateObserver();
+        if (!pages.containsKey(page)) pages.put(page, 0L);
+        if (pages.get(page) < version || mediaStore != null && mediaStore.hasPendingQuery()) schedule();
     }
-    private static void schedule() {
-        long now=SystemClock.uptimeMillis();
-        if(firstPending==0) firstPending=now;
-        main.removeCallbacks(flush);
-        main.postAtTime(flush,Math.min(now+180,firstPending+1000));
-    }
-    private static File canonical(File file) {
-        try { return file.getCanonicalFile(); }
-        catch(IOException | SecurityException ignored) { return file.getAbsoluteFile(); }
-    }
-    private static boolean visible(cu page) {
-        return page.H==2 && !page.I && page.C.c()==page;
-    }
-    private static boolean shows(cu page,File dir) {
-        if(page instanceof bf) {
-            File open=((bf)page).g;
-            return open!=null && (dir.equals(open) || dir.equals(canonical(open)));
+
+    private static void updateObserver() {
+        QuickApp app = QuickApp.a();
+        if (!GalleryStorage.enhancedScan(app) || !GalleryStorage.hasAccess(app)) {
+            if (mediaStore != null) mediaStore.close();
+            mediaStore = null;
+        } else if (mediaStore == null) {
+            try {
+                mediaStore = new MediaStoreDirectories(app, main, ReceivedMediaUpdates::schedule,
+                        ReceivedMediaUpdates::indexedChanges, ReceivedMediaUpdates::volumeChanged);
+            } catch (RuntimeException error) {
+                Log.w("GalleryScan", "Cannot observe MediaStore", error);
+            }
         }
-        bz albums=(bz)page;
-        if(!albums.o) return true;
-        if(albums.z==null) return false;
-        File root=canonical(albums.z);
-        for(File ancestor=dir;ancestor!=null;ancestor=ancestor.getParentFile())
-            if(root.equals(ancestor)) return true;
+    }
+
+    private static void record(File directory) {
+        changed.put(directory, ++version);
+        if (changed.size() > MAX_CHANGED_DIRECTORIES) {
+            changed.clear();
+            reconcileAt = version;
+        }
+    }
+
+    private static void indexedChanges(Set<File> directories) {
+        if (!GalleryStorage.enhancedScan(QuickApp.a())) return;
+        if (directories == null) {
+            reconcileAt = ++version;
+        } else if (!directories.isEmpty()) {
+            for (File directory : directories) record(directory);
+        } else {
+            return;
+        }
+        schedule();
+    }
+
+    private static void volumeChanged() {
+        QuickApp app = QuickApp.a();
+        if (!GalleryStorage.enhancedScan(app)) return;
+        QuickApp.p = new bh(app);
+        QuickApp.x = false;
+        reconcileAt = ++version;
+        schedule();
+    }
+
+    private static void schedule() {
+        long now = SystemClock.uptimeMillis();
+        if (firstPending == 0) firstPending = now;
+        main.removeCallbacks(flush);
+        main.postAtTime(flush, Math.min(now + 180, firstPending + 1000));
+    }
+
+    static File canonical(File file) {
+        try {
+            return file.getCanonicalFile();
+        } catch (IOException | SecurityException ignored) {
+            return file.getAbsoluteFile();
+        }
+    }
+
+    private static boolean visible(cu page) {
+        return page.H == 2 && !page.I && page.C.c() == page;
+    }
+
+    private static boolean shows(cu page, File openDirectory, File dir) {
+        if (page instanceof bf) return dir.equals(openDirectory);
+        if (!((bz) page).o) return true;
+        for (File ancestor = dir; ancestor != null; ancestor = ancestor.getParentFile()) {
+            if (ancestor.equals(openDirectory)) return true;
+        }
         return false;
     }
-    private static void invalidate(File dir,Set<File> invalidated) {
-        // Scanner operation 4 evicts the folder and empty-directory caches (mtimes are in seconds).
-        if(dir!=null && invalidated.add(dir)) QuickApp.q.a(4,dir.getPath(),null);
+
+    private static void invalidate(File dir, Set<File> invalidated) {
+        if (dir != null && invalidated.add(dir)) QuickApp.q.a(4, dir.getPath(), null);
     }
+
     private static void refresh() {
-        firstPending=0;
-        Set<File> invalidated=new HashSet<>();
-        for(cu page:new ArrayList<>(pages.keySet())) {
-            if(page==null || !visible(page)) continue;
-            long previous=pages.get(page);
-            // Let the older asynchronous folder snapshot finish before issuing another; c(false)
-            // wakes us again. Overlapping loads could otherwise put an older count back on screen.
-            if(previous==version || (page instanceof bf && page.J)) continue;
-            pages.put(page,version);
-            boolean reload=false;
-            for(Map.Entry<File,Long> update:changed.entrySet()) {
-                if(update.getValue()<=previous) continue;
-                File dir=update.getKey();
-                if(page instanceof bz) {
-                    // Also expire the parent's "no children" entry if this was the first receipt.
-                    invalidate(dir,invalidated); invalidate(dir.getParentFile(),invalidated);
-                }
-                if(shows(page,dir)) reload=true;
+        firstPending = 0;
+        boolean enhanced = GalleryStorage.enhancedScan(QuickApp.a());
+        boolean canQuery = false;
+        Set<File> invalidated = new HashSet<>();
+        for (cu page : new ArrayList<>(pages.keySet())) {
+            if (page == null || !visible(page)) continue;
+            boolean busy = page instanceof bz ? ((bz) page).scanningAlbums() : page.J;
+            if (busy) continue;
+            canQuery = true;
+            long previous = pages.get(page);
+            if (previous == version) continue;
+            long target = version;
+            Runnable consumed = () -> pages.put(page, target);
+            boolean reconcile = previous < reconcileAt;
+            List<File> directories = new ArrayList<>();
+            File open = page instanceof bf ? ((bf) page).g : ((bz) page).o ? ((bz) page).z : null;
+            File openDirectory = open == null ? null : canonical(open);
+            for (Map.Entry<File, Long> update : changed.entrySet()) {
+                if (update.getValue() <= previous) continue;
+                File dir = update.getKey();
+                if (shows(page, openDirectory, dir)) directories.add(dir);
+                else if (page instanceof bz) invalidateDirectory(dir, invalidated);
             }
-            if(!reload) continue;
-            if(page instanceof bz) {
-                QuickApp.x=false;
-                ((bz)page).w(); // normal filtered, asynchronous album scan; keep scroll and selection
+            if (!reconcile && directories.isEmpty()) {
+                consumed.run();
+            } else if (page instanceof bz) {
+                bz albums = (bz) page;
+                if (enhanced && !albums.o && QuickApp.x && !reconcile) {
+                    albums.scanChangedAlbums(directories, consumed);
+                } else {
+                    if (reconcile) QuickApp.q.a(4, null, null);
+                    for (File dir : directories) {
+                        invalidateDirectory(dir, invalidated);
+                    }
+                    QuickApp.x = false;
+                    albums.scanAlbums(consumed);
+                }
             } else {
-                bf folder=(bf)page;
-                e model=folder.g;
-                folder.a(model,()->{
-                    QuickApp.v.c(model); // this model may also be the cached album cover's key
-                    if(!visible(folder) || folder.g!=model) return;
-                    if(model.j()>0) folder.f.setEmptyText(null);
-                    folder.f.requestLayout(); folder.f.invalidate(); folder.m();
-                });
+                refreshFolder((bf) page, consumed);
             }
         }
+        if (enhanced && canQuery && mediaStore != null) mediaStore.queryIfNeeded();
+    }
+
+    private static void invalidateDirectory(File dir, Set<File> invalidated) {
+        invalidate(dir, invalidated);
+        invalidate(dir.getParentFile(), invalidated);
+    }
+
+    private static void refreshFolder(bf folder, Runnable consumed) {
+        e model = folder.g;
+        folder.a(model, () -> {
+            QuickApp.v.c(model);
+            consumed.run();
+            if (folder.g != model) return;
+            if (!folder.k.isEmpty()) folder.k.retainAll(new HashSet<>(model.i));
+            if (!visible(folder)) return;
+            folder.f.setEmptyText(model.j() > 0 ? null : folder.g(R.string.no_picture_in_album));
+            folder.f.requestLayout();
+            folder.f.invalidate();
+            folder.l();
+        });
     }
 }

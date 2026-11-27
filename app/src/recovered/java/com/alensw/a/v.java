@@ -1,15 +1,22 @@
 package com.alensw.a;
 
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import com.alensw.PicFolder.QuickApp;
 import com.alensw.jni.JniUtils;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class v extends com.alensw.b.k.e {
@@ -21,6 +28,21 @@ class v extends com.alensw.b.k.e {
    final com.alensw.a.u f;
    private com.alensw.a.al h;
    private final String i;
+   boolean enhanced;
+   private boolean prescanning;
+   private Map<String, Prescan> prescans;
+   private Set<String> walked;
+   private int reusedPrescans;
+
+   private static final class Prescan {
+      final int modified;
+      final ArrayList<com.alensw.a.e> children;
+
+      Prescan(com.alensw.a.e folder) {
+         modified = folder.e;
+         children = folder.h;
+      }
+   }
 
    private v(com.alensw.a.u var1) {
       this.f = var1;
@@ -39,10 +61,19 @@ class v extends com.alensw.b.k.e {
 
       while (!this.e) {
          while (var5.size() > 0) {
-            com.alensw.a.e var6 = (com.alensw.a.e)var5.pop();
-            String var7 = var6.getPath();
-            if ((!var7.endsWith(this.i) || !QuickApp.p.g(var7)) && !this.a(var7, true, true) && this.a(var7, false)) {
-               var4.add(var6);
+             com.alensw.a.e var6 = (com.alensw.a.e)var5.pop();
+             String var7 = var6.getPath();
+             if ((!var7.endsWith(this.i) || !QuickApp.p.g(var7)) && !this.a(var7, true, true) && this.a(var7, false)) {
+                if (walked != null && !walked.add(var7)) continue;
+                if (prescans != null) {
+                   Prescan earlier = prescans.remove(var7);
+                   if (earlier != null && earlier.modified == (var6.e != 0 ? var6.e : JniUtils.fuGetFileTime(var7))) {
+                      var5.addAll(earlier.children);
+                      reusedPrescans++;
+                      continue;
+                   }
+                }
+                var4.add(var6);
             }
          }
 
@@ -56,6 +87,15 @@ class v extends com.alensw.b.k.e {
       }
 
       return var2;
+   }
+
+   boolean keepPrescan(com.alensw.a.e folder, int mediaCount) {
+      if (prescans == null) return true;
+      // The scan has already checked ancestor .nomedia when it found media. A
+      // cached path can bypass a hidden parent that the recursive pass would prune.
+      if (mediaCount > 0 && !this.d && folder.a(false) && !QuickApp.p.a(folder.getPath())) return false;
+      if (folder.h != null) prescans.put(folder.getPath(), new Prescan(folder));
+      return true;
    }
 
    private int a(com.alensw.a.e var1, boolean var2) {
@@ -83,7 +123,7 @@ class v extends com.alensw.b.k.e {
             var1.h.clear();
          }
 
-         int var4 = com.alensw.a.s.a(this.f.a, this.h, var1, var5, var2);
+          int var4 = com.alensw.a.s.a(this.f.a, this.h, var1, var5, var2, enhanced && !prescanning);
          var3 = var4;
          if (var2) {
             var3 = var4;
@@ -348,99 +388,174 @@ class v extends com.alensw.b.k.e {
       com.alensw.b.l.b.a(var1, QuickApp.o.a);
    }
 
+   private ArrayList<String> prepareFilters(boolean allAlbums) {
+      this.f.refreshDefaultExclusions();
+      List<String> excluded = com.alensw.a.u.a(this.f).a(true);
+      ArrayList<String> included = com.alensw.a.u.a(this.f).a(false);
+      HashMap<String, Boolean> exclusions = new HashMap<>();
+      if (allAlbums) {
+         for (Object path : com.alensw.a.u.b(this.f)) exclusions.put((String) path, false);
+      }
+      for (String path : excluded) exclusions.put(path, true);
+      com.alensw.a.u.a(this.f, exclusions.isEmpty() ? null : exclusions);
+      com.alensw.a.u.a(this.f, exclusions.isEmpty() ? null : exclusions.keySet().toArray(new String[0]));
+      com.alensw.a.u.b(this.f, included.isEmpty() ? null : included.toArray(new String[0]));
+      return included;
+   }
+
+   private void clearFilters() {
+      com.alensw.a.u.a(this.f, (HashMap) null);
+      com.alensw.a.u.a(this.f, (String[]) null);
+      com.alensw.a.u.b(this.f, null);
+   }
+
+   private ArrayList<com.alensw.a.e> scanRoots(List<String> included) {
+      ArrayList<com.alensw.a.e> roots = new ArrayList<>(4);
+      for (String path : included) {
+         com.alensw.a.e root = new com.alensw.a.e(path, 0);
+         if (root.exists()) {
+            if (QuickApp.p.a(path)) root.f = 0;
+            roots.add(root);
+         }
+      }
+      if (roots.isEmpty()) {
+         for (String path : QuickApp.p.a()) {
+            com.alensw.a.e root = new com.alensw.a.e(path, 0);
+            if (root.exists()) {
+               root.f = 0;
+               roots.add(root);
+            }
+         }
+      }
+      return roots;
+   }
+
+   private static boolean under(File root, File directory) {
+      return root.equals(directory) || com.alensw.b.l.b.c(root.getPath(), directory.getPath())
+              || ("/".equals(root.getPath()) && directory.isAbsolute());
+   }
+
+   private static boolean isPrescanCandidate(File directory, List<com.alensw.a.e> roots) {
+      String path = directory.getPath();
+      for (File root : roots) {
+         if (under(root, directory) && path.indexOf("/.", root.getPath().length()) < 0) return true;
+      }
+      return false;
+   }
+
+   private File inScanRoot(File directory, List<com.alensw.a.e> roots) {
+      for (File root : roots) {
+         if (under(root, directory)) return directory;
+      }
+      // MediaStore and the filesystem can use different aliases for the same volume.
+      try {
+         File canonical = directory.getCanonicalFile();
+         for (File root : roots) {
+            File canonicalRoot = root.getCanonicalFile();
+            if (canonicalRoot.equals(canonical)) return root;
+            String prefix = com.alensw.b.l.b.e(canonicalRoot.getPath());
+            if (canonical.getPath().startsWith(prefix)) {
+               return new File(root, canonical.getPath().substring(prefix.length()));
+            }
+         }
+      } catch (IOException | SecurityException ignored) {}
+      return null;
+   }
+
+   private boolean reachable(File directory, List<com.alensw.a.e> roots) {
+      for (com.alensw.a.e root : roots) {
+         if (!under(root, directory) || !this.d && root.a(false)) continue;
+         for (File ancestor = directory; ancestor != null; ancestor = ancestor.getParentFile()) {
+            String path = ancestor.getPath();
+            if (this.a(path, true, true) || (path.endsWith(this.i) && QuickApp.p.g(path))
+                    || (!this.d && !QuickApp.p.a(path) && new File(ancestor, ".nomedia").exists())) break;
+            if (ancestor.equals(root)) return true;
+            if (ancestor.getName().startsWith(".")) break;
+         }
+      }
+      return false;
+   }
+
+   ArrayList<com.alensw.a.e> refreshDirectories() {
+      ArrayList<com.alensw.a.e> results = new ArrayList<>();
+      List<com.alensw.a.e> roots = scanRoots(prepareFilters(true));
+      Set<File> visited = new HashSet<>();
+      Set<File> invalidated = new HashSet<>();
+      long start = SystemClock.uptimeMillis();
+      try {
+         for (File changed : (List<File>) this.b) {
+            if (this.e) break;
+            File directory = inScanRoot(changed, roots);
+            if (directory == null || !visited.add(directory)) continue;
+            for (File ancestor = directory; ancestor != null && invalidated.add(ancestor);
+                 ancestor = ancestor.getParentFile()) {
+               this.f.invalidateDirectory(ancestor.getPath());
+            }
+            com.alensw.a.e album = new com.alensw.a.e(directory, 0);
+            if (this.a(directory.getPath(), false) && reachable(directory, roots)) {
+               this.a(album, true);
+            }
+            album.h = null;
+            results.add(album);
+         }
+      } finally {
+         clearFilters();
+      }
+      Log.d("FolderScanner", "refresh directories: " + results.size()
+              + ", used=" + (SystemClock.uptimeMillis() - start));
+      return results;
+   }
+
    private int c() {
-        int iB;
-        int i;
-        com.alensw.a.bh srcType0108 = QuickApp.p;
-        boolean z = this.a == 3;
-        ArrayList arrayListA = com.alensw.a.u.a(this.f).a(true);
-        ArrayList<String> arrayListA2 = com.alensw.a.u.a(this.f).a(false);
-        com.alensw.a.u.a(this.f, new HashMap(com.alensw.a.u.b(this.f).size() + arrayListA.size()));
-        if (z) {
-            Iterator it = com.alensw.a.u.b(this.f).iterator();
-            while (it.hasNext()) {
-                com.alensw.a.u.c(this.f).put((String) it.next(), false);
-            }
-        }
-        Iterator it2 = arrayListA.iterator();
-        while (it2.hasNext()) {
-            com.alensw.a.u.c(this.f).put((String) it2.next(), true);
-        }
-        if (com.alensw.a.u.c(this.f).isEmpty()) {
-            com.alensw.a.u.a(this.f, (HashMap) null);
-        } else {
-            com.alensw.a.u.a(this.f, new String[com.alensw.a.u.c(this.f).size()]);
-            com.alensw.a.u.c(this.f).keySet().toArray(com.alensw.a.u.d(this.f));
-        }
-        if (arrayListA2.isEmpty()) {
-            com.alensw.a.u.b(this.f, null);
-        } else {
-            com.alensw.a.u.b(this.f, new String[arrayListA2.size()]);
-            arrayListA2.toArray(com.alensw.a.u.e(this.f));
-        }
-        if (z) {
-            ArrayList arrayList = new ArrayList(128);
-            ArrayList<com.alensw.a.e> arrayList2 = new ArrayList(128);
-            for (String str : arrayListA2) {
-                com.alensw.a.e srcType0111 = new com.alensw.a.e(str, 0);
-                if (srcType0111.exists()) {
-                    if (srcType0108.a(str)) {
-                        srcType0111.f = 0;
-                    }
-                    arrayList2.add(srcType0111);
-                }
-            }
-            if (arrayList2.isEmpty()) {
-                for (String str2 : srcType0108.a()) {
-                    com.alensw.a.e srcType0112 = new com.alensw.a.e(str2, 0);
-                    if (srcType0112.exists()) {
-                        srcType0112.f = 0;
-                        arrayList2.add(srcType0112);
-                    }
-                }
-            }
-            long jCurrentTimeMillis = System.currentTimeMillis();
-            if (this.d) {
-                a(arrayList);
-            } else {
-                b(arrayList);
-            }
-            if (arrayList.isEmpty()) {
-                i = 0;
-            } else {
-                int iA = 0 + a(arrayList, false, false, (Stack) null);
-                long jCurrentTimeMillis2 = System.currentTimeMillis();
-                Log.d("FolderScanner", "prescan: " + iA + ", used=" + (jCurrentTimeMillis2 - jCurrentTimeMillis));
-                this.c.obtainMessage(14, 0, 0).sendToTarget();
-                jCurrentTimeMillis = jCurrentTimeMillis2;
-                i = iA;
-            }
-            iB = i;
-            for (com.alensw.a.e srcType0113 : arrayList2) {
-                if (this.e) {
-                    break;
-                }
-                if (this.d || !srcType0113.a(false)) {
-                    iB = a(srcType0113) + iB;
-                }
-            }
-            Log.d("FolderScanner", "scan: " + iB + ", used=" + (System.currentTimeMillis() - jCurrentTimeMillis));
-            if (!this.e) {
-                if (com.alensw.a.s.a(this.f.a).e()) {
-                    com.alensw.a.s.a(this.f.a).b(com.alensw.a.s.c(this.f.a));
-                }
-                if (this.d && com.alensw.a.s.b(this.f.a).e()) {
-                    com.alensw.a.s.b(this.f.a).b(com.alensw.a.s.d(this.f.a));
-                }
-            }
-        } else {
-            iB = this.b != null ? 0 + b(new com.alensw.a.e((String) this.b, 0)) : 0;
-        }
-        com.alensw.a.u.a(this.f, (HashMap) null);
-        com.alensw.a.u.a(this.f, (String[]) null);
-        com.alensw.a.u.b(this.f, null);
-        return iB;
-    }
+      ArrayList<String> included = prepareFilters(this.a == 3);
+      try {
+         if (this.a == 3) return scanAll(scanRoots(included));
+         return this.b == null ? 0 : b(new com.alensw.a.e((String) this.b, 0));
+      } finally {
+         clearFilters();
+      }
+   }
+
+   private int scanAll(ArrayList<com.alensw.a.e> roots) {
+      long start = SystemClock.uptimeMillis();
+      ArrayList<com.alensw.a.e> known = new ArrayList<>(128);
+      if (this.d) a(known);
+      else b(known);
+      if (enhanced) {
+         for (Iterator<com.alensw.a.e> it = known.iterator(); it.hasNext();) {
+            if (!isPrescanCandidate(it.next(), roots)) it.remove();
+         }
+         prescans = new ConcurrentHashMap<>();
+         if (roots.size() > 1) walked = new HashSet<>();
+      }
+      int count = 0;
+      if (!known.isEmpty()) {
+         prescanning = true;
+         count = a(known, false, false, null);
+         prescanning = false;
+         long finished = SystemClock.uptimeMillis();
+         Log.d("FolderScanner", "prescan: " + count + ", used=" + (finished - start));
+         this.c.obtainMessage(14, 0, 0).sendToTarget();
+         start = finished;
+      }
+      for (com.alensw.a.e root : roots) {
+         if (this.e) break;
+         if (this.d || !root.a(false)) count += a(root);
+      }
+      Log.d("FolderScanner", "scan: " + count + ", used=" + (SystemClock.uptimeMillis() - start));
+      if (enhanced) Log.d("FolderScanner", "reused prescanned directories: " + reusedPrescans);
+      prescans = null;
+      walked = null;
+      if (!this.e) {
+         if (com.alensw.a.s.a(this.f.a).e()) {
+            com.alensw.a.s.a(this.f.a).b(com.alensw.a.s.c(this.f.a));
+         }
+         if (this.d && com.alensw.a.s.b(this.f.a).e()) {
+            com.alensw.a.s.b(this.f.a).b(com.alensw.a.s.d(this.f.a));
+         }
+      }
+      return count;
+   }
 
    static int c(com.alensw.a.v var0) {
       return var0.c();

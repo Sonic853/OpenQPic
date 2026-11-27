@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
@@ -25,7 +26,13 @@ import java.util.Map;
 
 /** Storage APIs used by the filesystem-backed gallery on newer Android releases. */
 public final class GalleryStorage {
+    public static final String ENHANCED_SCAN = "enhanced_scan";
+
     private GalleryStorage() {}
+
+    public static boolean enhancedScan(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ENHANCED_SCAN, true);
+    }
 
     public static boolean hasAccess(Context context) {
         if(Build.VERSION.SDK_INT>=30) return Environment.isExternalStorageManager();

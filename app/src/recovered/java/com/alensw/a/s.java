@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.concurrent.Future;
 
 public class s {
+   public static final int REFRESH_DIRECTORIES = 5;
+   public static final int DIRECTORIES_REFRESHED = 15;
    public static final String[] a = new String[]{
       "Android/data/com.facebook.orca/files/stickers", "clockworkmod/blobs", "Pictures/cache", "autonavi/mini_mapv3", "BaiduMap/vmp", "taobao/wvcache"
    };
@@ -36,7 +38,7 @@ public class s {
       this.l = com.alensw.b.c.b.b(var1, "others_").getPath();
    }
 
-   private int a(com.alensw.a.al var1, com.alensw.a.e var2, boolean var3, boolean var4) {
+   private int a(com.alensw.a.al var1, com.alensw.a.e var2, boolean var3, boolean var4, boolean enhanced) {
         HashMap map;
         int i;
         Integer num;
@@ -57,12 +59,16 @@ public class s {
         boolean z5 = iD == 7 || iD == 8;
         Future futureSubmit = null;
         if (z3) {
-            futureSubmit = z4 ? d.submit(new com.alensw.a.t(this, z5, path)) : null;
-            if (!z4 || !com.alensw.a.am.d(path)) {
+            boolean indexed = z4 && com.alensw.a.am.d(path);
+            if (z4 && (!enhanced || indexed)) {
+                futureSubmit = d.submit(new com.alensw.a.t(this, z5, path));
+            }
+            if (!indexed) {
                 i2 |= 240;
             }
         }
         if (var1.b(var2, i2) < 0) {
+            if (enhanced && futureSubmit != null) futureSubmit.cancel(false);
             return 0;
         }
         ArrayList<com.alensw.a.d> arrayList = var2.i;
@@ -90,6 +96,9 @@ public class s {
         }
         if (z3 && z4 && size > 0) {
             try {
+                // Unknown directories can still have newly indexed files. Query only once
+                // the native pass confirms there is media whose metadata we need.
+                if (futureSubmit == null) futureSubmit = d.submit(new com.alensw.a.t(this, z5, path));
                 map = (HashMap) futureSubmit.get();
             } catch (Throwable th) {
                 th.printStackTrace();
@@ -123,13 +132,15 @@ public class s {
                 }
             }
             map2.clear();
+        } else if (enhanced && futureSubmit != null) {
+            futureSubmit.cancel(false);
         }
         var2.l();
         return size;
     }
 
-   static int a(com.alensw.a.s var0, com.alensw.a.al var1, com.alensw.a.e var2, boolean var3, boolean var4) {
-      return var0.a(var1, var2, var3, var4);
+   static int a(com.alensw.a.s var0, com.alensw.a.al var1, com.alensw.a.e var2, boolean var3, boolean var4, boolean enhanced) {
+      return var0.a(var1, var2, var3, var4, enhanced);
    }
 
    static com.alensw.a.b a(com.alensw.a.s var0) {
@@ -217,7 +228,7 @@ public class s {
    }
 
    public int b(com.alensw.a.e var1, boolean var2) {
-      return this.a(this.g, var1, var2, false);
+      return this.a(this.g, var1, var2, false, false);
    }
 
    public void b() {

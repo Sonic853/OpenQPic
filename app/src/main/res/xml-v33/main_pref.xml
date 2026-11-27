@@ -21,6 +21,7 @@
             <Preference android:icon="@drawable/ic_preference_warning" android:selectable="false" android:summary="@string/external_files_warning" />
         </PreferenceCategory>
         <PreferenceCategory android:layout="@layout/pref_category" android:title="@string/scan_category" android:singleLineTitle="false">
+            <SwitchPreference android:icon="@drawable/ic_invisible" android:title="@string/enhanced_scan" android:key="enhanced_scan" android:summary="@string/enhanced_scan_summary" android:defaultValue="true" android:singleLineTitle="false" />
             <Preference android:icon="@drawable/ic_in_folder" android:title="@string/included_folders" android:key="included_folders" android:summary="@string/included_folders_summary" android:singleLineTitle="false" />
             <Preference android:icon="@drawable/ic_ex_folder" android:title="@string/excluded_folders" android:key="excluded_folders" android:summary="@string/excluded_folders_summary" android:singleLineTitle="false" />
             <SwitchPreference android:icon="@drawable/ic_video_album" android:title="@string/include_video" android:key="include_video" android:defaultValue="true" android:summaryOn="@string/hidden_video_enable" android:summaryOff="@string/hidden_video_disable" android:singleLineTitle="false" />

@@ -67,6 +67,10 @@ public class MainPreference extends com.alensw.ui.activity.ba {
       } else if (var6.equals(this.getString(com.alensw.PicFolder.R.string.local_albums))) {
          var1.findPreference("included_folders").setIntent(PathListActivity.a(this, false));
          var1.findPreference("excluded_folders").setIntent(PathListActivity.a(this, true));
+         var1.findPreference(com.alensw.PicFolder.GalleryStorage.ENHANCED_SCAN).setOnPreferenceChangeListener((preference, enabled) -> {
+            com.alensw.PicFolder.QuickApp.a(true);
+            return true;
+         });
          SwitchPreference var24 = (SwitchPreference)var1.findPreference("crop_thumbnail");
          var24.setOnPreferenceClickListener(new com.alensw.ui.activity.aa(this, var24));
          var1.findPreference("default_sort").setOnPreferenceClickListener(new com.alensw.ui.activity.ab(this, var5));

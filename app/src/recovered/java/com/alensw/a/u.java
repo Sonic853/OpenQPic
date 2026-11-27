@@ -2,6 +2,7 @@ package com.alensw.a;
 
 import android.os.Handler;
 import android.os.Process;
+import com.alensw.PicFolder.GalleryStorage;
 import com.alensw.PicFolder.QuickApp;
 import java.io.File;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ class u extends com.alensw.b.k.g {
    private String[] f;
    private String[] g;
    private final ArrayList h;
+   private com.alensw.a.bh storage;
 
    private u(com.alensw.a.s var1) {
       this.a = var1;
@@ -72,6 +74,7 @@ class u extends com.alensw.b.k.g {
       var5.b = var4[0];
       var5.c = (Handler)var4[1];
       var5.d = this.a.b;
+      var5.enhanced = GalleryStorage.enhancedScan(com.alensw.a.s.e(this.a));
       if (var5.a != 4) {
          com.alensw.a.v.a(var5, new com.alensw.a.al());
          com.alensw.a.v.a(var5).a(com.alensw.a.s.f(this.a));
@@ -86,8 +89,14 @@ class u extends com.alensw.b.k.g {
       this.c = com.alensw.a.o.a(com.alensw.a.s.e(this.a));
       this.d = com.alensw.a.q.a(com.alensw.a.s.e(this.a));
       com.alensw.a.n.a(com.alensw.a.s.e(this.a));
+      refreshDefaultExclusions();
+   }
 
-      for (String var7 : QuickApp.p.a()) {
+   void refreshDefaultExclusions() {
+      if (storage == QuickApp.p) return;
+      storage = QuickApp.p;
+      this.h.clear();
+      for (String var7 : storage.a()) {
          for (String var8 : com.alensw.a.s.a) {
             var8 = var7 + File.separatorChar + var8;
             if (new File(var8).exists()) {
@@ -106,6 +115,12 @@ class u extends com.alensw.b.k.g {
             }
          }
       }
+   }
+
+   void invalidateDirectory(String path) {
+      com.alensw.a.s.a(this.a).c(path);
+      com.alensw.a.s.b(this.a).c(path);
+      com.alensw.a.s.g(this.a).c(path);
    }
 
    @Override
@@ -148,12 +163,10 @@ class u extends com.alensw.b.k.g {
                     com.alensw.a.s.g(this.a).h();
                 }
                 break;
-            case 4:
-                String str = (String) srcType0128.b;
-                if (str != null) {
-                    com.alensw.a.s.a(this.a).c(str);
-                    com.alensw.a.s.b(this.a).c(str);
-                    com.alensw.a.s.g(this.a).c(str);
+             case 4:
+                 String str = (String) srcType0128.b;
+                 if (str != null) {
+                     invalidateDirectory(str);
                 } else {
                     com.alensw.a.s.a(this.a).d();
                     com.alensw.a.s.b(this.a).d();
@@ -166,8 +179,13 @@ class u extends com.alensw.b.k.g {
                 }
                 com.alensw.a.s.a(this.a).h();
                 com.alensw.a.s.b(this.a).h();
-                com.alensw.a.s.g(this.a).h();
-                break;
+                 com.alensw.a.s.g(this.a).h();
+                 break;
+             case com.alensw.a.s.REFRESH_DIRECTORIES:
+                 ArrayList<com.alensw.a.e> directories = srcType0128.refreshDirectories();
+                 this.b.obtainMessage(com.alensw.a.s.DIRECTORIES_REFRESHED, 0,
+                         srcType0128.e ? 0 : 1, directories).sendToTarget();
+                 break;
         }
         this.b = null;
         return 0;

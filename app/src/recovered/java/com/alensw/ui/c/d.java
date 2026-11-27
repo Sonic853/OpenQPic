@@ -125,8 +125,7 @@ class d extends com.alensw.ui.a.ao {
 
       if (this.f.size() > 0) {
          QuickApp.s.a(var2, this.f);
-         QuickApp.x = false;
-         QuickApp.q.a(4, var2, null);
+         ReceivedMediaUpdates.published(this.a);
       } else {
          this.g.add(0, var2);
 

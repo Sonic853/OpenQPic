@@ -139,6 +139,8 @@ Android 4.4不允许任何非系统APP修改外置SD卡上的公共文件！
     <string name="single_tap_zoom">单击进行缩放</string>
     <string name="single_tap_zoom_summary">单击缩放，双击显示控制栏，否则反之</string>
     <string name="viewer_swipe_up">上滑行为</string>
+    <string name="enhanced_scan">增强扫描</string>
+    <string name="enhanced_scan_summary">优先刷新有变化的文件夹，减少加载相册时的重复扫描</string>
     <string name="viewer_swipe_down">下滑行为</string>
     <string name="viewer_swipe_none">无</string>
     <string name="viewer_swipe_details">显示详情</string>
