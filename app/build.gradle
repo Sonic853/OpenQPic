@@ -48,10 +48,17 @@ android {
         buildConfig = false
     }
     lint { baseline = file('lint-baseline.xml') }
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
     androidResources {
         additionalParameters += ['--no-resource-deduping', '--no-resource-removal',
                                  '--no-auto-version']
-        noCompress += ['svg', 'so']
+        noCompress += ['svg']
     }
     packaging {
         jniLibs.keepDebugSymbols += ['**/libqpicjni156.so', '**/libqpiclocalsend.so']
@@ -219,6 +226,7 @@ abstract class LinkStableResources extends DefaultTask {
 androidComponents {
     onVariants(selector().all()) { variant ->
         def cap = variant.name.capitalize()
+        if (variant.buildType != 'release') variant.androidResources.noCompress.add('so')
         def aapt = sdkComponents.aapt2.flatMap { it.executable }
         def libraryDirs = variant.runtimeConfiguration.incoming.artifactView {
             attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, 'android-res')
@@ -278,18 +286,19 @@ androidComponents {
     }
 }
 
-tasks.register('verifyLocalSendDebug', Exec) {
-    group = 'verification'
-    description = 'Verify the LocalSend APK/AAB, DEX ownership, gallery resource IDs and both native libraries.'
-    dependsOn 'assembleDebug', 'bundleDebug'
-    def sdk = androidComponents.sdkComponents.sdkDirectory
-    doFirst {
-        def archives = configurations.debugRuntimeClasspath.incoming.artifacts.artifacts.collectEntries { artifact ->
-            [(artifact.id.componentIdentifier.displayName): artifact.file]
+['debug', 'release'].each { buildType ->
+    def cap = buildType.capitalize()
+    tasks.register("verifyLocalSend${cap}", Exec) {
+        group = 'verification'
+        description = "Verify the ${buildType} APK/AAB, DEX ownership, gallery resource IDs and both native libraries."
+        dependsOn "assemble${cap}", "bundle${cap}"
+        def sdk = androidComponents.sdkComponents.sdkDirectory
+        doFirst {
+            def archives = configurations.getByName("${buildType}RuntimeClasspath").incoming.artifacts.artifacts
+            environment 'JAVA_HOME', System.getProperty('java.home')
+            commandLine providers.gradleProperty('python').getOrElse(System.getProperty('os.name').startsWith('Windows') ? 'python' : 'python3'),
+                    rootProject.file('tools/verify_localsend.py'), '--variant', buildType, '--build-tools', sdk.get().dir('build-tools/36.0.0').asFile
+            archives.each { artifact -> args '--library', artifact.id.componentIdentifier.displayName, artifact.file }
         }
-        environment 'JAVA_HOME', System.getProperty('java.home')
-        commandLine providers.gradleProperty('python').getOrElse(System.getProperty('os.name').startsWith('Windows') ? 'python' : 'python3'),
-                rootProject.file('tools/verify_localsend.py'), '--build-tools', sdk.get().dir('build-tools/36.0.0').asFile
-        archives.each { coordinate, file -> args '--library', coordinate, file }
     }
 }

@@ -11,7 +11,7 @@ import struct
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
-from zipfile import ZipFile
+from zipfile import ZIP_DEFLATED, ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT/"app"
@@ -67,6 +67,20 @@ def dex(data):
     return set(types), {types[u(u(100)+i*32)] for i in range(u(96))}, strings
 
 
+def check_file_provider_api(data, tools):
+    # Check the actual public method definitions; neither overload needs a call site in the app.
+    dexdump = tools / ("dexdump.exe" if os.name == "nt" else "dexdump")
+    with tempfile.TemporaryDirectory() as temp:
+        dex_file = Path(temp) / "provider.dex"
+        dex_file.write_bytes(data)
+        api = ET.fromstring(subprocess.check_output([dexdump, "-e", "-l", "xml", dex_file]))
+    methods = api.findall("./package[@name='androidx.core.content']/class[@name='FileProvider']"
+                          "/method[@name='getUriForFile'][@visibility='public'][@static='true'][@return='android.net.Uri']")
+    signatures = {tuple(p.get("type") for p in m.findall("parameter")) for m in methods}
+    args = ("android.content.Context", "java.lang.String", "java.io.File")
+    assert {args, (*args, "java.lang.String")} <= signatures, ("missing FileProvider.getUriForFile overload", signatures)
+
+
 def library_inventory(archives):
     pinned = {coord: digest for digest, coord in
               (line.split() for line in (APP/"runtime-libraries.sha256").read_text().splitlines())}
@@ -91,7 +105,8 @@ def library_inventory(archives):
     return classes, r_classes, resources
 
 
-def verify(apk, aab, tools, archives):
+def verify(apk, aab, tools, archives, variant="debug"):
+    release = variant == "release"
     pinned = json.loads((APP/"native-inputs.json").read_text())
     assert {"app/src/main/java/org/openqpic/localsend/"+n for n in
             ("Wire.java", "LocalSend.java", "LoopbackHttp.java", "HttpChannel.java", "SystemTls.java")} <= pinned.keys()
@@ -140,11 +155,19 @@ def verify(apk, aab, tools, archives):
     gallery = {r[-1] for r in inventory if r[0] not in replaced}
     assert len(gallery)==566 and not removed & gallery
     assert gallery & external == libraries["androidx.documentfile:documentfile:1.1.0"]
-    expected = gallery | external
+    provider = "Landroidx/core/content/FileProvider;"
+    if release:
+        # Only Release shrinks Core and its transitive dependencies.
+        expected = gallery | {provider, "Landroidx/core/app/CoreComponentFactory;",
+                              "Landroidx/core/provider/DocumentsContractCompat;", "Landroidx/core/view/ViewCompat;"}
+        expected.update(libraries["androidx.drawerlayout:drawerlayout:1.2.0"])
+        expected.update(libraries["androidx.viewpager:viewpager:1.1.0"])
+    else:
+        expected = gallery | external
     assert not next((APP/"src").rglob("*.smali"),None), "Smali in product sources"
     for suffix in ("*.class","*.dex","*.jar"):
         assert not next((APP/"src").rglob(suffix),None), "Precompiled Java input: "+suffix
-    classdir=APP/"build/intermediates/javac/debug/compileDebugJavaWithJavac/classes"
+    classdir=APP/f"build/intermediates/javac/{variant}/compile{variant.capitalize()}JavaWithJavac/classes"
     javac={"L"+f.relative_to(classdir).as_posix()[:-6]+";" for f in classdir.rglob("*.class")}
     expected.update(s for s in (APP/"product-java.txt").read_text().splitlines() if s.startswith("L"))
     assert expected-external <= javac, ("not compiled from Java", sorted(expected-external-javac))
@@ -158,6 +181,8 @@ def verify(apk, aab, tools, archives):
         for name, digest in libs.items():
             elf=z.read(name)
             assert sha(elf) == sha(bundle.read("base/"+name)) == digest, name
+            if release:
+                assert z.getinfo(name).compress_type == ZIP_DEFLATED, ("uncompressed release JNI", name)
             check_elf(elf,name.split("/")[1],image if name.endswith("/libqpicjni156.so") else wire)
         for package in (z, bundle):
             packaged = [n for n in package.namelist() if re.search(r"(^|/)(licenses?|notice|copying)([./_-]|$)", n, re.I)
@@ -176,6 +201,8 @@ def verify(apk, aab, tools, archives):
             data = z.read(name)
             assert data == bundle.read("base/dex/"+name)
             types, classes, strings = dex(data)
+            if release and provider in classes:
+                check_file_provider_api(data, tools)
             assert not classes & defs
             defs |= classes
             refs |= {t.lstrip("[") for t in types}
@@ -185,6 +212,9 @@ def verify(apk, aab, tools, archives):
                           b"last_check_update", b"quickpic.authorization", b"quickpic.account", b"failed_upload_tasks", b"umeng"):
                 assert stale.lower() not in data.lower(), stale
         assert expected <= defs, ("missing from DEX", sorted(expected-defs))
+        if release:
+            assert core - defs, "Release packaged the entire Core library"
+            assert (refs & external) <= defs, ("dangling library references", (refs & external) - defs)
         assert {"Ljavax/net/ssl/SSLSocket;","Ljavax/net/ssl/SSLServerSocket;",
                 "Landroid/security/keystore/KeyGenParameterSpec$Builder;","Landroid/media/MediaDataSource;"} <= refs
         program = javac | external
@@ -192,12 +222,15 @@ def verify(apk, aab, tools, archives):
         unexpected={d for d in defs-program if d.rstrip(";").split("$")[0] not in generated_r
                     and not ("$$ExternalSynthetic" in d and d.split("$$ExternalSynthetic")[0]+";" in program)
                     and not (d.endswith("$-CC;") and d.removesuffix("$-CC;")+";" in program)}
+        if release:
+            # R8 supplies the API 28 superclass of CoreComponentFactory for older devices.
+            unexpected.discard("Landroid/app/AppComponentFactory;")
         assert not unexpected, ("DEX classes not traceable to source, Maven libraries, D8 or R", sorted(unexpected))
         assert not {t for t in refs if t.startswith(PREFIX)} - {d for d in defs if d.startswith(PREFIX)}
         forbidden=retired | removed | {r[0] for r in inventory if len(r)==2}
         assert not forbidden & (defs|refs), forbidden & (defs|refs)
         # AndroidX Core publishes a few legacy Binder/Parcelizer binary names.
-        assert {t for t in refs if t.startswith("Landroid/support/")} == {t for t in core if t.startswith("Landroid/support/")}
+        assert {t for t in refs if t.startswith("Landroid/support/")} == {t for t in core & defs if t.startswith("Landroid/support/")}
         assert not any(t.startswith(("Lorg/apache/http/", "Lcom/alensw/cloud/",
                                       "Lb/a/", "Lcom/c/a/")) for t in refs)
         api=b"https://api.github.com/repos/Sonic853/OpenQPic/releases/latest"
@@ -259,7 +292,7 @@ def verify(apk, aab, tools, archives):
     assert product_resources <= table.keys()
     extras = {k.replace(".", "_") for k in table.keys()-stable.keys()} - library_resources - product_resources
     assert all(re.fullmatch(r"(string|id|layout|drawable)/ls_\w+", k) for k in extras), extras
-    symbols = (APP/"build/intermediates/runtime_symbol_list/debug/processDebugResources/R.txt").read_text()
+    symbols = (APP/f"build/intermediates/runtime_symbol_list/{variant}/process{variant.capitalize()}Resources/R.txt").read_text()
     java_ids = {kind+"/"+name: value for kind, name, value in re.findall(r"^int (\w+) (\S+) (0x[0-9a-f]+)$", symbols, re.M)}
     aliases = {"string/"+word: "string/stable_keyword_"+word for word in ("default", "interface")}
     projected = {aliases.get(k, k.replace(".", "_")): value for k, value in table.items()}
@@ -296,13 +329,15 @@ def verify(apk, aab, tools, archives):
         bundle_resources = run(aapt,"dump","resources",binary)
         assert resource_ids(bundle_resources) == table, "AAB and APK resource IDs differ"
         check_license_link(binary, bundle_resources)
-    run(java,"-Xmx128m","-XX:+UseSerialGC","-jar",tools/"lib/apksigner.jar","verify",apk)
+    if not release:  # Release is signed after artifact verification.
+        run(java,"-Xmx128m","-XX:+UseSerialGC","-jar",tools/"lib/apksigner.jar","verify",apk)
     return {"apk_sha256":sha(apk.read_bytes()), "bytes":apk.stat().st_size, "dex_classes":len(defs),
+            "aab_bytes":aab.stat().st_size, "resource_ids":len(table),
             "java_compiled_classes":len(javac),"retained_gallery_types":len(gallery),
-            "external_library_types":len(external),
-            "maven_artifacts":len(libraries), "core_types":len(core), "replaced_support_types":len(support),
+            "external_library_types":len(defs & external),
+            "maven_artifacts":len(libraries), "core_types":len(defs & core), "replaced_support_types":len(support),
             "versionName":tag,"versionCode":code,"minSdk":23,"targetSdk":32,"retired_legacy_types":len(retired),
-            "removed_unused_library_types":len(unused-restored_by_core),
+            "removed_unused_library_types":len(unused-defs),
             "replaced_video_server_types":len(replaced_video),
             "original_resource_ids":len(original), "pre_androidx_resource_ids":len(stable),
             "native_sha256":libs,"licenses_url":LICENSES_URL,
@@ -311,12 +346,15 @@ def verify(apk, aab, tools, archives):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--variant", choices=("debug", "release"), default="debug")
     ap.add_argument("--build-tools", type=Path, required=True)
     ap.add_argument("--library", nargs=2, action="append", required=True, metavar=("COORDINATE", "ARCHIVE"))
     args = ap.parse_args()
-    data = verify(APP/"build/outputs/apk/debug/app-debug.apk",APP/"build/outputs/bundle/debug/app-debug.aab",
-                  args.build_tools,dict(args.library))
-    report = APP/"build/reports/localsend-debug.json"
+    variant = args.variant
+    apk_name = "app-release-unsigned.apk" if variant == "release" else "app-debug.apk"
+    data = verify(APP/f"build/outputs/apk/{variant}"/apk_name, APP/f"build/outputs/bundle/{variant}/app-{variant}.aab",
+                  args.build_tools, dict(args.library), variant)
+    report = APP/f"build/reports/localsend-{variant}.json"
     report.parent.mkdir(parents=True,exist_ok=True)
     report.write_text(json.dumps(data,indent=2)+"\n","utf-8")
     print(report, data["bytes"], data["dex_classes"])

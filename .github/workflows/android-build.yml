@@ -65,7 +65,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.name }}
         run: |
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0'
-          bash gradlew :app:verifyLocalSendDebug :app:assembleRelease "-PopenqpicVersion=$VERSION"
+          bash gradlew :app:verifyLocalSendDebug :app:verifyLocalSendRelease "-PopenqpicVersion=$VERSION"
           code=$(jq -er '.versionCode' app/build/reports/localsend-debug.json)
           package=$("$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging app/build/outputs/apk/release/app-release-unsigned.apk)
           [[ "${package%%$'\n'*}" == *" versionCode='$code' versionName='$VERSION' "* ]]

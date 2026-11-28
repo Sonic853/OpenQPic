@@ -36,6 +36,7 @@ Android 相册，保留原图库、播放、分享和「WiFi 快传」界面。*
 .\gradlew.bat :app:bundleDebug            # app/build/outputs/bundle/debug/app-debug.aab
 .\gradlew.bat :app:assembleRelease        # app/build/outputs/apk/release/app-release-unsigned.apk
 .\gradlew.bat :app:verifyLocalSendDebug   # 额外需要 Python 3.10+
+.\gradlew.bat :app:verifyLocalSendRelease # 检查裁剪后的 Release APK 和 AAB，同样需要 Python
 ```
 
 首次构建从 Maven Central 和 Google Maven 下载依赖；缓存后可追加 `--offline`。从旧版本切换且已有旧构建缓存时，先运行一次 `:app:clean`。本工作区可用 `$env:GRADLE_USER_HOME=(Resolve-Path '..\OpenPic\.local\android-project\gradle').Path` 复用缓存。
@@ -53,6 +54,6 @@ Android 相册，保留原图库、播放、分享和「WiFi 快传」界面。*
 
 ## 验证
 
-`verifyLocalSendDebug` 检查实际 APK/AAB 的 SDK、两套 JNI、DEX、[运行库及其摘要](app/runtime-libraries.sha256)、签名与对齐。原版 918 个资源 ID 和 OpenQPic 后加的 77 个 ID 均锁定；APK、AAB 与 Java 使用的 ID 逐项核对。`tools/localsend_smoke.py --tls` 和 `tools/multisend_smoke.py --tls` 用官方 LocalSend 核心验证加密收发、指纹校验、取消和后台队列。见[系统 TLS 实测与体积](verification/system-tls.md)、[快传实现](docs/localsend-http/IMPLEMENTATION.md)及 [targetSdk 32 兼容记录](verification/target-sdk-32.md)。
+两种构建都检查 APK/AAB 的 SDK、两套 JNI、DEX、[运行库及其摘要](app/runtime-libraries.sha256)和 APK 对齐。Debug 核对完整依赖及调试签名；Release 用 R8 裁掉未用的库代码，并检查 `FileProvider.getUriForFile` 的两个公开重载及 JNI 压缩。原版 918 个资源 ID 和 OpenQPic 后加的 77 个 ID 均锁定；APK、AAB 与 Java 使用的 ID 逐项核对。`tools/localsend_smoke.py --tls` 和 `tools/multisend_smoke.py --tls` 用官方 LocalSend 核心验证加密收发、指纹校验、取消和后台队列。见[系统 TLS 实测与体积](verification/system-tls.md)、[快传实现](docs/localsend-http/IMPLEMENTATION.md)及 [targetSdk 32 兼容记录](verification/target-sdk-32.md)。
 
 [`tools/gallery_share_smoke.py`](tools/gallery_share_smoke.py) 用无存储权限的独立应用从系统面板和直达菜单读取单张、多张、视频及混合媒体并核对 SHA-256。[回环视频迁移验证](verification/native-video.md)记录脱离 HttpCore 后的制品与测试；[原版保真验证](STABLE-BASELINE.md)及[早期协议与定容分析](docs/localsend-http/README.md)是历史记录。

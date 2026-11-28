@@ -17,7 +17,11 @@ AndroidX 使用自己的抽屉 `SavedState`。首次恢复旧版本留下的 Act
 
 编辑入口是 `app/src/main/res`。AAPT2 链接完整 AAR 资源并给应用资源最高覆盖优先级；主分支已有的 995 个资源 ID（含原版 918 个）保持不变。Java 使用同一张最终 ID 表，只有 `string/default`、`string/interface` 在 `R` 中使用合法别名。`:app:verifyLocalSendDebug` 比对 APK、AAB、Java 符号、Maven 类、JNI 和仓库专用许可证。
 
-从 `44bdffb` 的 Debug APK（`2026.11.27`）比对 `2026.11.28`：995 个旧资源的各配置值只有版本字符串不同；233 份 `res/`、`assets/` 文件中，只有替换抽屉类名的 `res/layout/main.xml` 字节不同。Debug 和 Release 的 APK、AAB 均有 1,163 个资源 ID，DEX 均含 Core `classes.jar` 的全部 936 个类型。
+从 `44bdffb` 的 Debug APK（`2026.11.27`）比对 `2026.11.28`：995 个旧资源的各配置值只有版本字符串不同；233 份 `res/`、`assets/` 文件中，只有替换抽屉类名的 `res/layout/main.xml` 字节不同。Debug 和 Release 的 APK、AAB 均有 1,163 个资源 ID。Debug 保留官方 Core `classes.jar` 的全部 936 个类型。
+
+Release 的 [R8 规则](../../app/proguard-rules.pro)保留图库、JNI 入口、DocumentFile、DrawerLayout 和 ViewPager，只裁剪未使用的库代码，不混淆、不内联、不裁资源。`2026.11.28` 的 Release 保留 86 个官方 Core 类型，包括 `FileProvider`、`DocumentsContractCompat` 和 `ViewCompat`。`FileProvider.getUriForFile` 的两个公开重载须显式保留；`:app:verifyLocalSendRelease` 从 DEX 核对签名。三个 ABI 的六份 `.so` 以 ZIP 压缩写入通用 APK，解压后的 SHA-256 不变。同版本未签名 APK 从 3.85 MiB 降到 1.81 MiB，AAB 从 2.97 MiB 降到 1.66 MiB。
+
+裁剪后的 Release APK 使用测试密钥在 Android 6.0 ARM 上覆盖安装：旧图库页面状态、抽屉、快传分页、系统目录授权和两套 JNI 调用均通过。独立接收应用通过两个 FileProvider 的只读授权读回了相同内容；下述八组图库分享用例也在该 Release 上通过。正式签名的精简 APK 也已在 Android 6.0 上覆盖同版本未裁剪的正式包，图库成功启动，UID、首次安装时间和存储授权均保留。
 
 Android 6.0 和 9 上均从 `44bdffb` 同签名覆盖安装，并恢复了由旧版实际保存的 Activity 状态：图库页面栈、相册路径及根目录选择保持一致。上滑详情从第 5 张切到第 6 张时标题由 `5/11` 更新为 `6/11`，相册重命名后返回列表显示新名称。
 
