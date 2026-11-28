@@ -67,8 +67,9 @@ def main():
         table="content://media/external/"+("video" if mime=="video/mp4" else "images")+"/media"
         where=shlex.quote("_data='"+DIR+"/"+name+"'")
         for _ in range(24):
-            match=re.search(r"_id=(\d+), _size=(\d+)",sh(f"content query --uri {table} --projection _id:_size --where {where}"))
-            if match and int(match[2])==size: return
+            match=re.search(r"_id=(\d+), _size=(\d+), mime_type=([^\s,]+)",
+                            sh(f"content query --uri {table} --projection _id:_size:mime_type --where {where}"))
+            if match and int(match[2])==size and match[3]==mime: return
             time.sleep(.15)
         raise AssertionError("Media not indexed: "+name)
     def marker(color):
@@ -136,13 +137,16 @@ def main():
                 f=Path(td)/seed;f.write_bytes(png(pink));run("push",str(f),DIR+"/"+seed)
             sh("am start -W -n "+PKG+"/.GalleryActivity -d file:///storage/emulated/0/Download/QP%20Transfer")
         else:
-            sh("am start -W -n "+PKG+"/.GalleryActivity"); title("Albums")
+            sh("am start -W -n "+PKG+"/.GalleryActivity")
+            if any(n.get("resource-id")==PKG+":id/drawer_list" for n in tree().iter("node")):
+                sh("input keyevent 4")  # The first launch of each version demonstrates the drawer.
+            title("Albums")
             record=focused(); deliver(seed,"Albums",png(pink),"image/png",pink)
             point=visible(pink)
             assert focused()==record;sh(f"input tap {point[0]} {point[1]}")
         title("QP Transfer (1)"); record=focused()
         visible(pink)
-        second="refresh-"+tag+"-two.png";names.append(second);deliver(second,"QP Transfer (1)",png(green),"image/png",green)
+        second="refresh-"+tag+"-two.jpg";names.append(second);deliver(second,"QP Transfer (1)",png(green),"image/png",green)
         title("QP Transfer (2)"); visible(green); visible(pink); assert focused()==record
         counts=[1,2]
         if opt.mp4:

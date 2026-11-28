@@ -312,12 +312,24 @@ def main():
                 code,body=waiter.result(timeout=7); assert code==200,(code,body)
                 return json.loads(body)
             wrong="fake-"+run_id+".jpg"; invalid=b"plain text masquerading as an image"
-            companion="companion-"+run_id+".png"
-            req=offer(wrong,invalid,"image/jpeg"); req["files"]["good"]=dict(offer(companion,data)["files"]["one"],id="good")
+            req=offer(wrong,invalid,"image/jpeg")
+            broken="header-"+run_id+".jpg"; header=data[:33]  # PNG signature and IHDR, no pixels
+            req["files"]["broken"]=dict(offer(broken,header,"image/png")["files"]["one"],id="broken")
+            # Same PNG bytes: one sender knows the content type, another trusts the .jpg suffix.
+            photos={"by_content":("content-"+run_id+".jpg","image/png"),
+                    "by_name":("name-"+run_id+".jpg","image/jpeg")}
+            for key,(name,mime) in photos.items():
+                req["files"][key]=dict(offer(name,data,mime)["files"]["one"],id=key)
             t=accept(req)
+            assert set(t["files"])==set(req["files"]),t
             assert http(upload_path(t),invalid)[0]==415 and wrong not in files()
-            assert http(upload_path(t,"good"),data)[0]==200; added.add(companion); assert contents(companion)==data
+            assert http(upload_path(t,"broken"),header)[0]==415 and broken not in files()
+            for key,(name,_) in photos.items():
+                status,body=http(upload_path(t,key),data)
+                assert status==200,(name,status,body)
+                added.add(name); assert contents(name)==data
             result["disguised_media_rejected_before_publish"]=True
+            result["mislabeled_png_received_under_original_name"]=True
             keep="choose-"+run_id+".png"; skip="skip-"+run_id+".png"
             req=offer(keep,data); req["files"]["two"]=dict(req["files"]["one"],id="two",fileName=skip)
             waiter=pool.submit(http,"prepare-upload",req,"POST",75); tap(prefix=skip)

@@ -61,25 +61,30 @@ final class TransferMedia {
         if(ext!=null && mime.equals(ext.substring(0,ext.indexOf('/')+1)+"*")) return ext;
         if(!extensions.containsValue(mime)) return null;
         if(ext==null || ext.equals(mime)) return mime;
+        // Both are recognized image types. Use the suffix for MediaStore's display name;
+        // the decoder will identify the actual format after upload.
+        if(ext.startsWith("image/") && mime.startsWith("image/")) return ext;
         // WebM and MP4 can carry just audio, independently of their common suffix.
         return ("video/mp4".equals(ext) && "audio/mp4".equals(mime)) ||
                 ("video/webm".equals(ext) && "audio/webm".equals(mime)) ? mime:null;
     }
-    static boolean readable(ParcelFileDescriptor file,LocalSend.Item item,ContentResolver resolver,Uri uri) throws IOException {
+    static String verifiedType(ParcelFileDescriptor file,LocalSend.Item item,ContentResolver resolver,Uri uri) throws IOException {
         if(item.type.startsWith("image/")) {
             BitmapFactory.Options opts=new BitmapFactory.Options();
             opts.inJustDecodeBounds=true;
             BitmapFactory.decodeFileDescriptor(file.getFileDescriptor(),null,opts);
-            if(opts.outWidth>0 && opts.outHeight>0 && opts.outMimeType!=null && item.type.equals(normal(opts.outMimeType))) {
+            String type=opts.outMimeType==null?null:normal(opts.outMimeType);
+            if(opts.outWidth>0 && opts.outHeight>0 && type!=null && type.startsWith("image/") && extensions.containsValue(type)) {
                 opts.inJustDecodeBounds=false; opts.inSampleSize=1;
                 while(Math.max(opts.outWidth,opts.outHeight)/(long)opts.inSampleSize>128) opts.inSampleSize*=2;
                 Bitmap sample=BitmapFactory.decodeFileDescriptor(file.getFileDescriptor(),null,opts);
                 if(sample!=null) {
                     sample.recycle();
-                    return true;
+                    return type;
                 }
             }
-            return Build.VERSION.SDK_INT>=28 && "image/webp".equals(item.type) && SystemAnimation.readable(resolver,uri);
+            // Animated WebP may need ImageDecoder, which checks the WebP MIME itself.
+            return Build.VERSION.SDK_INT>=28 && SystemAnimation.readable(resolver,uri) ? "image/webp":null;
         }
         MediaExtractor probe=new MediaExtractor();
         try {
@@ -89,12 +94,12 @@ final class TransferMedia {
                 String format=probe.getTrackFormat(n).getString(MediaFormat.KEY_MIME);
                 if(format!=null && format.startsWith(kind)) {
                     probe.selectTrack(n);
-                    if(probe.getSampleTime()>=0) return true;
+                    if(probe.getSampleTime()>=0) return item.type;
                     probe.unselectTrack(n);
                 }
             }
-            return false;
-        } catch(IOException | RuntimeException invalid) { return false; }
+            return null;
+        } catch(IOException | RuntimeException invalid) { return null; }
         finally { probe.release(); }
     }
     private TransferMedia() {}

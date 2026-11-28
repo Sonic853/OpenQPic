@@ -146,6 +146,7 @@ final class TransferFiles {
         final LocalSend.Item item; final String name;
         final LocalSend.Cancellation cancellation;
         File temp; Uri row; ParcelFileDescriptor output;
+        String verifiedType;
         boolean committed;
         Destination(LocalSend.Item item,LocalSend.Cancellation cancellation) throws IOException {
             this.item=item; this.cancellation=cancellation; name=basename(item.name);
@@ -172,7 +173,8 @@ final class TransferFiles {
         public boolean isMedia() throws IOException {
             try(ParcelFileDescriptor p=row==null?ParcelFileDescriptor.open(temp,ParcelFileDescriptor.MODE_READ_ONLY):
                     resolver.openFileDescriptor(row,"r")) {
-                return p!=null && TransferMedia.readable(p,item,resolver,row==null?Uri.fromFile(temp):row);
+                verifiedType=p==null?null:TransferMedia.verifiedType(p,item,resolver,row==null?Uri.fromFile(temp):row);
+                return verifiedType!=null;
             }
         }
         public boolean matches(String expected) throws IOException {
@@ -190,9 +192,11 @@ final class TransferFiles {
             } catch(java.security.NoSuchAlgorithmException ex) { throw new IOException(ex); }
         }
         public void commit() throws IOException {
+            final String type=verifiedType;
+            if(type==null) throw new IOException("Unverified download");
             output.close(); output=null;
             File saved=null;
-            if(row!=null) {
+            if(row!=null) { // Changing MIME_TYPE here can make MediaStore append another extension.
                 ContentValues v=new ContentValues(); v.put(MediaStore.MediaColumns.IS_PENDING,0);
                 if(resolver.update(row,v,null,null)!=1) throw new IOException("Cannot publish download");
             } else {
@@ -203,10 +207,9 @@ final class TransferFiles {
                 saved=target;
             }
             committed=true;
-            if(item.type.startsWith("image/") || item.type.startsWith("video/")) ReceivedMediaUpdates.published(directory);
-            if(saved==null) finishIndex(row,item.type,null); // IS_PENDING has already been cleared
+            if(type.startsWith("image/") || type.startsWith("video/")) ReceivedMediaUpdates.published(directory);
+            if(saved==null) finishIndex(row,type,null); // IS_PENDING has already been cleared
             else try {
-                String type=item.type;
                 MediaScannerConnection.scanFile(context,new String[]{saved.toString()},new String[]{type},
                         (path,uri)->finishIndex(uri,type,path));
             } catch(RuntimeException e) { Log.w("LocalSend","Cannot request media scan",e); }

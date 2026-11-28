@@ -113,39 +113,48 @@
                 </Preference>
             </PreferenceCategory>
         </PreferenceScreen>
-        <PreferenceScreen android:icon="@drawable/ic_developer_page" android:title="@string/wstxda" android:summary="@string/about_v97_developer" android:singleLineTitle="false">
-            <PreferenceCategory android:layout="@layout/pref_category" android:title="@string/contact_category">
-                <Preference android:icon="@drawable/ic_email" android:title="@string/email" android:singleLineTitle="false">
-                    <intent android:action="android.intent.action.VIEW" android:data="@string/email_url" />
-                </Preference>
-                <Preference android:icon="@drawable/ic_telegram" android:title="@string/telegram" android:singleLineTitle="false">
-                    <intent android:action="android.intent.action.VIEW" android:data="@string/telegram_url" />
-                </Preference>
-            </PreferenceCategory>
-            <PreferenceCategory android:layout="@layout/pref_category" android:title="@string/follow_category">
-                <Preference android:icon="@drawable/ic_github" android:title="@string/github" android:singleLineTitle="false">
-                    <intent android:action="android.intent.action.VIEW" android:data="@string/github_url" />
-                </Preference>
-                <Preference android:icon="@drawable/ic_x" android:title="@string/x" android:singleLineTitle="false">
-                    <intent android:action="android.intent.action.VIEW" android:data="@string/x_url" />
-                </Preference>
-                <Preference android:icon="@drawable/ic_instagram" android:title="@string/instagram" android:singleLineTitle="false">
-                    <intent android:action="android.intent.action.VIEW" android:data="@string/instagram_url" />
-                </Preference>
-                <Preference android:icon="@drawable/ic_spotify" android:title="@string/spotify" android:singleLineTitle="false">
-                    <intent android:action="android.intent.action.VIEW" android:data="@string/spotify_url" />
-                </Preference>
-            </PreferenceCategory>
-        </PreferenceScreen>
-        <PreferenceScreen android:icon="@drawable/ic_donate" android:title="@string/donate" android:summary="@string/donate_desc" android:singleLineTitle="false">
-            <Preference android:icon="@drawable/ic_paypal" android:title="@string/paypal" android:singleLineTitle="false">
-                <intent android:action="android.intent.action.VIEW" android:data="@string/paypal_url" />
-            </Preference>
-            <Preference android:icon="@drawable/ic_bmc" android:title="@string/bmc" android:singleLineTitle="false">
-                <intent android:action="android.intent.action.VIEW" android:data="@string/bmc_url" />
-            </Preference>
-        </PreferenceScreen>
         <PreferenceScreen android:icon="@drawable/ic_contributors_page" android:title="@string/contributors" android:summary="@string/contributors_desc" android:singleLineTitle="false">
+            <PreferenceScreen android:icon="@drawable/ic_developer_page" android:title="@string/wstxda" android:summary="@string/about_v97_developer" android:singleLineTitle="false">
+                <PreferenceCategory android:layout="@layout/pref_category" android:title="@string/contact_category">
+                    <Preference android:icon="@drawable/ic_email" android:title="@string/email" android:singleLineTitle="false">
+                        <intent android:action="android.intent.action.VIEW" android:data="@string/email_url" />
+                    </Preference>
+                    <Preference android:icon="@drawable/ic_telegram" android:title="@string/telegram" android:singleLineTitle="false">
+                        <intent android:action="android.intent.action.VIEW" android:data="@string/telegram_url" />
+                    </Preference>
+                </PreferenceCategory>
+                <PreferenceCategory android:layout="@layout/pref_category" android:title="@string/follow_category">
+                    <Preference android:icon="@drawable/ic_github" android:title="@string/github" android:singleLineTitle="false">
+                        <intent android:action="android.intent.action.VIEW" android:data="@string/github_url" />
+                    </Preference>
+                    <Preference android:icon="@drawable/ic_x" android:title="@string/x" android:singleLineTitle="false">
+                        <intent android:action="android.intent.action.VIEW" android:data="@string/x_url" />
+                    </Preference>
+                    <Preference android:icon="@drawable/ic_instagram" android:title="@string/instagram" android:singleLineTitle="false">
+                        <intent android:action="android.intent.action.VIEW" android:data="@string/instagram_url" />
+                    </Preference>
+                    <Preference android:icon="@drawable/ic_spotify" android:title="@string/spotify" android:singleLineTitle="false">
+                        <intent android:action="android.intent.action.VIEW" android:data="@string/spotify_url" />
+                    </Preference>
+                </PreferenceCategory>
+            </PreferenceScreen>
+            <PreferenceScreen android:icon="@drawable/ic_donate" android:title="@string/donate" android:summary="@string/donate_desc" android:singleLineTitle="false">
+                <Preference android:icon="@drawable/ic_paypal" android:title="@string/paypal" android:singleLineTitle="false">
+                    <intent android:action="android.intent.action.VIEW" android:data="@string/paypal_url" />
+                </Preference>
+                <Preference android:icon="@drawable/ic_bmc" android:title="@string/bmc" android:singleLineTitle="false">
+                    <intent android:action="android.intent.action.VIEW" android:data="@string/bmc_url" />
+                </Preference>
+            </PreferenceScreen>
+            <Preference android:icon="@drawable/ic_telegram" android:title="@string/telegram" android:summary="@string/telegram_channel" android:singleLineTitle="false">
+                <intent android:action="android.intent.action.VIEW" android:data="@string/channel_url" />
+            </Preference>
+            <Preference android:icon="@drawable/ic_xda" android:title="@string/xda" android:summary="@string/xda_desc" android:singleLineTitle="false">
+                <intent android:action="android.intent.action.VIEW" android:data="@string/xda_url" />
+            </Preference>
+            <Preference android:icon="@drawable/ic_faq" android:title="@string/faq" android:singleLineTitle="false">
+                <intent android:action="android.intent.action.VIEW" android:data="@string/faq_url" />
+            </Preference>
             <Preference android:icon="@drawable/ic_contributors" android:title="@string/caio_name" android:summary="@string/caio_desc" android:singleLineTitle="false">
                 <intent android:action="android.intent.action.VIEW" android:data="@string/caio_url" />
             </Preference>
@@ -165,19 +174,10 @@
             <Preference android:icon="@drawable/ic_translators" android:title="@string/app_translator" android:summary="@string/app_translator_name" android:singleLineTitle="false" />
         </PreferenceScreen>
         <PreferenceCategory android:layout="@layout/pref_divider" />
-        <Preference android:icon="@drawable/ic_telegram" android:title="@string/telegram" android:summary="@string/telegram_channel" android:singleLineTitle="false">
-            <intent android:action="android.intent.action.VIEW" android:data="@string/channel_url" />
-        </Preference>
-        <Preference android:icon="@drawable/ic_xda" android:title="@string/xda" android:summary="@string/xda_desc" android:singleLineTitle="false">
-            <intent android:action="android.intent.action.VIEW" android:data="@string/xda_url" />
-        </Preference>
         <Preference android:icon="@drawable/ic_github" android:title="@string/github" android:summary="@string/github_repository" android:singleLineTitle="false">
             <intent android:action="android.intent.action.VIEW" android:data="@string/github_repository_url" />
         </Preference>
         <PreferenceCategory android:layout="@layout/pref_divider" />
-        <Preference android:icon="@drawable/ic_faq" android:title="@string/faq" android:singleLineTitle="false">
-            <intent android:action="android.intent.action.VIEW" android:data="@string/faq_url" />
-        </Preference>
         <Preference android:icon="@drawable/ic_mod_base" android:title="@string/app_name_alt" android:summary="@string/mod_base" android:singleLineTitle="false" />
     </PreferenceScreen>
 </PreferenceScreen>
