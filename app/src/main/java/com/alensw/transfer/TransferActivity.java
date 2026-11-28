@@ -17,7 +17,13 @@ import com.alensw.PicFolder.GalleryActivity;
 import com.alensw.PicFolder.QuickApp;
 import com.alensw.bean.CommonFile;
 import com.alensw.bean.UriFile;
-import com.alensw.ui.activity.ao;
+import com.alensw.cache.LruEntry;
+import com.alensw.image.PictureBitmap;
+import com.alensw.svg.SvgPicture;
+import com.alensw.ui.activity.GalleryChromeActivity;
+import com.alensw.ui.shape.GalleryDrawables;
+import com.alensw.ui.view.ImageGridAdapter;
+import com.alensw.ui.view.ImageGridCell;
 import com.alensw.ui.view.ImageGridView;
 import org.openqpic.localsend.LocalSend;
 import java.util.*;
@@ -26,7 +32,7 @@ import java.util.concurrent.Executors;
 import static com.alensw.PicFolder.R.*;
 
 /** The original gallery, system share target and launcher shortcut all enter here. */
-public final class TransferActivity extends ao implements TransferSessionService.Client {
+public final class TransferActivity extends GalleryChromeActivity implements TransferSessionService.Client {
     private final ArrayList<Uri> pendingFiles=new ArrayList<>();
     private final Set<Uri> selectedForRemoval=new HashSet<>();
     private final Map<Uri,CommonFile> thumbs=new HashMap<>();
@@ -119,7 +125,7 @@ public final class TransferActivity extends ao implements TransferSessionService
             tabs[0]=bar.findViewById(id.first_item); tabs[1]=bar.findViewById(id.second_item);
             for(int i=0;i<2;i++) {
                 final int n=i; tabs[i].setText(i==0?string.send:string.transfer_list);
-                tabs[i].setTextColor(K.getTitleColor()); tabs[i].setBackgroundDrawable(com.alensw.ui.d.d.a(K.getTitleColor()));
+                tabs[i].setTextColor(K.getTitleColor()); tabs[i].setBackgroundDrawable(GalleryDrawables.a(K.getTitleColor()));
                 tabs[i].setOnClickListener(v->pager.setCurrentItem(n));
             }
             select(0); K.a(bar,new LinearLayout.LayoutParams(-2,-1));
@@ -141,7 +147,7 @@ public final class TransferActivity extends ao implements TransferSessionService
     private String alias() { return prefs.getString("transfer_name",Build.MODEL); }
     private void select(int index) { for(int i=0;i<2;i++) if(tabs[i]!=null) tabs[i].setSelected(index==i); }
     private void icon(ImageView v,int resource) {
-        v.setImageDrawable(com.b.a.b.a(getResources(),resource,ao.b(this,attr.colorMenuDrawable),ao.b(this)));
+        v.setImageDrawable(SvgPicture.a(getResources(),resource,GalleryChromeActivity.b(this,attr.colorMenuDrawable),GalleryChromeActivity.b(this)));
     }
     private void orient(Configuration c) {
         LinearLayout l=(LinearLayout)send; boolean wide=c.orientation==Configuration.ORIENTATION_LANDSCAPE;
@@ -225,20 +231,20 @@ public final class TransferActivity extends ao implements TransferSessionService
     private void pick() {
         startActivityForResult(new Intent("com.alensw.PicFolder.action.PICK_MULTIPLE").setClass(this,GalleryActivity.class),PICK);
     }
-    private final class Thumbnails implements com.alensw.ui.view.aj {
+    private final class Thumbnails implements ImageGridAdapter {
         public int a() { return pendingFiles.size(); } public String a(int i) { return null; }
         public void a(int from,int to,int speed) {
             for(int i=Math.max(0,from);i<Math.min(to,pendingFiles.size());i++) {
                 CommonFile f=thumbs.get(pendingFiles.get(i));
                 if(f!=null && !QuickApp.w.a(f)) QuickApp.t.a(f,false,(key,image)->{
-                    QuickApp.w.a(key,(com.alensw.b.a.c)image.l()); grid.postInvalidate();
+                    QuickApp.w.a(key,(LruEntry)image.l()); grid.postInvalidate();
                 });
             }
         }
-        public void a(int i,com.alensw.ui.view.ak cell) {
+        public void a(int i,ImageGridCell cell) {
             if(i<0 || i>=pendingFiles.size()) return;
             Uri u=pendingFiles.get(i); CommonFile f=thumbs.get(u);
-            cell.a=f==null?null:(com.alensw.b.h.h)QuickApp.w.b(f);
+            cell.a=f==null?null:(PictureBitmap)QuickApp.w.b(f);
             if(cell.a!=null) cell.a.l();
             cell.c=f==null?u.getLastPathSegment():f.h()=='I'?null:f.a();
             if(selectedForRemoval.contains(u)) cell.b|=2; // existing ImageGridView checkmark

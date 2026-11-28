@@ -11,7 +11,7 @@ public class PasswordView extends LinearLayout {
    public static final char[] a = new char[]{'1', '2', '3', '4', '5', '6', '7', '8', '9', '✓', '0', '←'};
    private boolean b;
    private TextView c;
-   private com.alensw.ui.view.ay d;
+   private PasswordInputListener d;
 
    public PasswordView(Context var1) {
       this(var1, null);
@@ -21,7 +21,7 @@ public class PasswordView extends LinearLayout {
       super(var1, var2);
    }
 
-   static com.alensw.ui.view.ay a(PasswordView var0) {
+   static PasswordInputListener a(PasswordView var0) {
       return var0.d;
    }
 
@@ -35,7 +35,7 @@ public class PasswordView extends LinearLayout {
       this.c = (TextView)this.findViewById(com.alensw.PicFolder.R.id.pin_code);
    }
 
-   public void setInputListener(com.alensw.ui.view.ay var1) {
+   public void setInputListener(PasswordInputListener var1) {
       this.d = var1;
    }
 
@@ -68,9 +68,9 @@ public class PasswordView extends LinearLayout {
 
       var5.setVisibility(var2);
       if (this.b) {
-         var6.setOnPatternListener(new com.alensw.ui.view.av(this, var6));
+         var6.setOnPatternListener(new PasswordPatternListener(this, var6));
       } else {
-         var4.setAdapter((ListAdapter)(new com.alensw.ui.view.ax(this, new com.alensw.ui.view.aw(this))));
+         var4.setAdapter((ListAdapter)(new PinKeypadAdapter(this, new PinKeyClick(this))));
       }
    }
 }

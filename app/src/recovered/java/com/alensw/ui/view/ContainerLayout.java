@@ -13,9 +13,11 @@ import android.os.Build.VERSION;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.widget.FrameLayout;
+import com.alensw.ui.activity.GalleryChromeActivity;
+import com.alensw.ui.activity.GalleryPreferenceActivity;
 public class ContainerLayout extends FrameLayout {
    public static final boolean b;
-   private com.alensw.ui.view.u a;
+   private WindowInsetsListener a;
    private boolean c;
    private final int d;
    private final int e;
@@ -53,8 +55,8 @@ public class ContainerLayout extends FrameLayout {
          this.d = var10.getColor(var7.resourceId);
          var6.resolveAttribute(com.alensw.PicFolder.R.attr.colorStatusBar, var7, true);
          int var3 = var10.getColor(var7.resourceId);
-         if (var1 instanceof com.alensw.ui.activity.ao) {
-            com.alensw.ui.activity.ao var9 = (com.alensw.ui.activity.ao)var1;
+         if (var1 instanceof GalleryChromeActivity) {
+            GalleryChromeActivity var9 = (GalleryChromeActivity)var1;
             boolean var14;
             if (var9.T != -3 && var9.T != -2) {
                var14 = false;
@@ -67,10 +69,10 @@ public class ContainerLayout extends FrameLayout {
             }
 
             this.e = var3;
-         } else if (!(var1 instanceof com.alensw.ui.activity.ba)) {
+         } else if (!(var1 instanceof GalleryPreferenceActivity)) {
             this.e = var3;
          } else {
-            com.alensw.ui.activity.ba var8 = (com.alensw.ui.activity.ba)var1;
+            GalleryPreferenceActivity var8 = (GalleryPreferenceActivity)var1;
             boolean var4;
             if (var8.a != -3 && var8.a != -2) {
                var4 = false;
@@ -143,9 +145,9 @@ public class ContainerLayout extends FrameLayout {
                     if (!z || z3) {
                         return;
                     }
-                    if (activity instanceof com.alensw.ui.activity.ao) {
-                        height = ((com.alensw.ui.activity.ao) activity).k();
-                    } else if (!com.alensw.ui.activity.ao.e(activity)) {
+                    if (activity instanceof GalleryChromeActivity) {
+                        height = ((GalleryChromeActivity) activity).k();
+                    } else if (!GalleryChromeActivity.e(activity)) {
                         height = 0;
                     }
                     if (this.f != 0) {
@@ -188,7 +190,7 @@ public class ContainerLayout extends FrameLayout {
       }
    }
 
-   public void setOnInsetsListener(com.alensw.ui.view.u var1) {
+   public void setOnInsetsListener(WindowInsetsListener var1) {
       this.a = var1;
    }
 }

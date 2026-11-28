@@ -99,7 +99,7 @@ public class MultiListPreference extends ModernListPreference {
          var4[var2] = var3;
       }
 
-      var1.setMultiChoiceItems(this.getEntries(), this.c, new com.alensw.ui.view.at(this));
+      var1.setMultiChoiceItems(this.getEntries(), this.c, new TogglePreferenceChoice(this));
       a(this, true);
    }
 

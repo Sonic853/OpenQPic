@@ -1,6 +1,6 @@
 package com.alensw.transfer;
 
-import static com.alensw.b.f.c.webmMimeType;
+import static com.alensw.media.MediaFileTypes.webmMimeType;
 
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
@@ -10,7 +10,7 @@ import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
-import com.alensw.b.h.SystemAnimation;
+import com.alensw.image.SystemAnimation;
 import org.openqpic.localsend.LocalSend;
 import java.io.IOException;
 import java.util.HashMap;

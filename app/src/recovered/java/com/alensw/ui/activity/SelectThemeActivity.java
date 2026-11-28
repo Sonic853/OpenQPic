@@ -10,10 +10,11 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ListAdapter;
+import com.alensw.svg.SvgPicture;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SelectThemeActivity extends com.alensw.ui.activity.ao {
+public class SelectThemeActivity extends GalleryChromeActivity {
    public static final int[] a = new int[]{0, 1, 2, 3};
    public static final int[] b = new int[]{
       -28928,
@@ -42,8 +43,8 @@ public class SelectThemeActivity extends com.alensw.ui.activity.ao {
    private int f = 144;
    private final ArrayList g = new ArrayList(64);
    private final HashMap h = new HashMap(4);
-   private final OnGlobalLayoutListener i = new com.alensw.ui.activity.bi(this);
-   private final BaseAdapter j = new com.alensw.ui.activity.bk(this);
+   private final OnGlobalLayoutListener i = new ThemeGridLayoutListener(this);
+   private final BaseAdapter j = new ThemePreviewAdapter(this);
 
    static GridView a(SelectThemeActivity var0) {
       return var0.c;
@@ -81,7 +82,7 @@ public class SelectThemeActivity extends com.alensw.ui.activity.ao {
       float var2 = var14.getDisplayMetrics().density;
       this.e = (int)(24.0F * var2);
       this.f = (int)(144.0F * var2);
-      this.d = com.b.a.b.a(var14, com.alensw.PicFolder.R.raw.ic_menu_done, this.Y);
+      this.d = SvgPicture.a(var14, com.alensw.PicFolder.R.raw.ic_menu_done, this.Y);
       int var3 = (int)(var2 * 4.0F);
       this.c.setHorizontalSpacing(var3);
       this.c.setVerticalSpacing(var3);
@@ -108,7 +109,7 @@ public class SelectThemeActivity extends com.alensw.ui.activity.ao {
          int var8 = var14.getColor(var24.resourceId);
          var13.resolveAttribute(com.alensw.PicFolder.R.attr.colorActionIcon, var24, true);
          int var9 = var14.getColor(var24.resourceId);
-         this.g.add(new com.alensw.ui.activity.bl(var7, var5, var6, var8, var9));
+         this.g.add(new ThemeOption(var7, var5, var6, var8, var9));
       }
 
       var13.applyStyle(com.alensw.PicFolder.R.style.Theme_DarkColor, true);
@@ -124,14 +125,14 @@ public class SelectThemeActivity extends com.alensw.ui.activity.ao {
 
       for (int var23 : b) {
          if (var23 >>> 24 == 255) {
-            this.g.add(new com.alensw.ui.activity.bl(-3, com.alensw.PicFolder.R.style.Theme_DarkColor, var23, var21, var19));
+            this.g.add(new ThemeOption(-3, com.alensw.PicFolder.R.style.Theme_DarkColor, var23, var21, var19));
          }
 
-         this.g.add(new com.alensw.ui.activity.bl(-2, com.alensw.PicFolder.R.style.Theme_LightColor, var23, var20, var22));
+         this.g.add(new ThemeOption(-2, com.alensw.PicFolder.R.style.Theme_LightColor, var23, var20, var22));
       }
 
       this.c.setAdapter((ListAdapter)this.j);
-      this.c.setOnItemClickListener(new com.alensw.ui.activity.bj(this));
+      this.c.setOnItemClickListener(new SelectThemeClick(this));
    }
 
    @Override

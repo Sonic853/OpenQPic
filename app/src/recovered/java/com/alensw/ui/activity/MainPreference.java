@@ -16,13 +16,16 @@ import android.preference.SwitchPreference;
 import android.view.MenuItem;
 import android.widget.Toast;
 import com.alensw.PicFolder.QuickApp;
+import com.alensw.gallery.FolderSortSettings;
+import com.alensw.ui.dialog.GalleryPasswordDialog;
 import com.alensw.ui.view.ConfirmPreference;
 import com.alensw.updater.UpdateView;
+import com.alensw.utils.GalleryUtils;
 import com.alensw.utils.MIUIUtils;
 import java.util.Locale;
 
-public class MainPreference extends com.alensw.ui.activity.ba {
-   private Runnable g = new com.alensw.ui.activity.z(this);
+public class MainPreference extends GalleryPreferenceActivity {
+   private Runnable g = new ClearThumbnails(this);
 
    public static Intent a(Context var0) {
       Intent var1 = new Intent("android.intent.action.SEND");
@@ -51,7 +54,7 @@ public class MainPreference extends com.alensw.ui.activity.ba {
                this.getPreferenceScreen().removePreference(var2);
             }
 
-            com.alensw.ui.activity.MainPreference$1 var4 = new com.alensw.ui.activity.MainPreference$1(this);
+            BatteryOptimizationPreferenceClick var4 = new BatteryOptimizationPreferenceClick(this);
             var2.setOnPreferenceClickListener(var4);
          } catch (Exception var3) {
          }
@@ -63,7 +66,7 @@ public class MainPreference extends com.alensw.ui.activity.ba {
       SharedPreferences var5 = this.getPreferenceManager().getSharedPreferences();
       CharSequence var6 = var1.getTitle();
       if (var6.equals(this.getString(com.alensw.PicFolder.R.string.stable_keyword_interface))) {
-         var1.findPreference("main_theme").setOnPreferenceClickListener(new com.alensw.ui.activity.v(this));
+         var1.findPreference("main_theme").setOnPreferenceClickListener(new OpenThemePicker(this));
       } else if (var6.equals(this.getString(com.alensw.PicFolder.R.string.local_albums))) {
          var1.findPreference("included_folders").setIntent(PathListActivity.a(this, false));
          var1.findPreference("excluded_folders").setIntent(PathListActivity.a(this, true));
@@ -72,8 +75,8 @@ public class MainPreference extends com.alensw.ui.activity.ba {
             return true;
          });
          SwitchPreference var24 = (SwitchPreference)var1.findPreference("crop_thumbnail");
-         var24.setOnPreferenceClickListener(new com.alensw.ui.activity.aa(this, var24));
-         var1.findPreference("default_sort").setOnPreferenceClickListener(new com.alensw.ui.activity.ab(this, var5));
+         var24.setOnPreferenceClickListener(new ConfirmClearThumbnails(this, var24));
+         var1.findPreference("default_sort").setOnPreferenceClickListener(new DefaultSortPreference(this, var5));
       } else if (var6.equals(this.getString(com.alensw.PicFolder.R.string.view))) {
          this.a((ListPreference)var1.findPreference("screen_orientation"));
          this.a((ListPreference)var1.findPreference("viewer_swipe_up"));
@@ -82,7 +85,7 @@ public class MainPreference extends com.alensw.ui.activity.ba {
             this.a(var1, "auto_hide_navigate_bar");
          } else if (VERSION.SDK_INT < 19) {
             SwitchPreference var12 = (SwitchPreference)var1.findPreference("auto_hide_navigate_bar");
-            var12.setOnPreferenceClickListener(new com.alensw.ui.activity.ac(this, var12));
+            var12.setOnPreferenceClickListener(new NavigationBarTipPreference(this, var12));
          }
       } else if (var6.equals(this.getString(com.alensw.PicFolder.R.string.security))) {
          SwitchPreference var7 = (SwitchPreference)var1.findPreference("password_protect");
@@ -101,8 +104,8 @@ public class MainPreference extends com.alensw.ui.activity.ba {
             var7.setChecked(false);
          }
 
-         var7.setOnPreferenceClickListener(new com.alensw.ui.activity.ae(this, var7, var5));
-         com.alensw.ui.activity.ah var17 = new com.alensw.ui.activity.ah(this, var5);
+         var7.setOnPreferenceClickListener(new PasswordModePreference(this, var7, var5));
+         ProtectedSwitchClick var17 = new ProtectedSwitchClick(this, var5);
 
          for (int var14 = 1; var14 < var1.getPreferenceCount(); var14++) {
             Preference var26 = var1.getPreference(var14);
@@ -123,9 +126,9 @@ public class MainPreference extends com.alensw.ui.activity.ba {
          var30.setEntryValues(var27);
          this.a(var30);
          var30 = (ListPreference)var1.findPreference("slideshow_interval");
-         Integer var28 = com.alensw.b.l.b.a(var5.getString("slideshow_interval", "3"), 3);
+         Integer var28 = GalleryUtils.a(var5.getString("slideshow_interval", "3"), 3);
          String var9 = this.getString(com.alensw.PicFolder.R.string.custom);
-         String var10 = com.alensw.b.l.b.a(this.getResources(), "seconds", "s");
+         String var10 = GalleryUtils.a(this.getResources(), "seconds", "s");
          int[] var13 = new int[]{3, 5, 10, 30, 60, 0};
          String[] var8 = new String[var13.length];
 
@@ -137,9 +140,9 @@ public class MainPreference extends com.alensw.ui.activity.ba {
          var30.setEntries(var8);
          var30.setEntryValues(var8);
          var30.setSummary(var28.toString() + ' ' + var10);
-         var30.setOnPreferenceChangeListener(new com.alensw.ui.activity.aj(this, var9, var5, var28, var30, var10));
+         var30.setOnPreferenceChangeListener(new SlideshowIntervalPreference(this, var9, var5, var28, var30, var10));
       } else if (var6.equals(this.getString(com.alensw.PicFolder.R.string.cache))) {
-         ((ConfirmPreference)var1.findPreference("clear_preview_cache")).a = new com.alensw.ui.activity.al(this);
+         ((ConfirmPreference)var1.findPreference("clear_preview_cache")).a = new ConfirmClearPreviewCache(this);
          ((ConfirmPreference)var1.findPreference("clear_thumb_cache")).a = this.g;
       } else if (var6.equals(this.getString(com.alensw.PicFolder.R.string.android_11_warning))) {
          Locale var29 = this.getResources().getConfiguration().locale;
@@ -191,7 +194,7 @@ public class MainPreference extends com.alensw.ui.activity.ba {
             }
          }
 
-         var1.findPreference("details").setOnPreferenceClickListener(new com.alensw.ui.activity.an(this, var32));
+         var1.findPreference("details").setOnPreferenceClickListener(new OpenAppStoreDetails(this, var32));
          Preference var23 = var1.findPreference("donate");
          if (var23 != null) {
             if (Locale.SIMPLIFIED_CHINESE.equals(var29)) {
@@ -216,11 +219,11 @@ public class MainPreference extends com.alensw.ui.activity.ba {
 
    protected void a(ListPreference var1) {
       var1.setSummary(var1.getEntry());
-      var1.setOnPreferenceChangeListener(new com.alensw.ui.activity.y(this, var1));
+      var1.setOnPreferenceChangeListener(new UpdateListPreferenceSummary(this, var1));
    }
 
    protected void a(Preference var1, Intent var2) {
-      var1.setOnPreferenceClickListener(new com.alensw.ui.activity.x(this, var2));
+      var1.setOnPreferenceClickListener(new OpenPreferenceLink(this, var2));
    }
 
    @Override
@@ -241,7 +244,7 @@ public class MainPreference extends com.alensw.ui.activity.ba {
    }
 
    protected void a(boolean var1, SwitchPreference var2) {
-      com.alensw.ui.a.x.a(this, var1, new com.alensw.ui.activity.w(this, var2));
+      GalleryPasswordDialog.a(this, var1, new SavePasswordPreference(this, var2));
    }
 
    public Boolean isBatteryOptimizationEnabled(Boolean var1) {
@@ -325,7 +328,7 @@ public class MainPreference extends com.alensw.ui.activity.ba {
             if (var8) {
             }
 
-            com.alensw.ui.activity.a.a(this, "android.intent.action.VIEW", var7.append("").append("").toString());
+            GalleryActions.a(this, "android.intent.action.VIEW", var7.append("").append("").toString());
             var2 = var3;
             break;
          case com.alensw.PicFolder.R.id.sort_default:
@@ -363,7 +366,7 @@ public class MainPreference extends com.alensw.ui.activity.ba {
 
       boolean var4 = var5;
       if (var2 != var3) {
-         com.alensw.a.q.a(this).a = var2;
+         FolderSortSettings.a(this).a = var2;
          QuickApp.a(true);
          var6.edit().putInt("default_sort", var2).commit();
          var4 = var5;
@@ -376,7 +379,7 @@ public class MainPreference extends com.alensw.ui.activity.ba {
    protected void onResume() {
       super.onResume();
       if (this.getPreferenceScreen().getTitle().equals(this.getString(com.alensw.PicFolder.R.string.view))) {
-         new com.alensw.ui.activity.MainPreference$2(this).start();
+         new RefreshBatteryOptimizationPreference(this).start();
       }
    }
 

@@ -13,9 +13,12 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import com.alensw.ui.activity.GalleryActions;
+import com.alensw.ui.activity.GalleryChromeActivity;
+import com.alensw.utils.GalleryUtils;
 import java.util.ArrayList;
 
-public class WallpaperActivity extends com.alensw.ui.activity.ao {
+public class WallpaperActivity extends GalleryChromeActivity {
    private ListView a;
    private boolean b;
    private int c;
@@ -37,7 +40,7 @@ public class WallpaperActivity extends com.alensw.ui.activity.ao {
    protected Drawable a(Point var1) {
       float var2 = this.getResources().getDisplayMetrics().density;
       int var3 = (int)(4.0F * var2);
-      return new com.alensw.PicFolder.bg(this, (int)(var2 * 16.0F), var1, var2 * 16.0F, var3, (int)(220.0F * var2));
+      return new WallpaperSizeDrawable(this, (int)(var2 * 16.0F), var1, var2 * 16.0F, var3, (int)(220.0F * var2));
    }
 
    protected void a(Intent var1) {
@@ -50,9 +53,9 @@ public class WallpaperActivity extends com.alensw.ui.activity.ao {
          var3.add(new Point(var2, var2));
       }
 
-      com.alensw.PicFolder.be var4 = new com.alensw.PicFolder.be(this, var3);
+      WallpaperSizeAdapter var4 = new WallpaperSizeAdapter(this, var3);
       this.a.setAdapter((ListAdapter)var4);
-      this.a.setOnItemClickListener(new com.alensw.PicFolder.bf(this, var3, var1));
+      this.a.setOnItemClickListener(new SelectWallpaperSize(this, var3, var1));
    }
 
    protected void a(Intent var1, int var2, int var3) {
@@ -69,7 +72,7 @@ public class WallpaperActivity extends com.alensw.ui.activity.ao {
       var1.putExtra("aspectY", var3);
       var1.putExtra("outputX", var2);
       var1.putExtra("outputY", var3);
-      com.alensw.ui.activity.a.a(this, var1);
+      GalleryActions.a(this, var1);
       this.finish();
    }
 
@@ -91,7 +94,7 @@ public class WallpaperActivity extends com.alensw.ui.activity.ao {
       this.g(true);
       this.a = (ListView)this.findViewById(com.alensw.PicFolder.R.id.list);
       boolean var3;
-      if (com.alensw.b.l.b.b(this) != 2) {
+      if (GalleryUtils.b(this) != 2) {
          var3 = true;
       } else {
          var3 = false;
@@ -103,7 +106,7 @@ public class WallpaperActivity extends com.alensw.ui.activity.ao {
       }
 
       this.setRequestedOrientation(var2);
-      Point var4 = com.alensw.b.l.b.a(this);
+      Point var4 = GalleryUtils.a(this);
       if (this.b && var4.x > var4.y) {
          var2 = var4.x;
          var4.x = var4.y;
@@ -139,7 +142,7 @@ public class WallpaperActivity extends com.alensw.ui.activity.ao {
          var1.setAction("android.intent.action.GET_CONTENT");
          var1.setClass(this, GalleryActivity.class);
          var1.setType("image/*");
-         com.alensw.ui.activity.a.a(this, var1, 1);
+         GalleryActions.a(this, var1, 1);
       } else {
          var1.setAction("android.intent.action.SET_WALLPAPER");
          var1.setData(this.g);

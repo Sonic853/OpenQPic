@@ -28,7 +28,17 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.VideoView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-public class PlayerActivity extends com.alensw.ui.activity.p {
+import com.alensw.io.IntegerPropertyFile;
+import com.alensw.svg.SvgDrawable;
+import com.alensw.svg.SvgPicture;
+import com.alensw.ui.activity.GalleryIntentActivity;
+import com.alensw.ui.menu.GalleryMenu;
+import com.alensw.ui.page.MediaDetails;
+import com.alensw.ui.shape.BatteryIconShape;
+import com.alensw.ui.shape.GalleryDrawables;
+import com.alensw.ui.shape.PlaybackIconShape;
+import com.alensw.utils.GalleryUtils;
+public class PlayerActivity extends GalleryIntentActivity {
    protected ViewGroup a;
    private boolean ab;
    private int ac;
@@ -57,10 +67,10 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
    protected AudioManager t;
    protected TrackInfo[] u;
    protected BroadcastReceiver v;
-   protected final com.alensw.ui.d.b w = new com.alensw.ui.d.b();
-   protected final com.alensw.b.c.d x = new com.alensw.b.c.d(16);
-   protected final OnGlobalLayoutListener y = new com.alensw.PicFolder.al(this);
-   protected final OnSeekBarChangeListener z = new com.alensw.PicFolder.am(this);
+   protected final BatteryIconShape w = new BatteryIconShape();
+   protected final IntegerPropertyFile x = new IntegerPropertyFile(16);
+   protected final OnGlobalLayoutListener y = new PlayerControlsLayoutListener(this);
+   protected final OnSeekBarChangeListener z = new PlayerSeekBarListener(this);
 
    public PlayerActivity() {
       this.ab = true;
@@ -160,7 +170,7 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
       int var4 = this.k.getDuration();
       if (this.ac != var4) {
          this.ac = var4;
-         this.e.setText(com.alensw.b.l.b.a((long)var4));
+         this.e.setText(GalleryUtils.a((long)var4));
       }
 
       long var5 = this.d.getMax();
@@ -187,7 +197,7 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
                }
             }
 
-            var7 = var7 + com.alensw.b.l.b.a((long)var2);
+            var7 = var7 + GalleryUtils.a((long)var2);
             this.f.setText(var7);
          }
       }
@@ -198,12 +208,12 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
    protected void b() {
       ImageView var1 = (ImageView)this.g.findViewById(com.alensw.PicFolder.R.id.rewind);
       var1.setOnClickListener(this.Z);
-      a(var1, new com.alensw.ui.d.g(3), -855638017);
-      com.alensw.ui.d.d.a(var1);
+      a(var1, new PlaybackIconShape(3), -855638017);
+      GalleryDrawables.a(var1);
       var1 = (ImageView)this.g.findViewById(com.alensw.PicFolder.R.id.forward);
       var1.setOnClickListener(this.Z);
-      a(var1, new com.alensw.ui.d.g(2), -855638017);
-      com.alensw.ui.d.d.a(var1);
+      a(var1, new PlaybackIconShape(2), -855638017);
+      GalleryDrawables.a(var1);
    }
 
    protected void c() {
@@ -222,7 +232,7 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
          var1 = 1;
       }
 
-      a(var2, new com.alensw.ui.d.g(var1), -855638017);
+      a(var2, new PlaybackIconShape(var1), -855638017);
    }
 
    protected void e() {
@@ -250,7 +260,7 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
             var4 = "ic_volume_off_small";
          }
 
-         var3 = com.alensw.b.l.b.a((Resources)var3, var4);
+         var3 = GalleryUtils.a((Resources)var3, var4);
          var2 = (Drawable)var3;
          if (var3 == null) {
             var2 = new ColorDrawable(0);
@@ -319,7 +329,7 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
          this.setTitle(com.alensw.PicFolder.R.string.loading);
          this.i(true);
          this.I.getViewTreeObserver().addOnGlobalLayoutListener(this.y);
-         this.n = var6.getIntExtra("android.intent.extra.screenOrientation", com.alensw.b.l.b.a(var9.getString("screen_orientation", "-1"), -1));
+         this.n = var6.getIntExtra("android.intent.extra.screenOrientation", GalleryUtils.a(var9.getString("screen_orientation", "-1"), -1));
          if (this.n != -2) {
             this.a(this.n);
          }
@@ -334,7 +344,7 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
          this.g = (ViewGroup)this.I.findViewById(com.alensw.PicFolder.R.id.play_bar);
          this.h = (ImageView)this.g.findViewById(com.alensw.PicFolder.R.id.play);
          this.h.setOnClickListener(this.Z);
-         com.alensw.ui.d.d.a(this.h);
+         GalleryDrawables.a(this.h);
          this.b();
          this.i = (ImageView)this.g.findViewById(com.alensw.PicFolder.R.id.replay);
          this.d = (SeekBar)this.L.findViewById(com.alensw.PicFolder.R.id.seek);
@@ -348,20 +358,20 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
          this.f = (TextView)this.L.findViewById(com.alensw.PicFolder.R.id.time);
          this.f.setTextColor(-855638017);
          this.f.setShadowLayer(var2 / 2.0F, var2 / 4.0F, var2 / 4.0F, -16777216);
-         this.f.setOnClickListener(new com.alensw.PicFolder.an(this));
+         this.f.setOnClickListener(new TogglePlayerTimeDisplay(this));
          this.j = (PlayerView)this.I.findViewById(com.alensw.PicFolder.R.id.player);
          this.j.a(this.d, this.c, this.z);
-         this.j.a(new com.alensw.PicFolder.ao(this, var8));
+         this.j.a(new VideoPreparedListener(this, var8));
          this.k = this.j.a();
-         this.k.setOnCompletionListener(new com.alensw.PicFolder.ar(this));
-         this.k.setOnErrorListener(new com.alensw.PicFolder.as(this, var8));
+         this.k.setOnCompletionListener(new PlaybackCompletionListener(this));
+         this.k.setOnErrorListener(new PlaybackErrorListener(this, var8));
          if (!H) {
-            this.v = new com.alensw.PicFolder.at(this);
+            this.v = new PlayerBatteryReceiver(this);
             this.registerReceiver(this.v, new IntentFilter("android.intent.action.BATTERY_CHANGED"));
          }
 
          this.d();
-         this.x.a(com.alensw.b.l.b.b(this, "video_bookmark"));
+         this.x.a(GalleryUtils.b(this, "video_bookmark"));
          int var4;
          if (var1 != null && var1.containsKey("cur_pos")) {
             var4 = var1.getInt("cur_pos", 0);
@@ -376,10 +386,10 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
 
             var4 = var3;
             if (var3 > 0) {
-               com.b.a.l var11 = com.b.a.b.a(var7, com.alensw.PicFolder.R.raw.ic_menu_retry, -855638017, var7.getDimensionPixelSize(com.alensw.PicFolder.R.dimen.menu_material_icon_size));
+               SvgDrawable var11 = SvgPicture.a(var7, com.alensw.PicFolder.R.raw.ic_menu_retry, -855638017, var7.getDimensionPixelSize(com.alensw.PicFolder.R.dimen.menu_material_icon_size));
                this.i.setImageDrawable(var11);
                this.i.setVisibility(0);
-               this.i.setOnClickListener(new com.alensw.PicFolder.au(this));
+               this.i.setOnClickListener(new ReplayVideoClick(this));
                var4 = var3;
             }
          }
@@ -391,7 +401,7 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
    @TargetApi(11)
    @Override
    public boolean onCreateOptionsMenu(Menu var1) {
-      com.alensw.b.g.b.a(this, com.alensw.PicFolder.R.menu.player, var1);
+      GalleryMenu.a(this, com.alensw.PicFolder.R.menu.player, var1);
       boolean var3;
       if (this.u != null && this.o > 1) {
          var3 = true;
@@ -412,7 +422,7 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
       this.m = var1.findItem(com.alensw.PicFolder.R.id.battery);
       if (!H) {
          int var2 = this.getResources().getDimensionPixelSize(com.alensw.PicFolder.R.dimen.menu_material_icon_size);
-         this.m.setIcon(com.alensw.ui.d.d.a(this.w, var2, var2, this.X));
+         this.m.setIcon(GalleryDrawables.a(this.w, var2, var2, this.X));
          this.a(this.m, 2);
       } else {
          this.a(this.m, false);
@@ -433,8 +443,8 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
       this.p=false; this.r=false; this.l=null; this.u=null; this.o=0;
       this.d.setProgress(0); this.d.setSecondaryProgress(0); this.i.setVisibility(View.GONE);
       setTitle(com.alensw.PicFolder.R.string.loading); this.i(true);
-      this.j.a(new com.alensw.PicFolder.ao(this,uri));
-      this.k.setOnErrorListener(new com.alensw.PicFolder.as(this,uri));
+      this.j.a(new VideoPreparedListener(this,uri));
+      this.k.setOnErrorListener(new PlaybackErrorListener(this,uri));
       Integer bookmark=(Integer)this.x.b(uri.toString());
       this.j.a(intent,bookmark==null?0:bookmark); invalidateOptionsMenu();
    }
@@ -501,7 +511,7 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
       switch (var4) {
          case com.alensw.PicFolder.R.id.share:
             Intent var7 = this.getIntent();
-            new com.alensw.ui.c.df(this, var7.getData(), 'V', var7.getType(), null).a(this.findViewById(var4));
+            new MediaDetails(this, var7.getData(), 'V', var7.getType(), null).a(this.findViewById(var4));
             var5 = var6;
             break;
          case com.alensw.PicFolder.R.id.rewind:
@@ -537,7 +547,7 @@ public class PlayerActivity extends com.alensw.ui.activity.p {
             if (this.u != null) {
                var5 = var6;
                if (this.o > 1) {
-                  com.alensw.b.g.b.a(this, this.findViewById(var4), new com.alensw.PicFolder.av(this));
+                  GalleryMenu.a(this, this.findViewById(var4), new AudioTrackMenu(this));
                   var5 = var6;
                }
             }

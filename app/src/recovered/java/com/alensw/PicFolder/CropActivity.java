@@ -19,14 +19,25 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import com.alensw.gallery.GalleryFolders;
+import com.alensw.gallery.PictureLoadFuture;
+import com.alensw.gallery.PictureLoader;
+import com.alensw.gallery.ScannedFolder;
+import com.alensw.image.Picture;
+import com.alensw.image.TiledPicture;
+import com.alensw.svg.SvgPicture;
+import com.alensw.ui.activity.GalleryActions;
+import com.alensw.ui.activity.GalleryIntentActivity;
+import com.alensw.ui.menu.GalleryMenu;
+import com.alensw.utils.GalleryUtils;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class CropActivity extends com.alensw.ui.activity.p {
+public class CropActivity extends GalleryIntentActivity {
    protected static int[][] a;
    protected static int[][] b;
    protected final Rect c = new Rect();
-   private com.alensw.PicFolder.q d;
+   private CropImageView d;
    private LinearLayout e;
    private Intent f;
    private boolean g;
@@ -37,8 +48,8 @@ public class CropActivity extends com.alensw.ui.activity.p {
    private int l;
    private int m;
    private int n;
-   private com.alensw.a.as o;
-   private com.alensw.a.as p;
+   private PictureLoadFuture o;
+   private PictureLoadFuture p;
    private boolean q;
 
    static {
@@ -52,7 +63,7 @@ public class CropActivity extends com.alensw.ui.activity.p {
       b = new int[][]{{1, 1}, var0, var1, var2, var3};
    }
 
-   static com.alensw.PicFolder.q a(CropActivity var0) {
+   static CropImageView a(CropActivity var0) {
       return var0.d;
    }
 
@@ -64,7 +75,7 @@ public class CropActivity extends com.alensw.ui.activity.p {
       }
    }
 
-   private void a(com.alensw.b.h.j var1) {
+   private void a(Picture var1) {
       if (var1.k()) {
          Toast.makeText(this, com.alensw.PicFolder.R.string.load_failed, 1).show();
          this.finish();
@@ -107,7 +118,7 @@ public class CropActivity extends com.alensw.ui.activity.p {
    protected void a(Menu var1) {
       if (this.d.e()) {
          ArrayList var11 = new ArrayList(a.length);
-         com.alensw.PicFolder.m var13 = new com.alensw.PicFolder.m(this, var11);
+         SelectCropScale var13 = new SelectCropScale(this, var11);
          int var7 = this.d.getPictureWidth();
          int var8 = this.d.getPictureHeight();
          boolean var5;
@@ -197,7 +208,7 @@ public class CropActivity extends com.alensw.ui.activity.p {
             boolean z = pictureWidth >= pictureHeight;
             ArrayList arrayList = new ArrayList(b.length * 2);
             ArrayList arrayList2 = new ArrayList(a.length);
-            com.alensw.PicFolder.n srcType0060 = new com.alensw.PicFolder.n(this, arrayList, arrayList2);
+            SelectCropDimensions srcType0060 = new SelectCropDimensions(this, arrayList, arrayList2);
             SubMenu subMenuAddSubMenu = menu.addSubMenu(com.alensw.PicFolder.R.string.ratio);
             SubMenu subMenuAddSubMenu2 = menu.addSubMenu(com.alensw.PicFolder.R.string.pic_resolution);
             menu.add(1, 998, 0, com.alensw.PicFolder.R.string.crop_by_cropper).setOnMenuItemClickListener(srcType0060);
@@ -246,7 +257,7 @@ public class CropActivity extends com.alensw.ui.activity.p {
    public void finish() {
         if (this.d == null || !this.d.k) {
             this.q = true;
-            QuickApp.u.b((com.alensw.b.h.j) null);
+            QuickApp.u.b((Picture) null);
             if (this.o != null) {
                 this.o.cancel(false);
                 this.o = null;
@@ -256,7 +267,7 @@ public class CropActivity extends com.alensw.ui.activity.p {
                 this.p = null;
             }
             if (this.d != null) {
-                com.alensw.b.h.j srcType0202A = this.d.a((android.graphics.Bitmap.Config) null);
+                Picture srcType0202A = this.d.a((android.graphics.Bitmap.Config) null);
                 this.d.c(this.n);
                 this.d.a(srcType0202A, true);
                 if (srcType0202A != null) {
@@ -273,8 +284,8 @@ public class CropActivity extends com.alensw.ui.activity.p {
       byte var3 = 0;
       switch (var1.what) {
          case 30:
-            if (var1.obj instanceof com.alensw.b.h.j) {
-               com.alensw.b.h.j var11 = (com.alensw.b.h.j)var1.obj;
+            if (var1.obj instanceof Picture) {
+               Picture var11 = (Picture)var1.obj;
                if (!this.q) {
                   this.a(var11);
                }
@@ -324,9 +335,9 @@ public class CropActivity extends com.alensw.ui.activity.p {
             if (var1.arg1 == com.alensw.PicFolder.R.id.done) {
                if (var2) {
                   if (var6 != null) {
-                     com.alensw.a.e var8 = QuickApp.o.a(this, var6);
+                     ScannedFolder var8 = QuickApp.o.a(this, var6);
                      if (var8 != null) {
-                        com.alensw.a.x var9 = QuickApp.o;
+                        GalleryFolders var9 = QuickApp.o;
                         boolean var5;
                         if (var8.c < 4) {
                            var5 = true;
@@ -383,7 +394,7 @@ public class CropActivity extends com.alensw.ui.activity.p {
         boolean zEquals = "android.intent.action.SET_WALLPAPER".equals(action);
         boolean z3 = (zEquals || extras == null) ? zEquals : extras.getBoolean("setWallpaper") || extras.getBoolean("set-as-wallpaper");
         if (z3) {
-            setRequestedOrientation(com.alensw.b.l.b.b(this) == 2 ? 0 : 1);
+            setRequestedOrientation(GalleryUtils.b(this) == 2 ? 0 : 1);
         }
         boolean z4 = z3 && "com.android.camera.action.CROP".equals(action);
         if (!z4 && extras != null) {
@@ -410,17 +421,17 @@ public class CropActivity extends com.alensw.ui.activity.p {
                 type = "image/*";
             }
             intent2.setDataAndType(data, type);
-            for (ResolveInfo resolveInfo : com.alensw.ui.activity.a.a((android.content.Context) this, intent2, 0)) {
+            for (ResolveInfo resolveInfo : GalleryActions.a((android.content.Context) this, intent2, 0)) {
                 String str = resolveInfo.activityInfo.applicationInfo.packageName;
                 if (str.contains(".android.gallery3d") || str.startsWith("com.cooliris.media") || str.startsWith("com.htc.album")) {
-                    com.alensw.ui.activity.a.a(this, intent, resolveInfo);
+                    GalleryActions.a(this, intent, resolveInfo);
                     break;
                 }
             }
             finish();
             return;
         }
-        this.d = new com.alensw.PicFolder.q(this);
+        this.d = new CropImageView(this);
         setContentView(b());
         if (!this.d.a(getIntent(), z3, this.A, QuickApp.s)) {
             finish();
@@ -438,20 +449,20 @@ public class CropActivity extends com.alensw.ui.activity.p {
         } else if (this.K != null) {
             this.K.a(this.e, (android.view.ViewGroup.LayoutParams) new android.widget.LinearLayout.LayoutParams(-2, -1));
         }
-        com.alensw.PicFolder.i srcType0055 = new com.alensw.PicFolder.i(this);
+        CropButtonTooltip srcType0055 = new CropButtonTooltip(this);
         Resources resources = getResources();
         ImageView imageView = (ImageView) this.e.findViewById(com.alensw.PicFolder.R.id.share);
         if (this.h) {
             imageView.setOnClickListener(this.Z);
             imageView.setOnLongClickListener(srcType0055);
-            imageView.setImageDrawable(com.b.a.b.a(resources, com.alensw.PicFolder.R.raw.ic_menu_share, this.X));
+            imageView.setImageDrawable(SvgPicture.a(resources, com.alensw.PicFolder.R.raw.ic_menu_share, this.X));
         } else {
             imageView.setVisibility(8);
         }
         ImageView imageView2 = (ImageView) this.e.findViewById(com.alensw.PicFolder.R.id.done);
         imageView2.setOnClickListener(this.Z);
         imageView2.setOnLongClickListener(srcType0055);
-        imageView2.setImageDrawable(com.b.a.b.a(resources, com.alensw.PicFolder.R.raw.ic_menu_done, this.X));
+        imageView2.setImageDrawable(SvgPicture.a(resources, com.alensw.PicFolder.R.raw.ic_menu_done, this.X));
         this.g = !this.d.f && this.d.a == 0.0f;
         if (this.g) {
             a(defaultSharedPreferences.getBoolean("output_crop", true), defaultSharedPreferences.getInt("output_width", 0), defaultSharedPreferences.getInt("output_height", 0), defaultSharedPreferences.getInt("output_ratio_x", 0), defaultSharedPreferences.getInt("output_ratio_y", 0), false);
@@ -459,9 +470,9 @@ public class CropActivity extends com.alensw.ui.activity.p {
         if (this.d.e()) {
             return;
         }
-        com.alensw.a.ao srcType0088 = QuickApp.u;
-        com.alensw.b.h.j srcType0202A = srcType0088.a(data);
-        com.alensw.b.h.j srcType0202D = srcType0088.d();
+        PictureLoader srcType0088 = QuickApp.u;
+        Picture srcType0202A = srcType0088.a(data);
+        Picture srcType0202D = srcType0088.d();
         if (srcType0202D != null && (srcType0202A == null || !srcType0202D.a(data))) {
             srcType0202D.m();
             srcType0202D = null;
@@ -478,7 +489,7 @@ public class CropActivity extends com.alensw.ui.activity.p {
             this.d.b(srcType0202D);
         } else {
             this.d.a(com.alensw.PicFolder.R.string.loading);
-            this.o = srcType0088.a(data, 'I', com.alensw.b.h.n.a ? 1 : 4, this.A);
+            this.o = srcType0088.a(data, 'I', TiledPicture.a ? 1 : 4, this.A);
         }
         if (srcType0202A != null) {
             srcType0202A.m();
@@ -491,7 +502,7 @@ public class CropActivity extends com.alensw.ui.activity.p {
    @TargetApi(11)
    @Override
    public boolean onCreateOptionsMenu(Menu var1) {
-      com.alensw.b.g.b.a(this, com.alensw.PicFolder.R.menu.cropper, var1);
+      GalleryMenu.a(this, com.alensw.PicFolder.R.menu.cropper, var1);
       if (this.g) {
          this.a(var1, com.alensw.PicFolder.R.id.shrink, 1);
          this.a(var1, com.alensw.PicFolder.R.id.crop, 1);
@@ -526,23 +537,23 @@ public class CropActivity extends com.alensw.ui.activity.p {
                   Intent var6 = new Intent("android.intent.action.SEND");
                   var6.setType(var5.getType());
                   var6.putExtra("android.intent.extra.STREAM", var5.getData());
-                  com.alensw.ui.activity.a.a(this, var6, com.alensw.PicFolder.R.string.share, var7, new com.alensw.PicFolder.l(this));
+                  GalleryActions.a(this, var6, com.alensw.PicFolder.R.string.share, var7, new ShareCropResult(this));
                   break;
                case com.alensw.PicFolder.R.id.shrink:
-                  com.alensw.b.g.b.a(this, var7, new com.alensw.PicFolder.j(this));
+                  GalleryMenu.a(this, var7, new CropScaleMenu(this));
                   break;
                case com.alensw.PicFolder.R.id.crop:
-                  com.alensw.b.g.b.a(this, var7, new com.alensw.PicFolder.k(this));
+                  GalleryMenu.a(this, var7, new CropDimensionsMenu(this));
                   break;
                case com.alensw.PicFolder.R.id.rotate:
-                  com.alensw.ui.activity.a.c(this, var7);
+                  GalleryActions.c(this, var7);
                   break;
                case com.alensw.PicFolder.R.id.flip:
-                  com.alensw.ui.activity.a.b(this, var7);
+                  GalleryActions.b(this, var7);
                   break;
                case com.alensw.PicFolder.R.id.flip_horz:
                case com.alensw.PicFolder.R.id.flip_vert:
-                  com.alensw.PicFolder.q var8 = this.d;
+                  CropImageView var8 = this.d;
                   var3 = var4;
                   if (var2 == com.alensw.PicFolder.R.id.flip_horz) {
                      var3 = true;

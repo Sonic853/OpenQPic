@@ -3,8 +3,9 @@ package com.alensw.bean;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable.Creator;
+import com.alensw.gallery.GalleryMediaStore;
 public class MediaStoreFile extends CommonFile {
-   public static final Creator CREATOR = new com.alensw.bean.k();
+   public static final Creator CREATOR = new MediaStoreFileCreator();
    protected final int k;
    protected final String l;
 
@@ -46,7 +47,7 @@ public class MediaStoreFile extends CommonFile {
    @Override
    public Uri i() {
       if (this.j == null) {
-         this.j = com.alensw.a.ba.a(this.b).buildUpon().appendEncodedPath(Integer.toString(this.k)).build();
+         this.j = GalleryMediaStore.a(this.b).buildUpon().appendEncodedPath(Integer.toString(this.k)).build();
       }
 
       return this.j;

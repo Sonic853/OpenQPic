@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
+import com.alensw.svg.SvgPicture;
 @SuppressLint("Instantiatable")
 class HomeButton extends ImageView {
    private int a;
@@ -45,7 +46,7 @@ class HomeButton extends ImageView {
 
    public void b(boolean var1) {
       if (var1) {
-         super.setImageDrawable(com.b.a.b.a(this.getResources(), com.alensw.PicFolder.R.raw.ic_menu_done, this.a));
+         super.setImageDrawable(SvgPicture.a(this.getResources(), com.alensw.PicFolder.R.raw.ic_menu_done, this.a));
          super.setPadding(this.b, this.b, this.b, this.b);
       } else {
          super.setImageDrawable(this.e);

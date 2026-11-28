@@ -2,11 +2,12 @@ package com.alensw.PicFolder;
 
 import android.media.FaceDetector;
 import android.media.FaceDetector.Face;
+import com.alensw.image.Picture;
 class FaceDetectionTask implements Runnable {
-   final com.alensw.b.h.j a;
-   final com.alensw.PicFolder.q b;
+   final Picture a;
+   final CropImageView b;
 
-   FaceDetectionTask(com.alensw.PicFolder.q var1, com.alensw.b.h.j var2) {
+   FaceDetectionTask(CropImageView var1, Picture var2) {
       this.b = var1;
       this.a = var2;
    }
@@ -27,6 +28,6 @@ class FaceDetectionTask implements Runnable {
    @Override
    public void run() {
       Face var1 = this.a();
-      this.b.s.post(new com.alensw.PicFolder.s(this, var1));
+      this.b.s.post(new ApplyDetectedFaceCrop(this, var1));
    }
 }

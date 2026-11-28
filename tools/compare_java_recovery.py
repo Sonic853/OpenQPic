@@ -111,7 +111,7 @@ def compare(baseline, rebuilt, *, local_only=False):
         actual_interfaces = set(ni)
         # SDK 36 D8 backports ExecutorService.close to this ThreadPoolExecutor
         # subclass: it adds AutoCloseable and the concrete close() companion.
-        if (after == "Lcom/alensw/b/k/a;" and np == "Ljava/util/concurrent/ThreadPoolExecutor;"
+        if (before == "Lcom/alensw/b/k/a;" and np == "Ljava/util/concurrent/ThreadPoolExecutor;"
                 and ("code", "close()V") in nm):
             actual_interfaces.discard("Ljava/lang/AutoCloseable;")
         if renamed(parent) != np or set(map(renamed, interfaces)) != actual_interfaces:

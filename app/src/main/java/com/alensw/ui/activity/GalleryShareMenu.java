@@ -17,6 +17,11 @@ import android.webkit.MimeTypeMap;
 import com.alensw.PicFolder.CropActivity;
 import com.alensw.PicFolder.FileProvider;
 import com.alensw.PicFolder.R;
+import com.alensw.media.MediaFileTypes;
+import com.alensw.ui.menu.GalleryMenu;
+import com.alensw.ui.menu.GalleryMenuItem;
+import com.alensw.ui.menu.GallerySubMenu;
+import com.alensw.utils.GalleryUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,8 +40,8 @@ public final class GalleryShareMenu implements MenuItem.OnMenuItemClickListener 
         this.send = send;
     }
 
-    /** Java implementation of the five-argument activity menu in com.alensw.ui.activity.a. */
-    public static int show(Context context, Intent intent, View anchor, o callback) {
+    /** Builds the target menu for {@link GalleryActions} and dispatches the selected activity. */
+    public static int show(Context context, Intent intent, View anchor, IntentTargetCallback callback) {
         boolean share = prepareForMenu(context, intent);
         List<ResolveInfo> targets = new ArrayList<>(query(context, intent));
         Intent alternate = new Intent();
@@ -80,21 +85,21 @@ public final class GalleryShareMenu implements MenuItem.OnMenuItemClickListener 
         }
         PackageManager pm = context.getPackageManager();
         SharedPreferences prefs = context.getSharedPreferences("activity_menu", Context.MODE_PRIVATE);
-        com.alensw.b.l.b.a(targets, new b(pm, context, prefs));
-        g directClick = new g(targets, callback, alternates, alternate, intent, prefs);
-        com.alensw.b.g.b root = new com.alensw.b.g.b(context);
+        GalleryUtils.a(targets, new ShareTargetComparator(pm, context, prefs));
+        DirectShareTargetClick directClick = new DirectShareTargetClick(targets, callback, alternates, alternate, intent, prefs);
+        GalleryMenu root = new GalleryMenu(context);
         root.a(true);
         if (share) addChooserItem(context, intent, root);
         int directCount = anchor != null && size > 6 ? 5 : size;
-        com.alensw.b.g.b group = root;
+        GalleryMenu group = root;
         for (int i = 0; i < size; i++) {
             if (i == directCount) {
-                String more = com.alensw.b.l.b.a(context.getResources(), "more_item_label", "More");
-                group = (com.alensw.b.g.m) root.addSubMenu(more + '…');
+                String more = GalleryUtils.a(context.getResources(), "more_item_label", "More");
+                group = (GallerySubMenu) root.addSubMenu(more + '…');
             }
             ResolveInfo info = targets.get(i);
             CharSequence label = info.loadLabel(pm);
-            com.alensw.b.g.l item = group.a(Menu.NONE, i, Menu.NONE, label == null ? info.activityInfo.name : label);
+            GalleryMenuItem item = group.a(Menu.NONE, i, Menu.NONE, label == null ? info.activityInfo.name : label);
             item.a(info);
             item.setOnMenuItemClickListener(directClick);
         }
@@ -104,7 +109,7 @@ public final class GalleryShareMenu implements MenuItem.OnMenuItemClickListener 
 
     @SuppressWarnings("unchecked")
     private static List<ResolveInfo> query(Context context, Intent intent) {
-        return a.a(context, intent, 0);
+        return GalleryActions.a(context, intent, 0);
     }
 
     /** Resolve the MIME before querying direct targets as well as before creating the chooser. */
@@ -141,12 +146,12 @@ public final class GalleryShareMenu implements MenuItem.OnMenuItemClickListener 
         target.putExtra(Intent.EXTRA_STREAM, result.getData());
         prepareStreams(context, target);
         if (target.getComponent() == null) openChooser(context, target);
-        else a.a(context, target);
+        else GalleryActions.a(context, target);
     }
 
     private static void openChooser(Context context, Intent target) {
         // On our minSdk (23+), createChooser copies ClipData and URI grants onto ACTION_CHOOSER.
-        a.a(context, Intent.createChooser(target, null));
+        GalleryActions.a(context, Intent.createChooser(target, null));
     }
 
     @SuppressWarnings("deprecation") // Typed EXTRA_STREAM accessors were added in API 33.
@@ -188,7 +193,7 @@ public final class GalleryShareMenu implements MenuItem.OnMenuItemClickListener 
                 .getMimeTypeFromExtension(name.substring(dot + 1).toLowerCase(Locale.ROOT));
         // Our file provider derives MIME from the path too, but aliases MOV to MP4.
         if (byName != null && "com.alensw.PicFolder.FileProvider".equals(uri.getAuthority())) {
-            return com.alensw.b.f.c.webmMimeType(name, byName);
+            return MediaFileTypes.webmMimeType(name, byName);
         }
         String type = null;
         if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
@@ -198,7 +203,7 @@ public final class GalleryShareMenu implements MenuItem.OnMenuItemClickListener 
                 // A provider may not implement getType even when its stream is readable.
             }
         }
-        type = com.alensw.b.f.c.webmMimeType(context.getContentResolver(), uri, type);
+        type = MediaFileTypes.webmMimeType(context.getContentResolver(), uri, type);
         if (type != null && type.indexOf('/') > 0 && !type.endsWith("/*")
                 && !"application/octet-stream".equals(type)) return type;
         if (byName != null) return byName;

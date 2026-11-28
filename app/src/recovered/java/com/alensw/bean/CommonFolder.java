@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Parcel;
 import com.alensw.PicFolder.GalleryStorage;
+import com.alensw.utils.GalleryUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -13,12 +14,12 @@ import java.util.List;
 import java.util.Set;
 
 public class CommonFolder extends CommonFile {
-   public static final Comparator o = new com.alensw.bean.a();
-   public static final Comparator p = new com.alensw.bean.b();
-   public static final Comparator q = new com.alensw.bean.c();
-   public static final Comparator r = new com.alensw.bean.d();
-   public static final Comparator s = new com.alensw.bean.e();
-   public static final Comparator t = new com.alensw.bean.f();
+   public static final Comparator o = new FileNameComparator();
+   public static final Comparator p = new ReverseFileNameComparator();
+   public static final Comparator q = new FileDateComparator();
+   public static final Comparator r = new ReverseFileDateComparator();
+   public static final Comparator s = new FileSizeComparator();
+   public static final Comparator t = new ReverseFileSizeComparator();
    public int k = -1;
    public int l = 0;
    protected Comparator m = o;
@@ -63,7 +64,7 @@ public class CommonFolder extends CommonFile {
    }
 
    public int a(CommonFile var1) {
-      int var2 = com.alensw.b.l.b.a(this.n, var1, this.m);
+      int var2 = GalleryUtils.a(this.n, var1, this.m);
       if (var2 < 0) {
          int var3 = this.a(var1.i());
          if (var3 != -1) {
@@ -143,7 +144,7 @@ public class CommonFolder extends CommonFile {
    }
 
    public int b(CommonFile var1) {
-      return com.alensw.b.l.b.a(this.n, var1, this.m);
+      return GalleryUtils.a(this.n, var1, this.m);
    }
 
    public final Uri b(int var1) {
@@ -292,7 +293,7 @@ public class CommonFolder extends CommonFile {
       }
 
       CommonFile var1 = this.a(this.k);
-      com.alensw.b.l.b.a(this.n, this.m);
+      GalleryUtils.a(this.n, this.m);
       if (var1 != null) {
          this.k = this.a(var1);
       }

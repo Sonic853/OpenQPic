@@ -27,19 +27,31 @@ import com.alensw.bean.CommonRoot;
 import com.alensw.bean.DocumentFile;
 import com.alensw.bean.DocumentFolder;
 import com.alensw.bean.UriFile;
+import com.alensw.documents.DocumentProviderAccess;
 import com.alensw.transfer.TransferActivity;
+import com.alensw.ui.activity.GalleryActions;
+import com.alensw.ui.activity.GalleryIntentActivity;
 import com.alensw.ui.activity.MainPreference;
+import com.alensw.ui.dialog.GalleryPasswordDialog;
+import com.alensw.ui.page.AlbumsPage;
+import com.alensw.ui.page.GalleryPage;
+import com.alensw.ui.page.GalleryPageActivity;
+import com.alensw.ui.page.LocalFolderPage;
+import com.alensw.ui.page.LocalViewerPage;
+import com.alensw.ui.page.MediaFolderPage;
+import com.alensw.ui.view.GalleryDrawerAdapter;
 import com.alensw.updater.GitHubUpdates;
+import com.alensw.utils.GalleryUtils;
 import java.io.File;
 import java.util.ArrayList;
 
-public class GalleryActivity extends com.alensw.ui.c.cx {
+public class GalleryActivity extends GalleryPageActivity {
    private DrawerLayout e;
    private ViewGroup f;
    private ListView g;
    private GalleryDrawerToggle h;
    private static final String DRAWER_STATE_VERSION = "androidx_drawer_state";
-   private com.alensw.ui.view.bc i;
+   private GalleryDrawerAdapter i;
    private int j;
    private boolean waitingForStorage;
 
@@ -52,7 +64,7 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
       return var3;
    }
 
-   static com.alensw.ui.view.bc a(GalleryActivity var0) {
+   static GalleryDrawerAdapter a(GalleryActivity var0) {
       return var0.i;
    }
 
@@ -74,8 +86,8 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
          this.e.setScrimColor(this.g());
       }
 
-      this.f.setOnClickListener(new com.alensw.PicFolder.ah(this));
-      this.i = new com.alensw.ui.view.bc(this, this.g);
+      this.f.setOnClickListener(new CloseGalleryDrawer(this));
+      this.i = new GalleryDrawerAdapter(this, this.g);
       // A restored open drawer need not dispatch a new drag or opening callback.
       this.i.a();
       this.g.setAdapter((ListAdapter)this.i);
@@ -92,7 +104,7 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
          this.g.setBackgroundColor(this.U);
       }
 
-      this.g.setOnItemClickListener(new com.alensw.PicFolder.ai(this));
+      this.g.setOnItemClickListener(new DrawerItemClick(this));
    }
 
    static ListView d(GalleryActivity var0) {
@@ -179,54 +191,54 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
             }
          }
 
-         com.alensw.PicFolder.ab var16 = new com.alensw.PicFolder.ab(this);
+         FinishEmptyGallery var16 = new FinishEmptyGallery(this);
          if (this.j != 0) {
-            this.a(com.alensw.ui.c.bz.class, var4, null);
+            this.a(AlbumsPage.class, var4, null);
             Uri var12 = var6;
             if (var6 == null) {
                if (this.j == 1) {
-                  var12 = com.alensw.ui.activity.p.D;
+                  var12 = GalleryIntentActivity.D;
                } else {
                   var12 = var6;
                   if (this.j == 2) {
-                     var12 = com.alensw.ui.activity.p.E;
+                     var12 = GalleryIntentActivity.E;
                   }
                }
             }
 
             if (var12 != null && "file".equals(var12.getScheme())) {
-               this.a(com.alensw.ui.c.bf.class, a(var4.getAction(), var12, var4), null);
+               this.a(LocalFolderPage.class, a(var4.getAction(), var12, var4), null);
             }
          } else if (var6 != null) {
             String var13 = QuickApp.s.a(var6);
             if (var13 != null) {
                File var7 = new File(var13);
-               com.alensw.PicFolder.ac var8 = new com.alensw.PicFolder.ac(this, var2, var4, var7.isDirectory(), var7);
-               if (com.alensw.b.l.b.h(var13)) {
-                  com.alensw.ui.a.x.a(this, "protect_hidden", var8, var16);
+               OpenLocalGalleryPages var8 = new OpenLocalGalleryPages(this, var2, var4, var7.isDirectory(), var7);
+               if (GalleryUtils.h(var13)) {
+                  GalleryPasswordDialog.a(this, "protect_hidden", var8, var16);
                } else {
                   var8.run();
                }
-            } else if (com.alensw.b.j.a.d(var6)) {
+            } else if (DocumentProviderAccess.d(var6)) {
                CommonFile var14 = UriFile.a(var6);
                if (var14 instanceof DocumentFile && "vnd.android.document/directory".equals(var14.b())) {
-                  new com.alensw.PicFolder.ad(this, com.alensw.ui.c.z.a(new DocumentFolder(var14, var6.getAuthority(), ((DocumentFile)var14).k()), false, null)).run();
+                  new OpenMediaFolderPage(this, MediaFolderPage.a(new DocumentFolder(var14, var6.getAuthority(), ((DocumentFile)var14).k()), false, null)).run();
                }
             } else {
-               this.a(com.alensw.ui.c.dp.class, var4, null);
+               this.a(LocalViewerPage.class, var4, null);
             }
          } else if (var4.hasExtra("QuickPic.folder")) {
             CommonFolder var9 = (CommonFolder)var4.getParcelableExtra("QuickPic.folder");
             if (var9 != null) {
-               this.a(com.alensw.ui.c.z.class, com.alensw.ui.c.z.a(var9, true, null), null);
+               this.a(MediaFolderPage.class, MediaFolderPage.a(var9, true, null), null);
             }
          } else {
             String var10 = var3.getString("last_drive", "");
             CommonRoot var11 = this.i.a(var10);
             if ("folders".equals(var11.n)) {
-               this.a(com.alensw.ui.c.bz.class, new Intent(), null);
+               this.a(AlbumsPage.class, new Intent(), null);
             } else {
-               this.a(com.alensw.ui.c.z.class, com.alensw.ui.c.z.a(var11.k(), true, var11.n), null);
+               this.a(MediaFolderPage.class, MediaFolderPage.a(var11.k(), true, var11.n), null);
             }
          }
       }
@@ -279,7 +291,7 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
    }
 
    @Override
-   protected void a(com.alensw.ui.c.cu var1) {
+   protected void a(GalleryPage var1) {
       boolean var4 = false;
       super.a(var1);
       this.g(true);
@@ -287,7 +299,7 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
       if (this.j == 0 && this.h != null) {
          boolean var3 = this.h.isEnabled();
          boolean var2;
-         if (this.d() <= 1 && !(var1 instanceof com.alensw.ui.c.dp)) {
+         if (this.d() <= 1 && !(var1 instanceof LocalViewerPage)) {
             var2 = true;
          } else {
             var2 = false;
@@ -302,7 +314,7 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
                var3 = false;
             }
 
-            com.alensw.PicFolder.af var6 = new com.alensw.PicFolder.af(this, var5, this.j(var3), var2);
+            DrawerArrowAnimation var6 = new DrawerArrowAnimation(this, var5, this.j(var3), var2);
             var3 = var4;
             if (!var2) {
                var3 = true;
@@ -392,10 +404,10 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
 
                var6.setFlags(67108864);
                var6.setComponent(new ComponentName(this, TransferActivity.class));
-               com.alensw.ui.activity.a.a(this, var6);
+               GalleryActions.a(this, var6);
                break;
             case com.alensw.PicFolder.R.id.settings:
-               com.alensw.ui.activity.a.a(this, new Intent(this, MainPreference.class));
+               GalleryActions.a(this, new Intent(this, MainPreference.class));
                break;
             default:
                var4 = super.onOptionsItemSelected(var1);
@@ -411,7 +423,7 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
       super.onPostCreate(var1);
       if (this.j == 0) {
          this.h.syncIndicator();
-         if (this.d() > 1 || this.c() instanceof com.alensw.ui.c.dp) {
+         if (this.d() > 1 || this.c() instanceof LocalViewerPage) {
             var2 = false;
          }
 
@@ -424,8 +436,8 @@ public class GalleryActivity extends com.alensw.ui.c.cx {
          }
          SharedPreferences var3 = PreferenceManager.getDefaultSharedPreferences(this);
          if (var3.getInt("drawer_shown", 0) != QuickApp.k) {
-            com.alensw.b.l.b.a(var3.edit().putInt("drawer_shown", QuickApp.k));
-            this.e.postDelayed(new com.alensw.PicFolder.ae(this), 300L);
+            GalleryUtils.a(var3.edit().putInt("drawer_shown", QuickApp.k));
+            this.e.postDelayed(new OpenGalleryDrawer(this), 300L);
          }
       } else {
          this.h.setEnabled(false);

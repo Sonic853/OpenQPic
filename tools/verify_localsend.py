@@ -229,6 +229,11 @@ def verify(apk, aab, tools, archives, variant="debug"):
         assert not {t for t in refs if t.startswith(PREFIX)} - {d for d in defs if d.startswith(PREFIX)}
         forbidden=retired | removed | {r[0] for r in inventory if len(r)==2}
         assert not forbidden & (defs|refs), forbidden & (defs|refs)
+        # Include newer product helpers and anonymous classes moved with the recovered packages.
+        old_packages = ("Lcom/alensw/a/", "Lcom/alensw/b/", "Lcom/b/a/",
+                        "Lcom/alensw/ui/a/", "Lcom/alensw/ui/b/", "Lcom/alensw/ui/c/", "Lcom/alensw/ui/d/")
+        stale_types = {t for t in defs | refs if t.startswith(old_packages)}
+        assert not stale_types, ("obfuscated gallery package in DEX", sorted(stale_types))
         # AndroidX Core publishes a few legacy Binder/Parcelizer binary names.
         assert {t for t in refs if t.startswith("Landroid/support/")} == {t for t in core & defs if t.startswith("Landroid/support/")}
         assert not any(t.startswith(("Lorg/apache/http/", "Lcom/alensw/cloud/",

@@ -10,18 +10,23 @@ import android.os.Parcelable.Creator;
 import android.text.format.DateUtils;
 import android.util.Log;
 import com.alensw.PicFolder.QuickApp;
+import com.alensw.gallery.FolderScanFilters;
+import com.alensw.gallery.GalleryMediaStore;
+import com.alensw.location.ReverseGeocoding;
+import com.alensw.media.MediaFileTypes;
+import com.alensw.utils.GalleryUtils;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 
 public class MediaStoreFolder extends CommonFolder {
-   public static final Creator CREATOR = new com.alensw.bean.m();
+   public static final Creator CREATOR = new MediaStoreFolderCreator();
    protected static final HashMap u = new HashMap();
    public static final String[] v = new String[]{"_id", "_data", "_display_name", "mime_type", "_size", "date_modified", "datetaken", "latitude", "longitude"};
    private Context A;
-   private com.alensw.b.d.f B;
-   private com.alensw.a.o C;
+   private ReverseGeocoding B;
+   private FolderScanFilters C;
    private boolean D;
    private ArrayList E;
    private ArrayList F;
@@ -89,7 +94,7 @@ public class MediaStoreFolder extends CommonFolder {
       if (var1 == 0.0F && var2 == 0.0F) {
          var5 = "";
       } else {
-         long var3 = com.alensw.b.d.f.a(var1, var2);
+         long var3 = ReverseGeocoding.a(var1, var2);
          String var6 = this.B.a(var1, var2, var3);
          var5 = var6;
          if (var6 == null) {
@@ -115,7 +120,7 @@ public class MediaStoreFolder extends CommonFolder {
       String title = a(currentStart * 1000L);
       Cursor cursor = null;
       try {
-         cursor = resolver.query(com.alensw.a.ba.a(type), v, null, null, "datetaken DESC");
+         cursor = resolver.query(GalleryMediaStore.a(type), v, null, null, "datetaken DESC");
          if (cursor == null || !cursor.moveToFirst()) return;
          int size = this.n.size();
          int count = cursor.getCount();
@@ -135,7 +140,7 @@ public class MediaStoreFolder extends CommonFolder {
             if (!a(path)) continue;
             int id = cursor.getInt(0);
             String location = a(cursor.getFloat(7), cursor.getFloat(8));
-            com.alensw.bean.n key = new com.alensw.bean.n(start, location);
+            MomentGroupKey key = new MomentGroupKey(start, location);
             MediaStoreFolder folder = (MediaStoreFolder)u.get(key);
             if (folder == null) {
                folder = new MediaStoreFolder(id, title, 0x10000033, modified, taken, path, true, false);
@@ -186,7 +191,7 @@ public class MediaStoreFolder extends CommonFolder {
                var4 = true;
             } else {
                for (int var5 = 0; var5 < var3; var5++) {
-                  if (com.alensw.b.l.b.c((String)this.F.get(var5), var1)) {
+                  if (GalleryUtils.c((String)this.F.get(var5), var1)) {
                      var4 = true;
                      return var4;
                   }
@@ -197,7 +202,7 @@ public class MediaStoreFolder extends CommonFolder {
             break;
          }
 
-         if (com.alensw.b.l.b.c((String)this.E.get(var2), var1)) {
+         if (GalleryUtils.c((String)this.E.get(var2), var1)) {
             var4 = false;
             break;
          }
@@ -225,7 +230,7 @@ public class MediaStoreFolder extends CommonFolder {
       String[] range = {Long.toString(start * 1000L), Long.toString(end * 1000L)};
       Cursor cursor = null;
       try {
-         cursor = resolver.query(com.alensw.a.ba.a(type), v, "datetaken>=? AND datetaken<?", range, "datetaken DESC");
+         cursor = resolver.query(GalleryMediaStore.a(type), v, "datetaken>=? AND datetaken<?", range, "datetaken DESC");
          if (cursor == null || !cursor.moveToFirst()) return;
          int size = this.n.size();
          int count = cursor.getCount();
@@ -261,7 +266,7 @@ public class MediaStoreFolder extends CommonFolder {
    private void c(ContentResolver resolver, char type) {
       Cursor cursor = null;
       try {
-         cursor = resolver.query(com.alensw.a.ba.a(type), v, null, null, "datetaken DESC");
+         cursor = resolver.query(GalleryMediaStore.a(type), v, null, null, "datetaken DESC");
          if (cursor == null || !cursor.moveToFirst()) return;
          int size = this.n.size();
          int count = cursor.getCount();
@@ -290,8 +295,8 @@ public class MediaStoreFolder extends CommonFolder {
       this.l = a(0, 1);
       this.m = r;
       this.A = QuickApp.a();
-      this.B = com.alensw.b.d.f.a(this.A);
-      this.C = com.alensw.a.o.a(this.A);
+      this.B = ReverseGeocoding.a(this.A);
+      this.C = FolderScanFilters.a(this.A);
    }
 
    @Override
@@ -302,7 +307,7 @@ public class MediaStoreFolder extends CommonFolder {
       } else {
          int var3;
          try {
-            var3 = com.alensw.b.l.b.a(var1.getLastPathSegment(), 0);
+            var3 = GalleryUtils.a(var1.getLastPathSegment(), 0);
          } catch (Throwable var6) {
             var2 = super.a(var1);
             return var2;
@@ -359,7 +364,7 @@ public class MediaStoreFolder extends CommonFolder {
 
          if (this.D) {
             this.D = false;
-            this.B.a(new com.alensw.bean.l(this, var1));
+            this.B.a(new NotifyMediaStoreChange(this, var1));
          }
       } else {
          long var6 = System.currentTimeMillis();
@@ -381,8 +386,8 @@ public class MediaStoreFolder extends CommonFolder {
 
    @Override
    public void a(ContentResolver var1, ContentObserver var2) {
-      var1.registerContentObserver(com.alensw.a.ba.a('I'), false, var2);
-      var1.registerContentObserver(com.alensw.a.ba.a('V'), false, var2);
+      var1.registerContentObserver(GalleryMediaStore.a('I'), false, var2);
+      var1.registerContentObserver(GalleryMediaStore.a('V'), false, var2);
    }
 
    public MediaStoreFolder b(boolean var1) {
@@ -422,13 +427,13 @@ public class MediaStoreFolder extends CommonFolder {
    public Uri i() {
       if (this.j == null) {
          if (this.x) {
-            this.j = com.alensw.a.ba.a('I');
+            this.j = GalleryMediaStore.a('I');
          } else if (!this.n()) {
             this.j = this.b(0);
          } else if (this.z != null) {
-            this.j = com.alensw.a.ba.a(com.alensw.b.f.c.a(this.z)).buildUpon().appendEncodedPath(Integer.toString(this.y)).build();
+            this.j = GalleryMediaStore.a(MediaFileTypes.a(this.z)).buildUpon().appendEncodedPath(Integer.toString(this.y)).build();
          } else {
-            this.j = com.alensw.a.ba.a('I');
+            this.j = GalleryMediaStore.a('I');
          }
       }
 

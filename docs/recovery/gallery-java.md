@@ -6,7 +6,7 @@
 
 | 代码 | 位置及来源 |
 |---|---|
-| 图库、编辑、缩略图、播放、设置、媒体模型 | `app/src/recovered/java/com/`。依据当前产品的 DEX/Smali 恢复；使用 dex2jar、Vineflower、JADX 和 CFR 交叉结构化，再按原指令修正控制流和 Java 重载。现有类型及对外调用尽量沿用原来的名字。 |
+| 图库、编辑、缩略图、播放、设置、媒体模型 | `app/src/recovered/java/com/alensw/`。依据产品的 DEX/Smali 恢复；使用 dex2jar、Vineflower、JADX 和 CFR 交叉结构化，再按原指令修正控制流和 Java 重载。`gallery/` 管理扫描、相册和加载，`image/` 负责解码和位图，`ui/page/` 包含相册、搜索和全屏看图页面。 |
 | 抽屉、分页与文件授权 | [AndroidX 替换关系和版本](android-support.md)。快图箭头与遮罩在应用包内，原 60 个 Support 类型已替换。 |
 | Maven 库 | [运行时制品清单](../../app/runtime-libraries.sha256)，包括完整 Core 和 DocumentFile；不保留源码副本。 |
 | HTTP 回环视频 | `app/src/main/java/com/alensw/video/` 调用配套的 `org.openqpic.localsend.LoopbackHttp` 与 `libqpiclocalsend.so`。不再使用 [HttpCore](httpcore.md)。 |
@@ -16,13 +16,18 @@
 
 | 旧名 | 源码及 DEX 新名 | 原因 |
 |---|---|---|
-| `com.alensw.ui.c.do` | `com.alensw.ui.c.DateChangedCallback` | `do` 是 Java 关键字。 |
+| `com.alensw.ui.c.do` | `com.alensw.ui.page.DateChangedCallback` | 媒体日期变更回调；`do` 是 Java 关键字。 |
 | `com.alensw.PicFolder.r` | `com.alensw.PicFolder.FaceDetectionTask` | 在 Windows 的文件系统上会和 Android 生成的 `R.class` 冲突。 |
 | `com.alensw.PicFolder.ag` | `com.alensw.PicFolder.GalleryDrawerToggle` | 用 AndroidX 抽屉回调同步图库页面和工具栏。 |
+| `com.alensw.b.h.b` | `com.alensw.image.BitmapUtils` | 位图解码、缩放和缩略图。 |
+| `com.alensw.a.al` | `com.alensw.gallery.NativeFolderScanner` | 调用 JNI 扫描目录及媒体。 |
+| `com.alensw.ui.c.dp` | `com.alensw.ui.page.LocalViewerPage` | 浏览本地目录中的单张图片。 |
+
+恢复源码中原先的 515 个短文件名已按实现和调用关系命名；这些是维护用名称，不代表原作者的符号。查旧 Smali 时，用 DEX 描述符查上面的类型清单，第一列是旧名，第二列是当前名。[页面栈](../../app/src/recovered/java/com/alensw/ui/page/GalleryPageActivity.java)继续用旧版本的六个页面标识读写保存状态：当 Android 交回旧 `Bundle` 时，可以恢复原页面；若系统在替换 APK 时移除了任务，下次启动仍按原有逻辑打开图库。Manifest 组件、Provider authority、Parcelable 媒体模型和 JNI 入口仍沿用其公开名称。
 
 构建走 AGP 的 `javac / Maven 依赖 → D8 → APK/AAB`。保留清单中的 566 个图库类型有 5 个来自 DocumentFile，其余由本地 Java 编译。从前移除的 Core 源码不会参与构建；现在只使用官方 Maven 制品中的实现。
 
-恢复时也对照了调用的具体签名。例如，设置相册标题的 `b(CharSequence)` 和查询字符串的 `b(String)` 不能互换；选目录的 `a(File)` 不同于打开相册的 `a(e)`。裁剪宽高比及快速滚动条的滑块长度保留原来的浮点除法。图库模型还核对了游标关闭、SQLite 事务和写入队列的锁范围。宿主 JVM 上，52 组模型行为、83,168 条 SVG 数字扫描轨迹、2,000 条 SVG 路径和 576 条图像/GIF 轨迹与 DEX 转译对照一致。这些是受控差分，不替代 Android 实机或模拟器测试。
+恢复时也对照了调用的具体签名。例如，设置相册标题的 `b(CharSequence)` 和查询字符串的 `b(String)` 不能互换；选目录的 `a(File)` 不同于打开相册的 `a(ScannedFolder)`。裁剪宽高比及快速滚动条的滑块长度保留原来的浮点除法。图库模型还核对了游标关闭、SQLite 事务和写入队列的锁范围。宿主 JVM 上，52 组模型行为、83,168 条 SVG 数字扫描轨迹、2,000 条 SVG 路径和 576 条图像/GIF 轨迹与 DEX 转译对照一致。这些是受控差分，不替代 Android 实机或模拟器测试。
 
 ## 如何核对
 

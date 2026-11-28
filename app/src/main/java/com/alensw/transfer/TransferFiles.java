@@ -1,6 +1,6 @@
 package com.alensw.transfer;
 
-import static com.alensw.b.f.c.webmMimeType;
+import static com.alensw.media.MediaFileTypes.webmMimeType;
 
 import android.Manifest;
 import android.content.*;
@@ -15,7 +15,7 @@ import android.provider.OpenableColumns;
 import android.system.*;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
-import com.alensw.ui.c.ReceivedMediaUpdates;
+import com.alensw.ui.page.ReceivedMediaUpdates;
 import org.openqpic.localsend.LocalSend;
 import java.io.*;
 import java.nio.charset.StandardCharsets;

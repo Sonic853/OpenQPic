@@ -1,6 +1,6 @@
 package com.alensw.video;
 
-import static com.alensw.b.f.c.webmMimeType;
+import static com.alensw.media.MediaFileTypes.webmMimeType;
 
 import android.app.Service;
 import android.content.*;
@@ -15,6 +15,9 @@ import android.system.OsConstants;
 import android.util.Log;
 import com.alensw.PicFolder.PlayerActivity;
 import com.alensw.PicFolder.QuickApp;
+import com.alensw.documents.DocumentProviderAccess;
+import com.alensw.ui.activity.GalleryActions;
+import com.alensw.ui.page.MediaDetails;
 import org.openqpic.localsend.LoopbackHttp;
 import org.openqpic.localsend.SystemTls;
 import android.content.pm.ResolveInfo;
@@ -76,12 +79,12 @@ public final class VideoProxyService extends Service {
                     return;
                 }
                 // Reuse the gallery's MediaStore / read-only provider fallback for unindexed videos.
-                uri=com.alensw.ui.c.df.a(path,'V');
+                uri=MediaDetails.a(path,'V');
             } catch(IOException e) { Log.w("VideoProxy","Cannot resolve local video",e); return; }
         }
         Intent intent=new Intent(Intent.ACTION_VIEW).setDataAndType(uri,mime)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        if(!com.alensw.ui.activity.a.a(context,intent) && "content".equals(uri.getScheme())
+        if(!GalleryActions.a(context,intent) && "content".equals(uri.getScheme())
                 && mime!=null && mime.startsWith("video/")) {
             context.startService(intent.setClass(context,VideoProxyService.class));
         }
@@ -198,10 +201,10 @@ public final class VideoProxyService extends Service {
             }
             if(!parts[3].equals(name)) {
                 if(!parts[3].toLowerCase(Locale.ROOT).matches(".+\\.(srt|vtt|sub|ass|ssa)")) return;
-                String pathInProvider=com.alensw.b.j.a.b(uri);
+                String pathInProvider=DocumentProviderAccess.b(uri);
                 if(pathInProvider==null || !pathInProvider.endsWith("/"+name)) return;
                 pathInProvider=pathInProvider.substring(0,pathInProvider.length()-name.length())+parts[3];
-                uri=com.alensw.b.j.a.c(uri.getAuthority(),pathInProvider);
+                uri=DocumentProviderAccess.c(uri.getAuthority(),pathInProvider);
                 try(Cursor c=getContentResolver().query(uri,new String[]{OpenableColumns.SIZE},null,null,null)) {
                     if(c==null || !c.moveToFirst()) return;
                     size=c.isNull(0) ? -1 : c.getLong(0);

@@ -9,6 +9,7 @@ import android.graphics.SweepGradient;
 import android.os.Build.VERSION;
 import android.util.AttributeSet;
 import android.view.View;
+import com.alensw.ui.activity.GalleryChromeActivity;
 public class RadarView extends View {
    private float a;
    private float b;
@@ -25,7 +26,7 @@ public class RadarView extends View {
 
    public RadarView(Context var1, AttributeSet var2) {
       super(var1, var2);
-      int var4 = com.alensw.ui.activity.ao.d(var1);
+      int var4 = GalleryChromeActivity.d(var1);
 
       for (int var3 = 0; var3 < this.f.length - 1; var3++) {
          this.f[var3] = var4;

@@ -20,6 +20,7 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
+import com.alensw.gallery.StorageVolumes;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +58,7 @@ public final class GalleryStorage {
 
     public static void accessGranted(Context context) {
         // The first scan can complete with no readable folders while the permission UI is open.
-        QuickApp.p=new com.alensw.a.bh(context);
+        QuickApp.p=new StorageVolumes(context);
         QuickApp.q.a(4,null,null); // forget cached empty directories
         QuickApp.a(true); // existing page resume path reloads the current gallery
     }

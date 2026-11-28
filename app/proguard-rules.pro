@@ -3,7 +3,6 @@
 -dontoptimize
 -keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
 -keep class com.alensw.** { *; }
--keep class com.b.** { *; }
 -keep class org.openqpic.** { *; }
 
 -keep class androidx.documentfile.** { *; }

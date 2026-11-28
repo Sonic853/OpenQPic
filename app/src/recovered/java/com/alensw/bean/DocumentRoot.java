@@ -2,6 +2,7 @@ package com.alensw.bean;
 
 import android.database.Cursor;
 import android.net.Uri;
+import com.alensw.documents.DocumentProviderAccess;
 public class DocumentRoot extends CommonRoot {
    public static final String[] s = new String[]{"root_id", "document_id", "title", "mime_type", "flags", "icon", "summary"};
    protected final String q;
@@ -29,7 +30,7 @@ public class DocumentRoot extends CommonRoot {
    @Override
    public Uri i() {
       if (this.j == null) {
-         this.j = com.alensw.b.j.a.c(this.q, this.r);
+         this.j = DocumentProviderAccess.c(this.q, this.r);
       }
 
       return this.j;

@@ -8,6 +8,8 @@ import android.view.View.OnClickListener;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.alensw.ui.activity.GalleryChromeActivity;
+import com.alensw.utils.GalleryUtils;
 import java.io.File;
 
 public class PathBar extends HorizontalScrollView {
@@ -19,7 +21,7 @@ public class PathBar extends HorizontalScrollView {
    private final int f;
    private final LinearLayout g;
    private final LinearLayout.LayoutParams h = new LinearLayout.LayoutParams(-2, -1);
-   private final OnClickListener i = new com.alensw.ui.view.az(this);
+   private final OnClickListener i = new BreadcrumbClick(this);
 
    public PathBar(Context var1) {
       this(var1, null);
@@ -30,7 +32,7 @@ public class PathBar extends HorizontalScrollView {
       DisplayMetrics var3 = this.getResources().getDisplayMetrics();
       this.d = (int)(var3.density * 8.0F);
       this.e = Math.min(var3.widthPixels, var3.heightPixels) * 3 / 4;
-      this.f = com.alensw.ui.activity.ao.b(var1, 16842806);
+      this.f = GalleryChromeActivity.b(var1, 16842806);
       this.g = new LinearLayout(var1);
       this.g.setGravity(16);
       this.addView(this.g);
@@ -90,7 +92,7 @@ public class PathBar extends HorizontalScrollView {
          int var2 = this.g.getChildCount();
          if (!this.b.equals(var1) || var2 <= 0) {
             String var5 = var1.getPath();
-            if (this.b.getPath().startsWith(com.alensw.b.l.b.e(var5)) && var2 > 0) {
+            if (this.b.getPath().startsWith(GalleryUtils.e(var5)) && var2 > 0) {
                int var3 = var5.length();
                var2--;
 
@@ -131,7 +133,7 @@ public class PathBar extends HorizontalScrollView {
             }
 
             this.b = var1;
-            this.post(new com.alensw.ui.view.ba(this));
+            this.post(new ScrollToBreadcrumb(this));
          }
       }
    }

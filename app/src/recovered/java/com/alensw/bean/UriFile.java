@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import com.alensw.PicFolder.FileProvider;
 import com.alensw.PicFolder.QuickApp;
+import com.alensw.documents.DocumentProviderAccess;
+import com.alensw.media.MediaFileTypes;
 import java.io.File;
 
 public class UriFile extends CommonFile {
@@ -52,7 +54,7 @@ public class UriFile extends CommonFile {
          } else if ("com.alensw.PicFolder.FileProvider".equals(authority)) {
             String path = FileProvider.a(uri);
             if (path != null) return a(path, type, mime, 0L, modified, taken);
-         } else if (com.alensw.b.j.a.d(uri)) {
+         } else if (DocumentProviderAccess.d(uri)) {
             Cursor cursor = null;
             try {
                cursor = resolver.query(uri, DocumentFolder.w, null, null, null);
@@ -87,11 +89,11 @@ public class UriFile extends CommonFile {
    public static LocalFile a(String var0, char var1, String var2, long var3, long var5, long var7) {
       File var11 = new File(var0);
       if (var1 == 0) {
-         var1 = com.alensw.b.f.c.a(var0);
+         var1 = MediaFileTypes.a(var0);
       }
 
       if (var2 == null) {
-         var0 = com.alensw.b.f.c.a(var0, var1);
+         var0 = MediaFileTypes.a(var0, var1);
       } else {
          var0 = var2;
       }

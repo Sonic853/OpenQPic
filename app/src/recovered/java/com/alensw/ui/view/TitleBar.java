@@ -23,6 +23,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import com.alensw.svg.SvgPicture;
+import com.alensw.ui.menu.GalleryMenu;
 @SuppressLint("Instantiatable")
 public class TitleBar extends LinearLayout {
    private final int a;
@@ -37,11 +39,11 @@ public class TitleBar extends LinearLayout {
    private ProgressBar j;
    private ActionLayout k;
    private LinearLayout l;
-   private com.alensw.b.g.b m;
-   private com.alensw.ui.view.cb n;
-   private final OnClickListener o = new com.alensw.ui.view.bv(this);
-   private final OnLongClickListener p = new com.alensw.ui.view.bw(this);
-   private final Runnable q = new com.alensw.ui.view.bz(this);
+   private GalleryMenu m;
+   private TitleBarMenuCallback n;
+   private final OnClickListener o = new TitleBarActionClick(this);
+   private final OnLongClickListener p = new TitleBarActionTooltip(this);
+   private final Runnable q = new UpdateTitleBarActions(this);
 
    public TitleBar(Context var1) {
       this(var1, null);
@@ -62,7 +64,7 @@ public class TitleBar extends LinearLayout {
       var6.recycle();
    }
 
-   static com.alensw.b.g.b a(TitleBar var0) {
+   static GalleryMenu a(TitleBar var0) {
       return var0.m;
    }
 
@@ -221,7 +223,7 @@ public class TitleBar extends LinearLayout {
          var2 = false;
          var3 = this.getContext();
          if (this.m == null) {
-            this.m = new com.alensw.b.g.b(var3);
+            this.m = new GalleryMenu(var3);
             if (this.n != null) {
                var1 = this.n.a(this, this.m);
                break label27;
@@ -328,8 +330,8 @@ public class TitleBar extends LinearLayout {
       this.j = (ProgressBar)this.findViewById(com.alensw.PicFolder.R.id.circular);
       this.k = (ActionLayout)this.findViewById(com.alensw.PicFolder.R.id.container);
       this.f = (ImageView)this.k.findViewById(com.alensw.PicFolder.R.id.menu);
-      this.f.setImageDrawable(com.b.a.b.a(var2, com.alensw.PicFolder.R.raw.ic_menu_overflow, this.a));
-      this.f.setOnClickListener(new com.alensw.ui.view.bx(this));
+      this.f.setImageDrawable(SvgPicture.a(var2, com.alensw.PicFolder.R.raw.ic_menu_overflow, this.a));
+      this.f.setOnClickListener(new OpenTitleBarOverflow(this));
    }
 
    @Override
@@ -343,7 +345,7 @@ public class TitleBar extends LinearLayout {
    public void onSizeChanged(int var1, int var2, int var3, int var4) {
       super.onSizeChanged(var1, var2, var3, var4);
       this.e();
-      this.post(new com.alensw.ui.view.by(this));
+      this.post(new RequestTitleBarLayout(this));
    }
 
    @Override
@@ -366,7 +368,7 @@ public class TitleBar extends LinearLayout {
       this.g.setEnabled(var1);
    }
 
-   public void setMenuCallback(com.alensw.ui.view.cb var1) {
+   public void setMenuCallback(TitleBarMenuCallback var1) {
       this.n = var1;
    }
 
@@ -375,7 +377,7 @@ public class TitleBar extends LinearLayout {
    }
 
    public void setOnTitleClickListener(OnClickListener var1) {
-      ((View)this.h.getParent()).setOnClickListener(new com.alensw.ui.view.ca(this, var1));
+      ((View)this.h.getParent()).setOnClickListener(new ForwardTitleBarClick(this, var1));
    }
 
    public void setProgressVisible(boolean var1) {

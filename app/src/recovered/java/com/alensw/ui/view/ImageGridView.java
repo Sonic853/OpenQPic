@@ -25,8 +25,11 @@ import android.view.MotionEvent;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.animation.Animation;
+import com.alensw.image.BitmapUtils;
+import com.alensw.svg.SvgDrawable;
+import com.alensw.svg.SvgPicture;
 @SuppressLint("Instantiatable")
-public class ImageGridView extends com.alensw.ui.view.bp {
+public class ImageGridView extends ScrollableGalleryView {
    public static final boolean a;
    private int A;
    private int B;
@@ -84,11 +87,11 @@ public class ImageGridView extends com.alensw.ui.view.bp {
    public boolean c;
    public boolean d;
    public int e;
-   private com.alensw.ui.view.aj r;
+   private ImageGridAdapter r;
    private Bitmap s;
    private String t;
    private StaticLayout u;
-   private com.alensw.ui.view.ak[] v;
+   private ImageGridCell[] v;
    private final RectF w;
    private final Paint x;
    private final TextPaint y;
@@ -120,7 +123,7 @@ public class ImageGridView extends com.alensw.ui.view.bp {
 
       this.b = var7;
       this.e = 0;
-      this.v = new com.alensw.ui.view.ak[8];
+      this.v = new ImageGridCell[8];
       this.w = new RectF();
       this.x = new Paint();
       this.y = new TextPaint(129);
@@ -130,10 +133,10 @@ public class ImageGridView extends com.alensw.ui.view.bp {
       this.J = Integer.MIN_VALUE;
       this.S = 100.0F;
       this.T = 100.0F;
-      this.ac = new com.alensw.ui.view.ab(this);
-      this.ad = new com.alensw.ui.view.ac(this);
-      this.ae = new com.alensw.ui.view.ad(this);
-      this.af = new com.alensw.ui.view.ae(this);
+      this.ac = new ClearGridPressedItem(this);
+      this.ad = new GridItemClick(this);
+      this.ae = new GridItemLongClick(this);
+      this.af = new PrefetchGridItems(this);
       this.an = new RectF();
       this.ao = new Rect();
       this.ap = new RectF();
@@ -149,7 +152,7 @@ public class ImageGridView extends com.alensw.ui.view.bp {
       this.az = -1.0F;
       this.aA = -1.0F;
       this.aB = -1.0F;
-      this.aC = new com.alensw.ui.view.ai(this);
+      this.aC = new GridSelectionAutoScroll(this);
       this.setDrawingCacheEnabled(false);
       this.setWillNotCacheDrawing(true);
       Resources var11 = this.getResources();
@@ -175,7 +178,7 @@ public class ImageGridView extends com.alensw.ui.view.bp {
       this.aa = var11.getDimension(com.alensw.PicFolder.R.dimen.grid_subtext_size);
       this.ab = this.V * 10.0F;
       var5 = (int)(this.V * 28.0F);
-      this.s = com.alensw.b.h.b.a(var5, var5, Config.ARGB_8888);
+      this.s = BitmapUtils.a(var5, var5, Config.ARGB_8888);
       if (this.s != null) {
          Canvas var10 = new Canvas(this.s);
          int var6 = (int)(this.V * 2.0F);
@@ -184,7 +187,7 @@ public class ImageGridView extends com.alensw.ui.view.bp {
          var14.getPaint().setShadowLayer(this.V, this.V / 2.0F, this.V / 2.0F, -1610612736);
          var14.setBounds(var6, var6, var5 - var6, var5 - var6);
          var14.draw(var10);
-         com.b.a.l var12 = com.b.a.b.a(var11, com.alensw.PicFolder.R.raw.ic_menu_done, -1, var5);
+         SvgDrawable var12 = SvgPicture.a(var11, com.alensw.PicFolder.R.raw.ic_menu_done, -1, var5);
          var12.setBounds(0, 0, var5, var5);
          var12.draw(var10);
       }
@@ -230,7 +233,7 @@ public class ImageGridView extends com.alensw.ui.view.bp {
       return var1;
    }
 
-   static com.alensw.ui.view.aj c(ImageGridView var0) {
+   static ImageGridAdapter c(ImageGridView var0) {
       return var0.r;
    }
 
@@ -353,15 +356,15 @@ public class ImageGridView extends com.alensw.ui.view.bp {
         float f = z ? fMin : 1.0f;
         float f2 = z ? 1.0f - fMin : fMin - 1.0f;
         if (z) {
-            srcType0794 = new com.alensw.ui.view.af(this, f, f2);
+            srcType0794 = new GridEnterAnimation(this, f, f2);
         } else {
             this.au.set(0.0f, 0.0f, getWidth(), getHeight());
-            srcType0794 = new com.alensw.ui.view.ag(this, z, true, this.au, this.au, f, f2);
+            srcType0794 = new GridExitAnimation(this, z, true, this.au, this.au, f, f2);
             this.o.a(false);
         }
         srcType0794.setDuration(j);
-        srcType0794.setInterpolator(new com.alensw.ui.view.cc());
-        srcType0794.setAnimationListener(new com.alensw.ui.view.ah(this, z));
+        srcType0794.setInterpolator(new ViscousFluidInterpolator());
+        srcType0794.setAnimationListener(new GridTransitionListener(this, z));
         startAnimation(srcType0794);
         return j;
     }
@@ -423,7 +426,7 @@ public class ImageGridView extends com.alensw.ui.view.bp {
          var15 = var3;
       }
 
-      com.alensw.ui.view.ak var16 = this.e(var2);
+      ImageGridCell var16 = this.e(var2);
       boolean var13;
       if ((var16.b & 2) != 0) {
          var13 = true;
@@ -454,19 +457,19 @@ public class ImageGridView extends com.alensw.ui.view.bp {
       if (var2 != this.G) {
          if (this.ah == null && this.b) {
             if (var16.a == null) {
-               com.alensw.ui.view.ak.b(var16, 0);
+               ImageGridCell.b(var16, 0);
             } else {
                int var12;
-               if (com.alensw.ui.view.ak.b(var16) >= 223) {
+               if (ImageGridCell.b(var16) >= 223) {
                   var12 = 255;
                } else {
-                  var12 = com.alensw.ui.view.ak.b(var16) + 32;
+                  var12 = ImageGridCell.b(var16) + 32;
                }
 
-               com.alensw.ui.view.ak.b(var16, var12);
+               ImageGridCell.b(var16, var12);
             }
 
-            this.x.setAlpha(com.alensw.ui.view.ak.b(var16));
+            this.x.setAlpha(ImageGridCell.b(var16));
          } else {
             this.x.setAlpha(255);
          }
@@ -497,7 +500,7 @@ public class ImageGridView extends com.alensw.ui.view.bp {
       }
    }
 
-   protected void a(Canvas var1, com.alensw.ui.view.ak var2, RectF var3, boolean var4) {
+   protected void a(Canvas var1, ImageGridCell var2, RectF var3, boolean var4) {
       float var7 = this.V * 4.0F;
       float var8 = this.V * 2.0F;
       float var5;
@@ -621,7 +624,7 @@ public class ImageGridView extends com.alensw.ui.view.bp {
       }
    }
 
-   protected void a(Canvas canvas, com.alensw.ui.view.ak srcType0798, RectF rectF, boolean z, boolean z2) {
+   protected void a(Canvas canvas, ImageGridCell srcType0798, RectF rectF, boolean z, boolean z2) {
         RectF rectF2 = this.an;
         rectF2.set(rectF);
         boolean z3 = srcType0798.a != null;
@@ -694,7 +697,7 @@ public class ImageGridView extends com.alensw.ui.view.bp {
       }
    }
 
-   public void a(com.alensw.ui.view.aj var1, int var2, int var3) {
+   public void a(ImageGridAdapter var1, int var2, int var3) {
       this.r = var1;
       this.Q = var2;
       this.R = var3;
@@ -856,7 +859,7 @@ public class ImageGridView extends com.alensw.ui.view.bp {
       if (this.a(var1, var2)) {
          int var3 = this.Q;
          int var4 = this.R;
-         com.alensw.ui.view.ak var6 = this.e(var1);
+         ImageGridCell var6 = this.e(var1);
          var1 = var4;
          if (var6.a != null) {
             var3 = var6.a.g();
@@ -1031,7 +1034,7 @@ public class ImageGridView extends com.alensw.ui.view.bp {
       if (var1 >= this.E && var1 < this.F) {
          RectF var3 = this.w;
          if (this.a(var1, var3)) {
-            com.alensw.ui.view.ak var4 = this.v[var1 % this.v.length];
+            ImageGridCell var4 = this.v[var1 % this.v.length];
             if (var4 != null) {
                var4.a();
             }
@@ -1045,18 +1048,18 @@ public class ImageGridView extends com.alensw.ui.view.bp {
       return false;
    }
 
-   protected com.alensw.ui.view.ak e(int var1) {
-      com.alensw.ui.view.ak var4 = this.v[var1 % this.v.length];
-      com.alensw.ui.view.ak var3 = var4;
+   protected ImageGridCell e(int var1) {
+      ImageGridCell var4 = this.v[var1 % this.v.length];
+      ImageGridCell var3 = var4;
       if (var4 == null) {
-         com.alensw.ui.view.ak[] var6 = this.v;
+         ImageGridCell[] var6 = this.v;
          int var2 = this.v.length;
-         var3 = new com.alensw.ui.view.ak(this);
+         var3 = new ImageGridCell(this);
          var6[var1 % var2] = var3;
       }
 
       boolean var5;
-      if (com.alensw.ui.view.ak.a(var3) != var1) {
+      if (ImageGridCell.a(var3) != var1) {
          var5 = true;
       } else {
          var5 = false;
@@ -1064,9 +1067,9 @@ public class ImageGridView extends com.alensw.ui.view.bp {
 
       if (var5 || var3.a == null) {
          var3.a();
-         com.alensw.ui.view.ak.a(var3, var1);
+         ImageGridCell.a(var3, var1);
          if (var5) {
-            com.alensw.ui.view.ak.b(var3, 255);
+            ImageGridCell.b(var3, 255);
          }
 
          if (this.r != null) {
@@ -1178,10 +1181,10 @@ public class ImageGridView extends com.alensw.ui.view.bp {
         boolean z3;
         boolean z4 = this.ah != null;
         Animation animation = getAnimation();
-        if (animation instanceof com.alensw.ui.view.bu) {
+        if (animation instanceof BoundsTransition) {
             RectF rectF = this.au;
             rectF.set(0.0f, 0.0f, getWidth(), getHeight());
-            boolean zA = ((com.alensw.ui.view.bu) animation).a(rectF, rectF);
+            boolean zA = ((BoundsTransition) animation).a(rectF, rectF);
             if (zA) {
                 rectF.offset(getScrollX(), getScrollY());
                 com.alensw.compat.LegacyPlatform.save(canvas, 2);
@@ -1406,7 +1409,7 @@ public class ImageGridView extends com.alensw.ui.view.bp {
 
          var2 = Math.max(var2 + (var4 - var3) + 3 >> 2 << 2, 8);
          if (this.v.length < var2) {
-            com.alensw.ui.view.ak[] var7 = new com.alensw.ui.view.ak[var2];
+            ImageGridCell[] var7 = new ImageGridCell[var2];
             System.arraycopy(this.v, 0, var7, 0, this.v.length);
             this.v = var7;
          }

@@ -3,6 +3,7 @@ package com.alensw.bean;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.alensw.media.MediaFileTypes;
 public class CommonFile implements Parcelable {
    public static CommonFile a = new CommonFile('\u0000', "", "", 0, 0L, 0L, 0L, null, Uri.EMPTY);
    protected final char b;
@@ -61,7 +62,7 @@ public class CommonFile implements Parcelable {
    public static char a(String var0, String var1) {
       char var2;
       if (var0 == null) {
-         var2 = com.alensw.b.f.c.a(var1);
+         var2 = MediaFileTypes.a(var1);
       } else if (var0.startsWith("image/")) {
          var2 = 'I';
       } else if (var0.startsWith("video/")) {
@@ -71,7 +72,7 @@ public class CommonFile implements Parcelable {
       } else if (var0.startsWith("audio/")) {
          var2 = 'A';
       } else {
-         var2 = com.alensw.b.f.c.a(var1);
+         var2 = MediaFileTypes.a(var1);
       }
 
       return var2;

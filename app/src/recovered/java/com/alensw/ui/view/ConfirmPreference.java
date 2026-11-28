@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
+import com.alensw.ui.dialog.GalleryDialogs;
 public class ConfirmPreference extends DialogPreference {
    public Runnable a;
 
@@ -24,7 +25,7 @@ public class ConfirmPreference extends DialogPreference {
    @Override
    protected void showDialog(Bundle bundle) {
         Context context = getContext();
-        AlertDialog alertDialogA = com.alensw.ui.a.f.a(context, 0, (Object) getDialogMessage());
+        AlertDialog alertDialogA = GalleryDialogs.a(context, 0, (Object) getDialogMessage());
         if (alertDialogA == null) {
             return;
         }
@@ -33,8 +34,8 @@ public class ConfirmPreference extends DialogPreference {
             alertDialogA.setIcon(dialogIcon);
         }
         alertDialogA.setTitle(getDialogTitle());
-        alertDialogA.setButton(-1, context.getString(17039379), new com.alensw.ui.view.s(this));
-        alertDialogA.setButton(-2, context.getString(17039369), new com.alensw.ui.view.t(this));
-        com.alensw.ui.a.f.a(alertDialogA);
+        alertDialogA.setButton(-1, context.getString(17039379), new RunPreferenceConfirmation(this));
+        alertDialogA.setButton(-2, context.getString(17039369), new DismissPreferenceConfirmation(this));
+        GalleryDialogs.a(alertDialogA);
     }
 }

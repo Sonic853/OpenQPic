@@ -11,16 +11,23 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import com.alensw.PicFolder.QuickApp;
+import com.alensw.gallery.FolderScanFilters;
+import com.alensw.gallery.GalleryMediaStore;
+import com.alensw.sort.NameSortOrder;
+import com.alensw.svg.SvgPicture;
+import com.alensw.ui.dialog.FolderPickerDialog;
+import com.alensw.ui.menu.GalleryMenuItem;
+import com.alensw.utils.GalleryUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PathListActivity extends com.alensw.ui.activity.ao {
+public class PathListActivity extends GalleryChromeActivity {
    protected ArrayList a;
    protected BaseAdapter b;
    protected ListView c;
    protected boolean d;
    protected boolean e;
-   protected final OnClickListener f = new com.alensw.ui.activity.bf(this);
+   protected final OnClickListener f = new RemovePathClick(this);
 
    public static Intent a(Context var0, boolean var1) {
       Intent var2 = new Intent(var0, PathListActivity.class);
@@ -36,7 +43,7 @@ public class PathListActivity extends com.alensw.ui.activity.ao {
          var1 = 1;
       }
 
-      com.alensw.ui.a.ae.a(this, var1, null, new com.alensw.ui.activity.bh(this));
+      FolderPickerDialog.a(this, var1, null, new AddSelectedPath(this));
    }
 
    @TargetApi(14)
@@ -55,9 +62,9 @@ public class PathListActivity extends com.alensw.ui.activity.ao {
       }
 
       this.setTitle(var2);
-      this.a = com.alensw.a.o.a(this).a(this.e);
-      com.alensw.b.l.b.a((List)this.a, com.alensw.b.b.b.a);
-      this.b = new com.alensw.ui.activity.bg(this, this.getLayoutInflater(), com.b.a.b.a(this.getResources(), com.alensw.PicFolder.R.raw.ic_menu_cancel, com.alensw.ui.activity.ao.b(this, com.alensw.PicFolder.R.attr.colorMenuDrawable)));
+      this.a = FolderScanFilters.a(this).a(this.e);
+      GalleryUtils.a((List)this.a, NameSortOrder.a);
+      this.b = new PathListAdapter(this, this.getLayoutInflater(), SvgPicture.a(this.getResources(), com.alensw.PicFolder.R.raw.ic_menu_cancel, GalleryChromeActivity.b(this, com.alensw.PicFolder.R.attr.colorMenuDrawable)));
       this.c.setAdapter((ListAdapter)this.b);
    }
 
@@ -65,7 +72,7 @@ public class PathListActivity extends com.alensw.ui.activity.ao {
    @Override
    public boolean onCreateOptionsMenu(Menu var1) {
       MenuItem var2 = var1.add(0, com.alensw.PicFolder.R.id.add, 0, com.alensw.PicFolder.R.string.add);
-      com.alensw.b.g.l.a(this, var2);
+      GalleryMenuItem.a(this, var2);
       this.a(var2, 2);
       return true;
    }
@@ -89,8 +96,8 @@ public class PathListActivity extends com.alensw.ui.activity.ao {
    public void onStop() {
       super.onStop();
       if (this.d) {
-         com.alensw.a.o.a(this).a(this.a, this.e);
-         this.getContentResolver().notifyChange(com.alensw.a.ba.a('I'), null);
+         FolderScanFilters.a(this).a(this.a, this.e);
+         this.getContentResolver().notifyChange(GalleryMediaStore.a('I'), null);
          QuickApp.a(true);
          QuickApp.q.a(4, null, null);
          this.d = false;

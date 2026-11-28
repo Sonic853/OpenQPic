@@ -5,11 +5,12 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable.Creator;
+import com.alensw.documents.DocumentProviderAccess;
 import java.util.Iterator;
 import java.util.Set;
 
 public class DocumentFolder extends CommonFolder {
-   public static final Creator CREATOR = new com.alensw.bean.h();
+   public static final Creator CREATOR = new DocumentFolderCreator();
    public static final String[] w = new String[]{"document_id", "_display_name", "mime_type", "flags", "_size", "last_modified", "datetaken", "comment"};
    protected final String u;
    protected final String v;
@@ -62,7 +63,7 @@ public class DocumentFolder extends CommonFolder {
       } else {
          String var5;
          try {
-            var5 = com.alensw.b.j.a.b(var1);
+            var5 = DocumentProviderAccess.b(var1);
          } catch (Throwable var6) {
             var2 = super.a(var1);
             return var2;
@@ -194,7 +195,7 @@ public class DocumentFolder extends CommonFolder {
    @Override
    public Uri i() {
       if (this.j == null) {
-         this.j = com.alensw.b.j.a.c(this.u, this.v);
+         this.j = DocumentProviderAccess.c(this.u, this.v);
       }
 
       return this.j;
@@ -203,7 +204,7 @@ public class DocumentFolder extends CommonFolder {
    @Override
    public Uri q() {
       if (this.x == null) {
-         this.x = com.alensw.b.j.a.a(this.i());
+         this.x = DocumentProviderAccess.a(this.i());
       }
 
       return this.x;

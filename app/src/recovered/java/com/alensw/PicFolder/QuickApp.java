@@ -17,6 +17,20 @@ import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ViewConfiguration;
+import com.alensw.cache.ConcurrentLruCache;
+import com.alensw.concurrent.AsyncExecutor;
+import com.alensw.gallery.ExternalStorageDocuments;
+import com.alensw.gallery.FolderScanner;
+import com.alensw.gallery.GalleryFolders;
+import com.alensw.gallery.GalleryMediaStore;
+import com.alensw.gallery.PictureLoader;
+import com.alensw.gallery.StorageVolumes;
+import com.alensw.gallery.ThumbnailDatabase;
+import com.alensw.gallery.ThumbnailLoader;
+import com.alensw.image.BitmapUtils;
+import com.alensw.image.TiledPicture;
+import com.alensw.sort.NameSortOrder;
+import com.alensw.utils.GalleryUtils;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -41,15 +55,15 @@ public class QuickApp extends Application {
    public static String l;
    public static DateFormat m;
    public static DateFormat n;
-   public static com.alensw.a.x o;
-   public static com.alensw.a.bh p;
-   public static com.alensw.a.s q;
-   public static com.alensw.a.bc r;
-   public static com.alensw.a.ba s;
-   public static com.alensw.a.ah t;
-   public static com.alensw.a.ao u;
-   public static com.alensw.b.a.a v;
-   public static com.alensw.b.a.a w;
+   public static GalleryFolders o;
+   public static StorageVolumes p;
+   public static FolderScanner q;
+   public static ThumbnailDatabase r;
+   public static GalleryMediaStore s;
+   public static ThumbnailLoader t;
+   public static PictureLoader u;
+   public static ConcurrentLruCache v;
+   public static ConcurrentLruCache w;
    public static boolean x;
    public static String y;
    private static AtomicBoolean z = new AtomicBoolean();
@@ -113,7 +127,7 @@ public class QuickApp extends Application {
             break;
          }
 
-         if (com.alensw.b.l.b.a(this, F[var1])) {
+         if (GalleryUtils.a(this, F[var1])) {
             break;
          }
 
@@ -129,7 +143,7 @@ public class QuickApp extends Application {
       Resources var8 = this.getResources();
       Configuration var10 = var8.getConfiguration();
       DisplayMetrics var9 = var8.getDisplayMetrics();
-      com.alensw.b.h.b.a(this);
+      BitmapUtils.a(this);
       boolean var6;
       if ((var10.screenLayout & 15) >= 3) {
          var6 = true;
@@ -183,7 +197,7 @@ public class QuickApp extends Application {
       }
 
       d = var6;
-      c = com.alensw.b.l.b.a(this, "com.google.android.gms");
+      c = GalleryUtils.a(this, "com.google.android.gms");
       i = Math.max(var8.getInteger(17694721), 400);
       String var14;
       if (j == 2) {
@@ -195,20 +209,20 @@ public class QuickApp extends Application {
       l = var14;
       m = DateFormat.getDateInstance();
       n = android.text.format.DateFormat.getTimeFormat(this);
-      o = new com.alensw.a.x();
-      p = new com.alensw.a.bh(this);
-      q = new com.alensw.a.s(this);
-      r = new com.alensw.a.bc(this);
-      t = new com.alensw.a.ah(this);
-      u = new com.alensw.a.ao(this);
-      s = new com.alensw.a.ba(this);
-      com.alensw.a.c.a(this, p);
-      com.alensw.b.h.n.a(this, g);
+      o = new GalleryFolders();
+      p = new StorageVolumes(this);
+      q = new FolderScanner(this);
+      r = new ThumbnailDatabase(this);
+      t = new ThumbnailLoader(this);
+      u = new PictureLoader(this);
+      s = new GalleryMediaStore(this);
+      ExternalStorageDocuments.a(this, p);
+      TiledPicture.a(this, g);
       ContentResolver var15 = this.getContentResolver();
-      u.a(new com.alensw.PicFolder.bb(this, var15));
+      u.a(new LoadMediaBucketIndex(this, var15));
       var1 = r.c;
-      v = new com.alensw.PicFolder.bc(this, var1 / 2);
-      w = new com.alensw.PicFolder.bd(this, var1);
+      v = new AlbumCoverCache(this, var1 / 2);
+      w = new MediaThumbnailCache(this, var1);
       return true;
    }
 
@@ -216,7 +230,7 @@ public class QuickApp extends Application {
    private void h() {
         boolean z2;
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        com.alensw.a.c.a = defaultSharedPreferences.getString("external_sd_uuid", null);
+        ExternalStorageDocuments.a = defaultSharedPreferences.getString("external_sd_uuid", null);
         android.content.SharedPreferences.Editor sharedPreferences$EditorEdit = defaultSharedPreferences.edit();
         String string = defaultSharedPreferences.getString("bkgnd_theme", null);
         if (string != null) {
@@ -225,7 +239,7 @@ public class QuickApp extends Application {
                 sharedPreferences$EditorEdit.putInt("main_theme", 1);
                 sharedPreferences$EditorEdit.putBoolean("auto_black_bkgnd", true);
             } else {
-                sharedPreferences$EditorEdit.putInt("main_theme", com.alensw.b.l.b.a(string, 0));
+                sharedPreferences$EditorEdit.putInt("main_theme", GalleryUtils.a(string, 0));
             }
             z2 = true;
         } else {
@@ -236,7 +250,7 @@ public class QuickApp extends Application {
             z2 = true;
         }
         q.a((defaultSharedPreferences.getBoolean("include_video", true) ? 2 : 0) | 1, defaultSharedPreferences);
-        com.alensw.b.b.b.a(defaultSharedPreferences.getBoolean("sort_logical", true));
+        NameSortOrder.a(defaultSharedPreferences.getBoolean("sort_logical", true));
         if (android.os.Build.VERSION.SDK_INT >= 19 && d && !defaultSharedPreferences.contains("auto_hide_navigate_bar")) {
             sharedPreferences$EditorEdit.putBoolean("auto_hide_navigate_bar", true);
             z2 = true;
@@ -251,7 +265,7 @@ public class QuickApp extends Application {
             z2 = true;
         }
         if (z2) {
-            com.alensw.b.l.b.a(sharedPreferences$EditorEdit);
+            GalleryUtils.a(sharedPreferences$EditorEdit);
         }
     }
 
@@ -350,7 +364,7 @@ public class QuickApp extends Application {
          this.g();
          this.h();
          StringBuilder var2 = new StringBuilder();
-         Log.d("QuickApp", var2.append("v=").append(var1).append(", heap=").append(com.alensw.b.h.b.b).append(", core=").append(com.alensw.b.k.a.c).toString());
+         Log.d("QuickApp", var2.append("v=").append(var1).append(", heap=").append(BitmapUtils.b).append(", core=").append(AsyncExecutor.c).toString());
       } catch (Throwable var4) {
          Log.e("QuickApp", "init app: ", var4);
          System.exit(0);
@@ -374,7 +388,7 @@ public class QuickApp extends Application {
             }
          }
 
-         this.registerActivityLifecycleCallbacks(new com.alensw.PicFolder.ba(this));
+         this.registerActivityLifecycleCallbacks(new GalleryActivityLifecycle(this));
       }
    }
 }

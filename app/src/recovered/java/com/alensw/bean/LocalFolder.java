@@ -3,12 +3,14 @@ package com.alensw.bean;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable.Creator;
+import com.alensw.media.MediaFileTypes;
+import com.alensw.utils.GalleryUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 public class LocalFolder extends CommonFolder {
-   public static final Creator CREATOR = new com.alensw.bean.j();
+   public static final Creator CREATOR = new LocalFolderCreator();
    protected final String u;
    public ArrayList v = null;
 
@@ -36,7 +38,7 @@ public class LocalFolder extends CommonFolder {
    }
 
    public LocalFolder(String var1, String var2, int var3, long var4, long var6) {
-        super(var2 != null ? var2 : com.alensw.b.l.b.b(var1), var3, var4, var6, null);
+        super(var2 != null ? var2 : GalleryUtils.b(var1), var3, var4, var6, null);
         this.u = var1;
     }
 
@@ -76,9 +78,9 @@ public class LocalFolder extends CommonFolder {
    public void a(char var1, int var2, String var3) {
       this.n.ensureCapacity(256);
       if (var1 != 'D') {
-         this.n.add(new LocalFile(var1, this.u, var3, com.alensw.b.f.c.a(var3, var1), 5, 0L, var2, var2));
+         this.n.add(new LocalFile(var1, this.u, var3, MediaFileTypes.a(var3, var1), 5, 0L, var2, var2));
       } else if (this.v != null) {
-         this.v.add(new LocalFolder(com.alensw.b.l.b.b(this.u, var3), var3, 50, var2, var2));
+         this.v.add(new LocalFolder(GalleryUtils.b(this.u, var3), var3, 50, var2, var2));
       }
    }
 

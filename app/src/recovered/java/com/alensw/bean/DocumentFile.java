@@ -3,8 +3,9 @@ package com.alensw.bean;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable.Creator;
+import com.alensw.documents.DocumentProviderAccess;
 public class DocumentFile extends CommonFile {
-   public static final Creator CREATOR = new com.alensw.bean.g();
+   public static final Creator CREATOR = new DocumentFileCreator();
    protected final String k;
    protected final String l;
 
@@ -54,7 +55,7 @@ public class DocumentFile extends CommonFile {
    @Override
    public Uri i() {
       if (this.j == null) {
-         this.j = com.alensw.b.j.a.c(this.k, this.l);
+         this.j = DocumentProviderAccess.c(this.k, this.l);
       }
 
       return this.j;

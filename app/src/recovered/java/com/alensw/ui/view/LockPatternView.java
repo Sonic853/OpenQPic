@@ -23,13 +23,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LockPatternView extends View {
-   private final com.alensw.ui.view.ap[][] a;
+   private final PatternCellState[][] a;
    private final float b;
    private final float c;
    private final float d;
    private final Paint e = new Paint(5);
    private final Paint f = new Paint(5);
-   private com.alensw.ui.view.aq g;
+   private PatternInputListener g;
    private final ArrayList h = new ArrayList(9);
    private final boolean[][] i = new boolean[3][3];
    private float j = -1.0F;
@@ -73,11 +73,11 @@ public class LockPatternView extends View {
       this.f.setStrokeWidth(this.d);
       this.b = var3 * 12.0F;
       this.c = 2.3333333F;
-      this.a = new com.alensw.ui.view.ap[3][3];
+      this.a = new PatternCellState[3][3];
 
       for (int var9 = 0; var9 < 3; var9++) {
          for (int var5 = 0; var5 < 3; var5++) {
-            this.a[var9][var5] = new com.alensw.ui.view.ap();
+            this.a[var9][var5] = new PatternCellState();
          }
       }
 
@@ -154,16 +154,16 @@ public class LockPatternView extends View {
       return var2;
    }
 
-   private com.alensw.ui.view.ao a(float var1, float var2) {
-      com.alensw.ui.view.ao var9 = null;
+   private PatternCell a(float var1, float var2) {
+      PatternCell var9 = null;
       Object var11 = null;
       int var4 = 1;
-      com.alensw.ui.view.ao var10 = this.b(var1, var2);
+      PatternCell var10 = this.b(var1, var2);
       if (var10 != null) {
          ArrayList var12 = this.h;
-         var9 = (com.alensw.ui.view.ao)var11;
+         var9 = (PatternCell)var11;
          if (!var12.isEmpty()) {
-            var9 = (com.alensw.ui.view.ao)var12.get(var12.size() - 1);
+            var9 = (PatternCell)var12.get(var12.size() - 1);
             int var8 = var10.a - var9.a;
             int var7 = var10.b - var9.b;
             int var6 = var9.a;
@@ -195,7 +195,7 @@ public class LockPatternView extends View {
                var4 = var5;
             }
 
-            var9 = com.alensw.ui.view.ao.a(var3, var4);
+            var9 = PatternCell.a(var3, var4);
          }
 
          if (var9 != null && !this.i[var9.a][var9.b]) {
@@ -218,7 +218,7 @@ public class LockPatternView extends View {
          StringBuilder var4 = new StringBuilder(var2);
 
          for (int var1 = 0; var1 < var2; var1++) {
-            com.alensw.ui.view.ao var5 = (com.alensw.ui.view.ao)var0.get(var1);
+            PatternCell var5 = (PatternCell)var0.get(var1);
             int var3 = var5.a();
             var4.append((char)(var5.b() + var3 * 3 + 97));
          }
@@ -229,8 +229,8 @@ public class LockPatternView extends View {
       return var6;
    }
 
-   private void a(float var1, float var2, long var3, Interpolator var5, com.alensw.ui.view.ap var6, Runnable var7) {
-      new com.alensw.ui.view.an(this, this, var5, var6, var1, var2, var7).a(var3, true);
+   private void a(float var1, float var2, long var3, Interpolator var5, PatternCellState var6, Runnable var7) {
+      new PatternDotScaleAnimation(this, this, var5, var6, var1, var2, var7).a(var3, true);
    }
 
    private void a(Canvas var1, float var2, float var3, float var4, boolean var5, float var6) {
@@ -260,7 +260,7 @@ public class LockPatternView extends View {
             var3 = var1.getY();
          }
 
-         com.alensw.ui.view.ao var15 = this.a(var2, var3);
+         PatternCell var15 = this.a(var2, var3);
          int var14 = this.h.size();
          if (var15 != null && var14 == 1) {
             this.o = true;
@@ -274,7 +274,7 @@ public class LockPatternView extends View {
          }
 
          if (this.o && var14 > 0) {
-            com.alensw.ui.view.ao var16 = (com.alensw.ui.view.ao)this.h.get(var14 - 1);
+            PatternCell var16 = (PatternCell)this.h.get(var14 - 1);
             var4 = this.a(var16.b);
             float var7 = this.b(var16.a);
             var5 = Math.min(var4, var2) - var6;
@@ -305,11 +305,11 @@ public class LockPatternView extends View {
       }
    }
 
-   static void a(LockPatternView var0, float var1, float var2, long var3, Interpolator var5, com.alensw.ui.view.ap var6, Runnable var7) {
+   static void a(LockPatternView var0, float var1, float var2, long var3, Interpolator var5, PatternCellState var6, Runnable var7) {
       var0.a(var1, var2, var3, var5, var6, var7);
    }
 
-   private void a(com.alensw.ui.view.ao var1) {
+   private void a(PatternCell var1) {
       this.i[var1.a()][var1.b()] = true;
       this.h.add(var1);
       if (!this.m) {
@@ -319,8 +319,8 @@ public class LockPatternView extends View {
       this.b();
    }
 
-   private void a(com.alensw.ui.view.ap var1, float var2, float var3, float var4, float var5) {
-      com.alensw.ui.view.am var6 = new com.alensw.ui.view.am(this, this, this.y, var1, var2, var4, var3, var5);
+   private void a(PatternCellState var1, float var2, float var3, float var4, float var5) {
+      PatternLineEndAnimation var6 = new PatternLineEndAnimation(this, this, this.y, var1, var2, var4, var3, var5);
       var6.a(100L, true);
       var1.f = var6;
    }
@@ -357,19 +357,19 @@ public class LockPatternView extends View {
       return var0.y;
    }
 
-   private com.alensw.ui.view.ao b(float var1, float var2) {
+   private PatternCell b(float var1, float var2) {
       Object var6 = null;
       int var4 = this.a(var2);
-      com.alensw.ui.view.ao var5;
+      PatternCell var5;
       if (var4 < 0) {
-         var5 = (com.alensw.ui.view.ao)var6;
+         var5 = (PatternCell)var6;
       } else {
          int var3 = this.b(var1);
-         var5 = (com.alensw.ui.view.ao)var6;
+         var5 = (PatternCell)var6;
          if (var3 >= 0) {
-            var5 = (com.alensw.ui.view.ao)var6;
+            var5 = (PatternCell)var6;
             if (!this.i[var4][var3]) {
-               var5 = com.alensw.ui.view.ao.a(var4, var3);
+               var5 = PatternCell.a(var4, var3);
             }
          }
       }
@@ -392,9 +392,9 @@ public class LockPatternView extends View {
       }
    }
 
-   private void b(com.alensw.ui.view.ao var1) {
-      com.alensw.ui.view.ap var2 = this.a[var1.a][var1.b];
-      this.a(1.0F, this.c, 96L, this.z, var2, new com.alensw.ui.view.al(this, var2));
+   private void b(PatternCell var1) {
+      PatternCellState var2 = this.a[var1.a][var1.b];
+      this.a(1.0F, this.c, 96L, this.z, var2, new RestorePatternDotSize(this, var2));
       this.a(var2, this.j, this.k, this.a(var1.b), this.b(var1.a));
    }
 
@@ -408,7 +408,7 @@ public class LockPatternView extends View {
       this.f();
       float var3 = var1.getX();
       float var7 = var1.getY();
-      com.alensw.ui.view.ao var8 = this.a(var3, var7);
+      PatternCell var8 = this.a(var3, var7);
       if (var8 != null) {
          this.o = true;
          this.c();
@@ -458,7 +458,7 @@ public class LockPatternView extends View {
    private void h() {
       for (int var1 = 0; var1 < 3; var1++) {
          for (int var2 = 0; var2 < 3; var2++) {
-            com.alensw.ui.view.ap var3 = this.a[var1][var2];
+            PatternCellState var3 = this.a[var1][var2];
             if (var3.f != null) {
                var3.f.c();
                var3.d = Float.MIN_VALUE;
@@ -472,7 +472,7 @@ public class LockPatternView extends View {
       this.f();
    }
 
-   public com.alensw.ui.view.ap[][] getCellStates() {
+   public PatternCellState[][] getCellStates() {
       return this.a;
    }
 
@@ -488,7 +488,7 @@ public class LockPatternView extends View {
          float var3 = this.b(var7);
 
          for (int var8 = 0; var8 < 3; var8++) {
-            com.alensw.ui.view.ap var13 = this.a[var7][var8];
+            PatternCellState var13 = this.a[var7][var8];
             float var2 = this.a(var8);
             float var5 = var13.a;
             float var4 = this.b;
@@ -511,7 +511,7 @@ public class LockPatternView extends View {
          float var14 = 0.0F;
 
          for (int var20 = 0; var20 < var9; var18 = true) {
-            com.alensw.ui.view.ao var21 = (com.alensw.ui.view.ao)var10.get(var20);
+            PatternCell var21 = (PatternCell)var10.get(var20);
             if (!var11[var21.a][var21.b]) {
                break;
             }
@@ -519,7 +519,7 @@ public class LockPatternView extends View {
             float var16 = this.a(var21.b);
             float var17 = this.b(var21.a);
             if (var20 != 0) {
-               com.alensw.ui.view.ap var22 = this.a[var21.a][var21.b];
+               PatternCellState var22 = this.a[var21.a][var21.b];
                var12.rewind();
                var12.moveTo(var15, var14);
                if (var22.d != Float.MIN_VALUE && var22.e != Float.MIN_VALUE) {
@@ -649,7 +649,7 @@ public class LockPatternView extends View {
       this.m = var1;
    }
 
-   public void setOnPatternListener(com.alensw.ui.view.aq var1) {
+   public void setOnPatternListener(PatternInputListener var1) {
       this.g = var1;
    }
 

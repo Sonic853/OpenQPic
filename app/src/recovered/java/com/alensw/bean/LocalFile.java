@@ -3,10 +3,11 @@ package com.alensw.bean;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable.Creator;
+import com.alensw.utils.GalleryUtils;
 import java.io.File;
 
 public class LocalFile extends CommonFile {
-   public static final Creator CREATOR = new com.alensw.bean.i();
+   public static final Creator CREATOR = new LocalFileCreator();
    protected final String k;
 
    public LocalFile(char var1, String var2, String var3, String var4, int var5, long var6, long var8, long var10) {
@@ -54,7 +55,7 @@ public class LocalFile extends CommonFile {
 
    @Override
    public String j() {
-      return com.alensw.b.l.b.e(this.k) + this.c;
+      return GalleryUtils.e(this.k) + this.c;
    }
 
    @Override

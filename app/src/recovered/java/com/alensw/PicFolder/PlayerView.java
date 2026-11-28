@@ -17,6 +17,7 @@ import android.widget.FrameLayout;
 import android.widget.SeekBar;
 import android.widget.VideoView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import com.alensw.ui.view.ViscousFluidInterpolator;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -50,7 +51,7 @@ class PlayerView extends FrameLayout {
    @TargetApi(8)
    public PlayerView(Context var1, AttributeSet var2) {
       super(var1, var2);
-      this.a = new com.alensw.PicFolder.ax(this);
+      this.a = new PlayerGestureListener(this);
       this.o = 0;
       this.p = 1.0F;
       this.q = new float[3];
@@ -119,7 +120,7 @@ class PlayerView extends FrameLayout {
 
       if (var1 != this.p) {
          float var2 = this.p;
-         new com.alensw.PicFolder.az(this, this.l, new com.alensw.ui.view.cc(), var2, var1 - var2, var1).a(QuickApp.i, true);
+         new VideoScaleAnimation(this, this.l, new ViscousFluidInterpolator(), var2, var1 - var2, var1).a(QuickApp.i, true);
       }
    }
 
@@ -166,7 +167,7 @@ class PlayerView extends FrameLayout {
     }
 
    public void a(OnPreparedListener var1) {
-      this.l.setOnPreparedListener(new com.alensw.PicFolder.ay(this, var1));
+      this.l.setOnPreparedListener(new VideoSizePreparedListener(this, var1));
    }
 
    public void a(SeekBar var1, SeekBar var2, OnSeekBarChangeListener var3) {

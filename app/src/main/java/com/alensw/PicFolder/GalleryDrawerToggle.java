@@ -6,7 +6,7 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import androidx.drawerlayout.widget.DrawerLayout;
-import com.alensw.ui.c.cu;
+import com.alensw.ui.page.GalleryPage;
 import com.alensw.ui.view.GalleryArrow;
 
 final class GalleryDrawerToggle extends DrawerLayout.SimpleDrawerListener {
@@ -77,7 +77,7 @@ final class GalleryDrawerToggle extends DrawerLayout.SimpleDrawerListener {
 
     @Override public void onDrawerClosed(View panel) {
         drawerArrow.setDrawerProgress(0, rtl());
-        cu page = activity.c();
+        GalleryPage page = activity.c();
         if (page != null) {
             activity.setTitle(page.B());
             activity.a(page.C());

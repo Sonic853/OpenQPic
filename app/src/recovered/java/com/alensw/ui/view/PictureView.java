@@ -11,13 +11,14 @@ import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.animation.Animation;
+import com.alensw.image.Picture;
 @SuppressLint("Instantiatable")
-public class PictureView extends com.alensw.ui.view.j {
-   private final com.alensw.ui.view.w a;
+public class PictureView extends ZoomablePictureView {
+   private final PictureGestureDetector a;
    private final RectF b = new RectF();
    private boolean c;
    private int d;
-   private final com.alensw.ui.view.y e = new com.alensw.ui.view.bb(this);
+   private final PictureGestureListener e = new ViewerPictureGestures(this);
    private float verticalDragOffset;
    private float detailsReveal;
 
@@ -25,7 +26,7 @@ public class PictureView extends com.alensw.ui.view.j {
       this(var1, null);
    }
 
-   public void setVerticalDragListener(w.VerticalDragListener listener) {
+   public void setVerticalDragListener(PictureGestureDetector.VerticalDragListener listener) {
       this.a.setVerticalDragListener(listener);
    }
 
@@ -64,9 +65,9 @@ public class PictureView extends com.alensw.ui.view.j {
    }
 
    public void startViewerTransition(Animation animation, boolean entering) {
-      boolean fromDrag = !entering && this.verticalDragOffset != 0.0F && animation instanceof bu;
+      boolean fromDrag = !entering && this.verticalDragOffset != 0.0F && animation instanceof BoundsTransition;
       if (fromDrag) {
-         ((bu)animation).setExitOffsetY(this.verticalDragOffset);
+         ((BoundsTransition)animation).setExitOffsetY(this.verticalDragOffset);
       }
       this.setVerticalDragPosition(0.0F, 0.0F);
       this.startAnimation(animation);
@@ -78,17 +79,17 @@ public class PictureView extends com.alensw.ui.view.j {
 
    public PictureView(Context var1, AttributeSet var2) {
       super(var1, var2);
-      this.a = new com.alensw.ui.view.w(var1, this.e, this.getHandler());
+      this.a = new PictureGestureDetector(var1, this.e, this.getHandler());
    }
 
    private RectF b() {
       Animation var2 = this.getAnimation();
-      if (var2 instanceof com.alensw.ui.view.bu) {
+      if (var2 instanceof BoundsTransition) {
          RectF var1 = this.b;
          var1.set(0.0F, 0.0F, this.C, this.D);
          var1.intersect(this.P);
          var1.offset(0.0F, this.d);
-         if (((com.alensw.ui.view.bu)var2).a(var1, var1)) {
+         if (((BoundsTransition)var2).a(var1, var1)) {
             return var1;
          }
       }
@@ -105,7 +106,7 @@ public class PictureView extends com.alensw.ui.view.j {
    }
 
    @Override
-   public void a(com.alensw.b.h.j var1, boolean var2) {
+   public void a(Picture var1, boolean var2) {
       super.a(var1, var2);
       if (var1 != null) {
          var2 = true;

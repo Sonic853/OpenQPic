@@ -6,6 +6,11 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import com.alensw.documents.DocumentProviderAccess;
+import com.alensw.image.ExifData;
+import com.alensw.io.OpenFileHandle;
+import com.alensw.media.MediaFileTypes;
+import com.alensw.utils.GalleryUtils;
 import java.io.File;
 
 public class FileProvider extends ContentProvider {
@@ -15,7 +20,7 @@ public class FileProvider extends ContentProvider {
    public static Uri a(String var0) {
       Uri var1;
       if (var0 != null && var0.length() != 0) {
-         var1 = com.alensw.b.j.a.c("com.alensw.PicFolder.FileProvider", var0);
+         var1 = DocumentProviderAccess.c("com.alensw.PicFolder.FileProvider", var0);
       } else {
          var1 = Uri.EMPTY;
       }
@@ -25,7 +30,7 @@ public class FileProvider extends ContentProvider {
 
    public static String a(Uri uri) {
         try {
-            return com.alensw.b.j.a.b(uri);
+            return DocumentProviderAccess.b(uri);
         } catch (Throwable th) {
             return null;
         }
@@ -43,7 +48,7 @@ public class FileProvider extends ContentProvider {
       if (var2 == null) {
          var3 = "*/*";
       } else {
-         var3 = com.alensw.b.f.c.b(var2);
+         var3 = MediaFileTypes.b(var2);
       }
 
       return var3;
@@ -62,7 +67,7 @@ public class FileProvider extends ContentProvider {
    @Override
    public ParcelFileDescriptor openFile(Uri uri, String str) {
         try {
-            return com.alensw.b.c.f.b(new File(a(uri)), true);
+            return OpenFileHandle.b(new File(a(uri)), true);
         } catch (Throwable th) {
             return null;
         }
@@ -79,9 +84,9 @@ public class FileProvider extends ContentProvider {
       var5 = a(var1);
       if (var5 != null) {
          Object[] var12 = new Object[var16.length];
-         char var6 = com.alensw.b.f.c.a(var5);
+         char var6 = MediaFileTypes.a(var5);
          long var10 = new File(var5).lastModified();
-         com.alensw.b.h.c var17 = com.alensw.b.h.c.a(var5, true);
+         ExifData var17 = ExifData.a(var5, true);
          long var8;
          if (var17 != null) {
             var8 = var17.e();
@@ -101,11 +106,11 @@ public class FileProvider extends ContentProvider {
             if ("_data".equals(var13)) {
                var12[var7] = var5;
             } else if ("_display_name".equals(var13)) {
-               var12[var7] = com.alensw.b.l.b.b(var5);
+               var12[var7] = GalleryUtils.b(var5);
             } else if ("title".equals(var13)) {
-               var12[var7] = com.alensw.b.l.b.c(var5);
+               var12[var7] = GalleryUtils.c(var5);
             } else if ("mime_type".equals(var13)) {
-               var12[var7] = com.alensw.b.f.c.a(var5, var6);
+               var12[var7] = MediaFileTypes.a(var5, var6);
             } else if ("_size".equals(var13)) {
                var12[var7] = new File(var5).length();
             } else if (var6 == 'I') {
