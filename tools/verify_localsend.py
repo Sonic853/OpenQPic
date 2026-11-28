@@ -283,6 +283,7 @@ def verify(apk, aab, tools, archives, variant="debug"):
                    "bilibili","open_source_licenses","open_source_licenses_url")}
     viewer_resources = {"id/viewer_details_overlay", "id/viewer_details_sheet",
                         "string/gif_system_decoder", "string/gif_system_decoder_summary",
+                        "string/viewer_ignore_gif_loop_limit",
                         "array/viewer_swipe_actions", "array/viewer_swipe_values"} | {
                             "string/viewer_swipe_" + action for action in ("up", "down", "none", "details", "back")}
     scan_labels = {"string/enhanced_scan", "string/enhanced_scan_summary"}

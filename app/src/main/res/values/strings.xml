@@ -64,6 +64,7 @@ Continue to fix?"</string>
     <string name="force_true_color_summary">Force output 32bits true color image, may reduce the resolution</string>
     <string name="gif_system_decoder">Use system GIF decoder</string>
     <string name="gif_system_decoder_summary">Requires Android 9 or later</string>
+    <string name="viewer_ignore_gif_loop_limit">Ignore GIF loop limits</string>
     <string name="interface">Interface</string>
     <string name="grant_sd_permission">In the next screen, please select the root path of the SD card at left sidebar and confirm at bottom, to grant the writing permission of the SD card.</string>
     <string name="hide">Hide</string>

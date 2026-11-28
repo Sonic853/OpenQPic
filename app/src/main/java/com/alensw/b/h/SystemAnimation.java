@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ImageDecoder;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -23,17 +24,30 @@ import java.io.IOException;
 /** System GIF and WebP decoder and viewer rendering adapter. Callers gate it on API 28. */
 @TargetApi(28)
 public final class SystemAnimation extends j implements Drawable.Callback {
+    private static final String GIF = "image/gif";
     private static final String WEBP = "image/webp";
     private static final Handler FRAMES = new Handler(Looper.getMainLooper());
 
     private final AnimatedImageDrawable animation;
+    private final int encodedRepeatCount;
+    private final Bitmap gifFrame;
+    private final Canvas gifCanvas;
+    private boolean frameDirty = true;
     private View owner;
     private Paint background;
 
     private SystemAnimation(AnimatedImageDrawable animation, Uri uri, String mime) {
         super(animation.getIntrinsicWidth(), animation.getIntrinsicHeight(), 4, uri, mime);
         this.animation = animation;
+        encodedRepeatCount = animation.getRepeatCount();
         animation.setBounds(0, 0, e(), f());
+        boolean isGif = GIF.equals(mime);
+        if (isGif) animation.setFilterBitmap(true);
+        // Older drawables ignore the filter setter. Capture their GIF frames at decoded
+        // size so the viewer's bitmap paint controls the only scaling step.
+        gifFrame = isGif && !animation.isFilterBitmap()
+                ? Bitmap.createBitmap(e(), f(), Bitmap.Config.ARGB_8888) : null;
+        gifCanvas = gifFrame == null ? null : new Canvas(gifFrame);
     }
 
     /** Extended WebP has a VP8X chunk first; bit 1 of its feature flags denotes animation. */
@@ -134,6 +148,8 @@ public final class SystemAnimation extends j implements Drawable.Callback {
             a(true);
             owner = view;
             animation.setCallback(this);
+            if (GIF.equals(h)) animation.setRepeatCount(gifPlaybackRepeatCount(encodedRepeatCount));
+            frameDirty = true;
             animation.start();
         }
         return true;
@@ -149,6 +165,10 @@ public final class SystemAnimation extends j implements Drawable.Callback {
 
     @Override protected void a() {
         a(true);
+        if (gifCanvas != null) {
+            gifCanvas.setBitmap(null);
+            gifFrame.recycle();
+        }
         super.a();
     }
 
@@ -157,13 +177,24 @@ public final class SystemAnimation extends j implements Drawable.Callback {
         try {
             canvas.concat(matrix);
             if (background != null) canvas.drawRect(0, 0, e(), f(), background);
-            animation.draw(canvas);
+            if (gifCanvas != null) {
+                if (frameDirty) {
+                    frameDirty = false;
+                    gifFrame.eraseColor(Color.TRANSPARENT);
+                    animation.draw(gifCanvas);
+                }
+                canvas.drawBitmap(gifFrame, null, animation.getBounds(), paint);
+            } else {
+                if (GIF.equals(h)) animation.setFilterBitmap(paint == null || paint.isFilterBitmap());
+                animation.draw(canvas);
+            }
         } finally {
             canvas.restoreToCount(saved);
         }
     }
 
     @Override public void invalidateDrawable(Drawable drawable) {
+        frameDirty = true;
         if (owner != null) owner.postInvalidateOnAnimation();
     }
 

@@ -6,7 +6,9 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.view.View;
+import com.alensw.PicFolder.QuickApp;
 import java.util.Locale;
 
 public class j extends com.alensw.b.h.h {
@@ -135,6 +137,12 @@ public class j extends com.alensw.b.h.h {
 
    public boolean a(View var1, Paint var2) {
       return true;
+   }
+
+   static int gifPlaybackRepeatCount(int encodedRepeatCount) {
+      // Both GIF decoders use -1 for infinite repeats and 0 for a single play.
+      return PreferenceManager.getDefaultSharedPreferences(QuickApp.a())
+            .getBoolean("viewer_ignore_gif_loop_limit", true) ? -1 : encodedRepeatCount;
    }
 
    public long b() {

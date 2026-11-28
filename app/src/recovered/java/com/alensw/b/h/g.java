@@ -54,7 +54,7 @@ class g implements com.alensw.b.k.k {
 
     @Override public Void call() {
         int frameNumber = 0;
-        int repeats = owner.repeatCount;
+        int repeats = j.gifPlaybackRepeatCount(owner.repeatCount);
         try {
             for (f frame; (frame = nextBuffer()) != null;) {
                 long start = SystemClock.uptimeMillis();
